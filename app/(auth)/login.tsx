@@ -1,19 +1,8 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Colors } from '../constants/Colors';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
-//import logo from '../assets/EcoBuddy_logo.jpeg';
 
 
 export default function Login() {
@@ -33,7 +22,7 @@ export default function Login() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=3000' }}
+            source={require('../../assets/EcoBuddy_logo.jpeg')}
             style={styles.logo}
           />
           <Text style={styles.title}>Welcome Back!</Text>

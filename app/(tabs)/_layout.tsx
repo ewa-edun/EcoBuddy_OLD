@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, Recycle, Users, BookOpen, User } from 'lucide-react-native';
+import { Home, Recycle, Gift, BookOpen, Users, User } from 'lucide-react-native';
 import { Colors } from '../constants/Colors';
 
 export default function TabLayout() {
@@ -34,10 +34,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="community"
+        name="ecoRewards"
         options={{
-          title: 'Community',
-          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
+          title: 'Rewards',
+          tabBarIcon: ({ color, size }) => <Gift size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -45,6 +45,13 @@ export default function TabLayout() {
         options={{
           title: 'Learn',
           tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="community"
+        options={{
+          title: 'Community',
+          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
         }}
       />
       <Tabs.Screen

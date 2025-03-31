@@ -1,8 +1,18 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Colors } from '../constants/Colors';
+import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { useState } from 'react';
 
 export default function RegisterScreen() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+  });
+
   const handleRegister = () => {
     // Handle registration logic here
     router.replace('/(tabs)/home');
@@ -11,48 +21,71 @@ export default function RegisterScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join the recycling revolution in Nigeria</Text>
+        <View style={styles.header}>
+          <Image
+            source={require('../../assets/EcoBuddy_logo.jpeg')}
+            style={styles.logo}
+          />
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Join the recycling revolution in Nigeria</Text>
+        </View>
 
         <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name</Text>
+          <View style={styles.inputContainer}>
+            <User size={20} color={Colors.accent.darkGray} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your full name"
+              value={formData.fullName}
+              onChangeText={(text) => setFormData({ ...formData, fullName: text })}
               placeholderTextColor={Colors.accent.darkGray}
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <Mail size={20} color={Colors.accent.darkGray} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your email"
+              value={formData.email}
+              onChangeText={(text) => setFormData({ ...formData, email: text })}
               placeholderTextColor={Colors.accent.darkGray}
               keyboardType="email-address"
               autoCapitalize="none"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Phone Number</Text>
+          <View style={styles.inputContainer}>
+            <Phone size={20} color={Colors.accent.darkGray} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your phone number"
+              value={formData.phone}
+              onChangeText={(text) => setFormData({ ...formData, phone: text })}
               placeholderTextColor={Colors.accent.darkGray}
               keyboardType="phone-pad"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <Lock size={20} color={Colors.accent.darkGray} style={styles.inputIcon} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { flex: 1 }]}
               placeholder="Create a password"
+              value={formData.password}
+              onChangeText={(text) => setFormData({ ...formData, password: text })}
               placeholderTextColor={Colors.accent.darkGray}
-              secureTextEntry
+              secureTextEntry={!showPassword}
             />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeIcon}>
+              {showPassword ? (
+                <EyeOff size={20} color={Colors.accent.darkGray} />
+              ) : (
+                <Eye size={20} color={Colors.accent.darkGray} />
+              )}
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
@@ -80,7 +113,17 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
-    paddingTop: 60,
+    paddingTop: 40,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 24,
   },
   title: {
     fontSize: 32,
@@ -93,26 +136,30 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.accent.darkGray,
     marginBottom: 32,
+    textAlign: 'center',
   },
   form: {
-    gap: 20,
+    gap: 16,
   },
-  inputGroup: {
-    gap: 8,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.accent.lightGray,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 56,
   },
-  label: {
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-Medium',
-    color: Colors.accent.darkGray,
+  inputIcon: {
+    marginRight: 12,
   },
   input: {
-    borderWidth: 1,
-    borderColor: Colors.accent.lightGray,
-    borderRadius: 12,
-    padding: 16,
+    flex: 1,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.accent.darkGray,
+  },
+  eyeIcon: {
+    padding: 4,
   },
   button: {
     backgroundColor: Colors.primary.green,

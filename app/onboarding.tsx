@@ -1,19 +1,18 @@
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import { Colors } from './constants/Colors';
-import logo from '../assets/EcoBuddy_logo.jpeg';
 
 export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
       <Image
-        source={logo}
+        source={require('../assets/EcoBuddy_logo.jpeg')}
         style={styles.image}
       />
       <View style={styles.content}>
         <Text style={styles.title}>EcoBuddy Nigeria</Text>
         <Text style={styles.subtitle}>
-         ...no dey waste, E dey pay
+         ...no dey waste, make E pay
         </Text>
         <Link href="/(auth)/register" asChild>
           <TouchableOpacity style={styles.button}>
