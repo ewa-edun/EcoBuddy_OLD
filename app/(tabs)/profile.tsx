@@ -1,6 +1,7 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Award, Gift, Settings, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut } from 'lucide-react-native';
+import { router } from 'expo-router';
 
 const achievements = [
   {
@@ -54,12 +55,32 @@ const menuItems = [
 ];
 
 export default function ProfileScreen() {
+  const handleMenuPress = (route: string) => {
+    switch (route) {
+      case 'rewards':
+        router.push('/(tabs)/ecoRewards');
+        break;
+      case 'progress':
+        router.push('/(tabs)/wasteSelector');
+        break;
+      case 'help':
+        router.push('/features/help');
+        break;
+      case 'settings':
+        // Handle settings navigation
+        break;
+      case 'logout':
+        // Handle logout
+        break;
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200' }}
+            source={require('../../assets/user icon.png')}
             style={styles.avatar}
           />
           <View style={styles.profileInfo}>
@@ -121,7 +142,7 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Menu</Text>
         <View style={styles.menuContainer}>
           {menuItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.menuItem}>
+            <TouchableOpacity key={item.id} style={styles.menuItem} onPress={() => handleMenuPress(item.id)}>
               <View style={styles.menuItemLeft}>
                 <View
                   style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
@@ -135,7 +156,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('logout')}>
         <LogOut size={20} color={Colors.accent.darkGray} />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>

@@ -1,6 +1,7 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Gift, TrendingUp, Award, Camera, Recycle } from 'lucide-react-native';
+import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight } from 'lucide-react-native';
+import { router } from 'expo-router';
 
 export default function HomeScreen() {
   return (
@@ -11,7 +12,7 @@ export default function HomeScreen() {
           <Text style={styles.points}>2,450 Points</Text>
         </View>
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200' }}
+          source={require('../../assets/EcoBuddy_logo.jpeg')}
           style={styles.avatar}
         />
       </View>
@@ -66,6 +67,38 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.actionText}>Redeem Points</Text>
           </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Help & Support</Text>
+          <TouchableOpacity 
+            style={styles.seeAllButton}
+            onPress={() => router.push('/features/help')}>
+            <Text style={styles.seeAllText}>See All</Text>
+            <ChevronRight size={16} color={Colors.primary.green} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.helpPreview}>
+          <View style={styles.helpItem}>
+            <HelpCircle size={24} color={Colors.primary.green} />
+            <View style={styles.helpContent}>
+              <Text style={styles.helpTitle}>How do I use the Waste Selector?</Text>
+              <Text style={styles.helpPreviewText} numberOfLines={2}>
+                Simply take a photo of the item you want to dispose of, or select it from our catalog. The Waste Selector will tell you which bin it belongs in and provide recycling tips.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.helpItem}>
+            <HelpCircle size={24} color={Colors.primary.green} />
+            <View style={styles.helpContent}>
+              <Text style={styles.helpTitle}>How do I earn Eco Rewards points?</Text>
+              <Text style={styles.helpPreviewText} numberOfLines={2}>
+                You can earn points by correctly sorting waste, participating in community events, and completing educational modules.
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -196,5 +229,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.accent.darkGray,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  seeAllText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.primary.green,
+  },
+  helpPreview: {
+    gap: 16,
+  },
+  helpItem: {
+    flexDirection: 'row',
+    backgroundColor: Colors.accent.lightGray,
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+  },
+  helpContent: {
+    flex: 1,
+  },
+  helpTitle: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.accent.darkGray,
+    marginBottom: 4,
+  },
+  helpPreviewText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.accent.darkGray,
+    lineHeight: 20,
   },
 });
