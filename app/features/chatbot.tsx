@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Send, Bot, User } from 'lucide-react-native';
+import { Send } from 'lucide-react-native';
 
 type Message = {
   id: string;
@@ -20,6 +20,7 @@ export default function ChatbotScreen() {
     },
   ]);
   const [inputText, setInputText] = useState('');
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -34,6 +35,11 @@ export default function ChatbotScreen() {
     setMessages(prev => [...prev, newMessage]);
     setInputText('');
 
+    // Scroll to bottom after sending message
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+
     // Simulate bot response
     setTimeout(() => {
       const botResponse: Message = {
@@ -43,6 +49,11 @@ export default function ChatbotScreen() {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botResponse]);
+      
+      // Scroll to bottom after bot response
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
     }, 1000);
   };
 
@@ -50,7 +61,10 @@ export default function ChatbotScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
-      <ScrollView style={styles.messagesContainer}>
+      <ScrollView 
+        ref={scrollViewRef}
+        style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContentContainer}>
         {messages.map((message) => (
           <View
             key={message.id}
@@ -60,9 +74,15 @@ export default function ChatbotScreen() {
             ]}>
             <View style={styles.messageIcon}>
               {message.sender === 'user' ? (
-                <User size={20} color={Colors.secondary.white} />
+                <Image
+                  source={require('../../assets/user icon.png')}
+                  style={styles.avatar}
+                />
               ) : (
-                <Bot size={20} color={Colors.secondary.white} />
+                <Image
+                  source={require('../../assets/EcoBuddy_logo.jpeg')}
+                  style={styles.botIcon}
+                />
               )}
             </View>
             <View
@@ -112,7 +132,10 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
+  },
+  messagesContentContainer: {
     padding: 16,
+    paddingBottom: 80, // Add extra padding at bottom to prevent messages from being hidden behind input
   },
   messageContainer: {
     flexDirection: 'row',
@@ -126,12 +149,19 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   messageIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
     marginHorizontal: 8,
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  botIcon: {
+    width: '100%',
+    height: '100%',
   },
   messageBubble: {
     maxWidth: '80%',
@@ -162,6 +192,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary.white,
     borderTopWidth: 1,
     borderTopColor: Colors.accent.lightGray,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   input: {
     flex: 1,

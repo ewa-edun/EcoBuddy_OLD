@@ -142,28 +142,15 @@ EcoBuddy supports:
 - Recycling educational page with ai generated newsletter and human blogs articles.
 - Community post and engagement.
 
-- Need nav bar below with icons of home, waste selector, community, education, and profile. When on that page the icon is highlighted ad the name of the screen is seen beside it.
+## Pages to do today
+- On home page: 
+  - add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
+  - The hello john thats first seen should say welcome {name}. the name that was entered in the create account file and this name should be saved in the database so that it displays when the person logis in again.
 
-ecobuddy/
-├── app/
-│   ├── (tabs)/                      # Tab-based screens (main app)
-│   │   ├── home.tsx                 # Home screen (main dashboard)
-│   │   ├── game.tsx                 # Gamification/leaderboard
-│   │   ├── chatbot.tsx              # AI chatbot (Gemini)
-│   │   ├── community.tsx            # Social sharing
-│   │   ├── education.tsx            # Recycling tips/guides
-│   │   ├── pointReward.tsx          # Points/rewards system
-│   │   ├── wasteSelector.tsx        # Item scanner/selector
-│   │   └── index.tsx                # Onboarding (non-tab)
-│   │
-│   ├── (auth)/                      # Auth screens (non-tab)
-│   │   ├── registration.tsx         # Sign-up screen
-│   │   └── login.tsx                # (Optional) Login screen
-│   │
-│   ├── _layout.tsx                  # Shared layout (tabs config)
-│   ├── index.tsx                    # Root entry (redirects to onboarding/auth/home)
-│   └── +not-found.tsx               # 404 screen (optional)
-│
+- On the chatbot: when I type in the chat, the box goes down and out of the screen. fix that.
+
+
+
 ├── components/                      # Reusable UI components
 │   ├── NavBar.tsx                   # Custom tab bar
 │   ├── WasteScanner.tsx             # Item recognition
@@ -171,7 +158,6 @@ ecobuddy/
 │   └── ...                          # (Other components)
 │
 ├── constants/                       # Config/static data
-│   ├── icons.ts                     # Icon mappings (Font Awesome)
 │   ├── colors.ts                    # Color scheme (#4CAF50, etc.)
 │   └── firebase.ts                  # Firebase config (API keys)
 │
@@ -189,10 +175,3 @@ ecobuddy/
 │   │   └── chatbot.ts               # Chatbot logic
 │   │
 │   └── maps.ts                      # Google Maps API helpers
-│
-├── assets/                          # Static files
-│   ├── images/                      # App images
-│   └── fonts/                       # Custom fonts (if any)
-│
-├── app.json                         # Expo config
-└── package.json

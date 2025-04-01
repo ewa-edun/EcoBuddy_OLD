@@ -1,9 +1,31 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight } from 'lucide-react-native';
+import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 export default function HomeScreen() {
+  const handleQuickAction = (action: 'scan' | 'redeem') => {
+    switch (action) {
+      case 'scan':
+        router.push('/(tabs)/wasteSelector');
+        break;
+      case 'redeem':
+        router.push('/(tabs)/ecoRewards');
+        break;
+    }
+  };
+
+  const handleFeaturePress = (feature: 'game' | 'chatbot') => {
+    switch (feature) {
+      case 'game':
+        router.push('/features/game');
+        break;
+      case 'chatbot':
+        router.push('/features/chatbot');
+        break;
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -38,7 +60,7 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recent Activity</Text>
         <View style={styles.activityList}>
-          {[1, 2, 3].map((item) => (
+          {[1, 2].map((item) => (
             <View key={item} style={styles.activityItem}>
               <View style={styles.activityIcon}>
                 <Recycle size={24} color={Colors.primary.green} />
@@ -53,15 +75,41 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Additional Features</Text>
+        <View style={styles.featureGrid}>
+          <TouchableOpacity 
+            style={styles.featureCard}
+            onPress={() => handleFeaturePress('game')}>
+            <View style={[styles.featureIcon, { backgroundColor: Colors.primary.blue + '20' }]}>
+              <Gamepad2 size={24} color={Colors.primary.blue} />
+            </View>
+            <Text style={styles.featureText}>Eco Game</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.featureCard}
+            onPress={() => handleFeaturePress('chatbot')}>
+            <View style={[styles.featureIcon, { backgroundColor: Colors.primary.green + '20' }]}>
+              <MessageSquare size={24} color={Colors.primary.green} />
+            </View>
+            <Text style={styles.featureText}>AI Assistant</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionGrid}>
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity 
+            style={styles.actionCard}
+            onPress={() => handleQuickAction('scan')}>
             <View style={[styles.actionIcon, { backgroundColor: Colors.primary.green + '20' }]}>
               <Camera size={24} color={Colors.primary.green} />
             </View>
             <Text style={styles.actionText}>Scan Waste</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity 
+            style={styles.actionCard}
+            onPress={() => handleQuickAction('redeem')}>
             <View style={[styles.actionIcon, { backgroundColor: Colors.primary.blue + '20' }]}>
               <Gift size={24} color={Colors.primary.blue} />
             </View>
@@ -270,5 +318,34 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.accent.darkGray,
     lineHeight: 20,
+  },
+  featureGrid: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  featureCard: {
+    flex: 1,
+    backgroundColor: Colors.secondary.white,
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  featureIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  featureText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.accent.darkGray,
   },
 });
