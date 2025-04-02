@@ -188,7 +188,10 @@ Before you begin, ensure you have the following installed:
 - [Node.js](https://nodejs.org/) (v14 or higher)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - Expo CLI: run this in your terminal
-      npm install -g expo-cli
+
+  ```bash
+   npm install -g expo-cli
+   ```
 - [Git](https://git-scm.com/)
 - Expo Go from android play store
 
