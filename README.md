@@ -127,7 +127,7 @@ EcoBuddy supports:
      - AI-driven waste monitoring and feedback on recycling habits.
 
 
-**🚀 Let’s make Nigeria greener, one recycled item at a time!** 🌱♻️
+**🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 ## Pages
 - Onboarding screen
@@ -181,9 +181,107 @@ EcoBuddy supports:
 
 -On community, add better active chalenges where users can gain points as well.
 
+## 🚀 Getting Started
+
+### Prerequisites
+Before you begin, ensure you have the following installed:
+- [Node.js](https://nodejs.org/) (v14 or higher)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
+- Expo CLI: run this in your terminal
+      npm install -g expo-cli
+- [Git](https://git-scm.com/)
+- Expo Go from android play store
+
+### Installation Steps
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/ewa-edun/EcoBuddy.git
+   cd EcoBuddy
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Install Additional Required Packages**
+   ```bash
+   # UI and Icon Libraries
+   npm install lucide-react-native
+   npm install @expo/vector-icons
+   
+   # Navigation and Routing
+   npm install expo-router
+   npm install @react-navigation/native
+   npm install @react-navigation/stack
+   
+   # UI Components
+   npm install react-native-safe-area-context
+   npm install react-native-screens
+   
+   # Image and Media
+   npm install expo-image-picker
+   npm install expo-media-library
+   
+   # Layout and Styling
+   npm install react-native-reanimated
+   ```
+
+SKIP THIS NUMBER 4 STEP. I'VE NOT ADDED ANY FUCTIONALITIES YET SO ITS SAFE TO SKIP THIS RIGHT NOW.
+4. **Environment Setup**
+   Create a `.env` file in the root directory with the following variables:
+   ```
+   FIREBASE_API_KEY=your_firebase_api_key
+   FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   FIREBASE_PROJECT_ID=your_firebase_project_id
+   FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+   FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+   FIREBASE_APP_ID=your_firebase_app_id
+   GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+
+5. **Start the Development Server**
+   ```bash
+   npx expo start
+   ```
+
+6. **Running the App**
+   
+   - **On Physical Device:**
+     - Install the Expo Go app from the App Store or Play Store
+     - Scan the QR code shown in the terminal with your device's camera
+
+### Common Issues and Solutions
+
+1. **Metro Bundler Issues**
+   ```bash
+   # Clear Metro bundler cache
+   npx expo start -c
+   ```
+
+2. **Dependency Issues**
+   ```bash
+   # Remove node_modules and reinstall
+   rm -rf node_modules
+   npm install
+   ```
+
+3. **Environment Variables Not Loading**
+   - Ensure the `.env` file is in the root directory
+   - Restart the development server
+   - Make sure all required environment variables are set
+   ```
+
+### Additional Resources
+- [Expo Documentation](https://docs.expo.dev/)
+- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Google Maps Platform](https://developers.google.com/maps/documentation)
 
 
-
+**Happy coding! 🌱♻️**
 
 
 
