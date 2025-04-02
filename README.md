@@ -142,12 +142,48 @@ EcoBuddy supports:
 - Recycling educational page with ai generated newsletter and human blogs articles.
 - Community post and engagement.
 
-## Pages to do today
+## Pages/Fixes to do today
 - On home page: 
-  - add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
   - The hello john thats first seen should say welcome {name}. the name that was entered in the create account file and this name should be saved in the database so that it displays when the person logis in again.
 
 - On the chatbot: when I type in the chat, the box goes down and out of the screen. fix that.
+
+## Pages/Fixes for future
+- Need 6 new pages as babies to the main page
+   - Waste pick up schedule page
+   - Claim rewards page
+   - Post on community page
+   - Post blog article on education page.
+   - Edit profile page
+   - Settings page
+
+- Customize the not found page to have ecobuddy stuff on it.
+- AI for chatbot, for newspaper/blog, and for image recognizer(might have to train a model for this one).
+- On home page: add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
+- Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
+
+  - Game 1: **Trash Sort Challenge**
+      - Users must quickly drag and drop different waste items (plastic, metal, glass, paper) into the correct recycling bins before time runs out.
+      - 10 items, 2 minutes. 10 point each
+      - Incorrect sorting results in a small point deduction and once the timer is over, it shows their points before the timer ran out.
+
+  - Game 2:**Memory Match: Eco Edition**
+     - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
+     - Points: +20 per match, 3 minutes.
+
+  - Game 3:**Recycle Match**
+      - A puzzle game where users match three or more of the same recyclable items (like candy crush but with waste items).
+      - 5 matches, 20 points each
+
+  - Game 4:Eco Quiz Show
+      - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
+      - 10 Questions, 10 point each.
+
+-On community, add better active chalenges where users can gain points as well.
+
+
+
+
 
 
 
