@@ -182,31 +182,62 @@ EcoBuddy supports:
 -On community, add better active chalenges where users can gain points as well.
 
 ## 🚀 Getting Started
+1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)
+2. Once the folder is open, open the terminal, control + `, or just find it in the run (you'll see different sections on top named file, edit, run, help, view, just check I think view or smt till you see terminal, then open it)
+3. Now once your terminal is open, everything underneath would be typed into the terminal accordingly. 
 
 ### Prerequisites
-Before you begin, ensure you have the following installed:
-- [Node.js](https://nodejs.org/) (v14 or higher)
-- [npm](https://www.npmjs.com/) (comes with Node.js)
-- Expo CLI: run this in your terminal
+- Before you begin, ensure you have the following installed:
+
+1. [Node.js](https://nodejs.org/) (v14 or higher) Run this in your terminal 
+
+```bash
+node --v
+```
+
+- this command should bring out number like this 23.01.0 or smt like that sha. So the first number is the version which should be 23 or 24 since I saw what you downloaded 
+
+2. [npm](https://www.npmjs.com/) (comes with Node.js)
+```bash
+npm --v
+```
+
+- same with npm here. It should be around the same as node version number.
+
+4. Expo CLI: After you've confirmed node is properly installed, run this next in your terminal
 
   ```bash
    npm install -g expo-cli
    ```
-- [Git](https://git-scm.com/)
-- Expo Go from android play store
+
+5. [Git](https://git-scm.com/)
+- To be sure git is installed, on the left side panel, you'll see a bunch of icons. You're currently in the top one named folder. Check the second/third one the one that says git lens and check if it's connected or if it says install git on windows. if its connected then git bash is installed properly but if it still says install git for windows, it's most likely not properly installed. Although, if you're sure everything installed properly, exit VSCode and open it again. Sometimes VSCode needs to be reloaded.
+
+6. Download Expo Go from android play store.
+
+- After all these above are done and successful, run this in the terminal as well. You can do all of this in the same terminal.
 
 ### Installation Steps
 
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/ewa-edun/EcoBuddy.git
+```
+
+- then once it successfully cloned, run this:
+
+```bash
    cd EcoBuddy
    ```
+
+- Run this to install node modules, it's a big package but you need it to make sure the app runs smoothly and successfully.
 
 2. **Install Dependencies**
    ```bash
    npm install
    ```
+
+- After node modules are successfully installed, install these one after the other in the same terminal.
 
 3. **Install Additional Required Packages**
    ```bash
@@ -223,15 +254,12 @@ Before you begin, ensure you have the following installed:
    npm install react-native-safe-area-context
    npm install react-native-screens
    
-   # Image and Media
-   npm install expo-image-picker
-   npm install expo-media-library
-   
    # Layout and Styling
    npm install react-native-reanimated
    ```
 
-SKIP THIS NUMBER 4 STEP. I'VE NOT ADDED ANY FUCTIONALITIES YET SO ITS SAFE TO SKIP THIS RIGHT NOW.
+- SKIP THIS NUMBER 4 STEP. I'VE NOT ADDED ANY FUCTIONALITIES YET SO ITS SAFE TO SKIP THIS RIGHT NOW.
+
 4. **Environment Setup**
    Create a `.env` file in the root directory with the following variables:
    ```
@@ -245,6 +273,8 @@ SKIP THIS NUMBER 4 STEP. I'VE NOT ADDED ANY FUCTIONALITIES YET SO ITS SAFE TO SK
    GEMINI_API_KEY=your_gemini_api_key
    ```
 
+- Once everything is successfully installed, run this command in your terminal. Once you start this that means the app would start running.
+
 5. **Start the Development Server**
    ```bash
    npx expo start
@@ -254,7 +284,13 @@ SKIP THIS NUMBER 4 STEP. I'VE NOT ADDED ANY FUCTIONALITIES YET SO ITS SAFE TO SK
    
    - **On Physical Device:**
      - Install the Expo Go app from the App Store or Play Store
-     - Scan the QR code shown in the terminal with your device's camera
+     - Scan the QR code shown in the terminal with your device's camera.
+A QR code will come up in the terminal after you run number 5 command. Scan it and let the app load on your phone.
+
+
+-By now, you should be able to see the app on your phone with no issues.
+
+7. When you're done checking the app and you want to exit, click control + c to exit the app testing. and if you want to u. it again at a later time start from number 5 again.
 
 ### Common Issues and Solutions
 
@@ -271,11 +307,6 @@ SKIP THIS NUMBER 4 STEP. I'VE NOT ADDED ANY FUCTIONALITIES YET SO ITS SAFE TO SK
    npm install
    ```
 
-3. **Environment Variables Not Loading**
-   - Ensure the `.env` file is in the root directory
-   - Restart the development server
-   - Make sure all required environment variables are set
-   ```
 
 ### Additional Resources
 - [Expo Documentation](https://docs.expo.dev/)
