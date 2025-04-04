@@ -242,14 +242,10 @@ npm --v
 3. **Install Additional Required Packages**
    ```bash
    # UI and Icon Libraries
-   npm install lucide-react-native
-   npm install @expo/vector-icons
+   npm install lucide-react-native @expo/vector-iconsc expo-router @react-navigation/native @react-navigation/stack
    
-   # Navigation and Routing
-   npm install expo-router
-   npm install @react-navigation/native
-   npm install @react-navigation/stack
    
+  
    # UI Components
    npm install react-native-safe-area-context
    npm install react-native-screens
