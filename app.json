@@ -38,8 +38,7 @@
         {
           "CameraPermission": "Allow EcoBuddy to access your camera for waste scanning."
         }
-      ],
-      "react-native-vision-camera"
+      ]
     ],
     "experiments": {
       "typedRoutes": true

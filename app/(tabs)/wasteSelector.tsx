@@ -3,7 +3,7 @@ import { Colors } from '../constants/Colors';
 import { Info } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
 import { router } from 'expo-router';
-import { Camera, CameraType } from 'expo-camera';
+import { Camera, CameraType, CameraView } from 'expo-camera';
 
 type WasteCategory = {
   id: string;
@@ -48,7 +48,12 @@ export default function WasteSelectorScreen() {
   const [selectedCategory, setSelectedCategory] = useState<WasteCategory | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [uri, setUri] = useState<string | null>(null);
+  const toggleFacing = () => {
+    setFacing((prev) => (prev === "back" ? "front" : "back"));
+  };
 
   useEffect(() => {
     (async () => {
@@ -72,13 +77,14 @@ export default function WasteSelectorScreen() {
 
   const handleCameraCapture = async () => {
     if (cameraRef.current) {
-      try {
-        const photo = await cameraRef.current.takePictureAsync();
-        setShowCamera(false);
-      } catch (error) {
+      const photo = await cameraRef.current.takePictureAsync().catch(error => {
         console.error('Error taking picture:', error);
+      });
+      if (photo) {
+        setUri(photo.uri);
+        setShowCamera(false);
       }
-    }
+    }  
   };
 
   if (showCamera) {
@@ -91,10 +97,10 @@ export default function WasteSelectorScreen() {
 
     return (
       <View style={styles.container}>
-        <Camera
+        <CameraView
           ref={cameraRef}
           style={styles.camera}
-          type={CameraType.back}
+          facing={facing}
         >
           <View style={styles.cameraControls}>
             <TouchableOpacity
@@ -110,7 +116,7 @@ export default function WasteSelectorScreen() {
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
-        </Camera>
+        </CameraView>
       </View>
     );
   }
