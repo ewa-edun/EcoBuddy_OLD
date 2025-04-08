@@ -7,16 +7,20 @@ export default function TabLayout() {
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary.green,
-        tabBarInactiveTintColor: Colors.accent.darkGray,
+        tabBarActiveTintColor: Colors.primary.beige,
+        tabBarInactiveTintColor: Colors.secondary.white,
+        
         tabBarLabelStyle: {
           fontFamily: 'PlusJakartaSans-Medium',
           fontSize: 12,
         },
         tabBarStyle: {
           height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          paddingBottom: 9,
+          paddingTop: 6,
+          backgroundColor: Colors.background.main, // Teal background
+          borderTopWidth: 0, // Removes default border
+          elevation: 0, 
         },
       })}>
       <Tabs.Screen

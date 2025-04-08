@@ -51,7 +51,7 @@ export default function EcoRewardsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   header: {
     padding: 24,
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.accent.darkGray,
+    color: Colors.text.darker,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    color: Colors.accent.darkGray,
+    color: Colors.secondary.white,
     marginBottom: 16,
   },
   rewardsList: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   rewardCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 16,
     shadowColor: '#000',

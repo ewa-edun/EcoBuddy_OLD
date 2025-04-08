@@ -109,7 +109,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   content: {
     padding: 24,
@@ -186,6 +186,6 @@ const styles = StyleSheet.create({
   footerLink: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    color: Colors.primary.blue,
+    color: Colors.primary.beige,
   },
 });

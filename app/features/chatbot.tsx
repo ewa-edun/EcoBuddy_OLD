@@ -128,7 +128,7 @@ export default function ChatbotScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   messagesContainer: {
     flex: 1,
@@ -189,9 +189,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     padding: 14,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
     borderTopWidth: 1,
-    borderTopColor: Colors.accent.lightGray,
+    borderTopColor: Colors.background.main,
     paddingBottom: Platform.OS === 'ios' ? 25 : 16,
     bottom: 55, 
     left: 0,

@@ -87,7 +87,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   scrollContent: {
     flexGrow: 1,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: Colors.primary.blue,
+    color: Colors.primary.beige,
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
   },
@@ -174,6 +174,6 @@ const styles = StyleSheet.create({
   registerLink: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    color: Colors.primary.blue,
+    color: Colors.primary.beige,
   },
 });

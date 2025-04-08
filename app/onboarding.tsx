@@ -5,12 +5,11 @@ import { Colors } from './constants/Colors';
 export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
-      <Image
+      <Image style={styles.image}
         source={require('../assets/EcoBuddy_logo.jpeg')}
-        style={styles.image}
       />
       <View style={styles.content}>
-        <Text style={styles.title}>EcoBuddy Nigeria</Text>
+        <Text style={styles.title}>EcoBuddy</Text>
         <Text style={styles.subtitle}>
          ...no dey waste, make E pay
         </Text>
@@ -32,12 +31,24 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   image: {
-    width: '100%',
-    height: '50%',
-    resizeMode: 'contain',
+    width: 300,
+    height: 300,
+    resizeMode: 'cover',
+    borderRadius: 150,
+    alignSelf: 'center',
+    marginTop: 60,
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   content: {
     flex: 1,
@@ -47,7 +58,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: 'PlusJakartaSans-Bold',
-    color: Colors.primary.green,
+    color: Colors.primary.beige,
     marginBottom: 16,
   },
   subtitle: {
@@ -58,14 +69,14 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   button: {
-    backgroundColor: Colors.primary.green,
+    backgroundColor: Colors.primary.lightTeal,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 16,
   },
   buttonText: {
-    color: Colors.secondary.white,
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },
@@ -75,7 +86,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondaryButtonText: {
-    color: Colors.primary.blue,
+    color: Colors.primary.cream,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },

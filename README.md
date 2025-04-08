@@ -142,15 +142,29 @@ EcoBuddy supports:
 - Recycling educational page with ai generated newsletter and human blogs articles.
 - Community post and engagement.
 
-## Pages/Fixes to do today
-- On home page: 
-  - The hello john thats first seen should say welcome {name}. the name that was entered in the create account file and this name should be saved in the database so that it displays when the person logis in again.
+  main: #0C4242',
+      card: #0D4242',
+      modal: #115254',
+    },
+    text: {
+      primary: #FFFFFF',
+      secondary: #E0E0E0',
+      accent: #FFC107',
+#d7ccb6
+#FFFDD0
 
-- On the chatbot: when I type in the chat, the box goes down and out of the screen. fix that.
+## Pages/Fixes to do today
+- Waste selector page:
+ - The scan waste takes you to the camera and after that the model (which i will train and link later) decides what type of waste it is. Ask AI for more clarification and workflow for this with the model. After successful identification of the image let it take you to the next page.
+ - If its being clicked manually, let the submit for verification button take them to the second page (wasteSchedule.tsx).
+ - Sub page (wasteSchedule.tsx file) in the features folder: this is the page with the full details of what you want to type of waste to be recycled (as it was selected/scanned on the waste selector page), weight of the waste, more important features and info needed here,  with the maps of drop-up locations, etc etc, then a button saying submit waste. And after a successful submission, it takes them to the waste history page.
+ - Another sub page to see current transactions named waste history page in the features folder where they can see their waste transcations (the ones that have been successfully transferred, the ones that are still waiting to be transferred, and the one that were unsuccessful for different reasons.) and there should be a back to home button as well. there should be an small calender icon somewhere on the home page that links here.
 
 ## Pages/Fixes for future
-- Need 6 new pages as babies to the main page
-   - Waste pick up schedule page
+- Choose a logo and then update the color scheme according to that logo.
+- Check for other fonts and choose one.
+
+- Need new pages as babies to the main page
    - Claim rewards page
    - Post on community page
    - Post blog article on education page.
@@ -158,8 +172,15 @@ EcoBuddy supports:
    - Settings page
 
 - Customize the not found page to have ecobuddy stuff on it.
-- AI for chatbot, for newspaper/blog, and for image recognizer(might have to train a model for this one).
+
+- Add a referrals page where there's a referral code and how many people they've referred. For every referral you get 300 points. This would be a profile page link to the page.
+
+- AI for chatbot, for newspaper/blog, and for image recognizer(will train a model for this one).
+
 - On home page: add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
+
+- On home page: The hello john thats first seen should say welcome {name}. the name that was entered in the create account file and this name should be saved in the database so that it displays when the person logis in again.
+
 - Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
 
   - Game 1: **Trash Sort Challenge**

@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare } from 'lucide-react-native';
+import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare, Calendar } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 export default function HomeScreen() {
@@ -30,8 +30,8 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hello, John!</Text>
-          <Text style={styles.points}>2,450 Points</Text>
+          <Text style={styles.greeting}>Hello, Ewa</Text>
+          <Text style={styles.points}>5000 Eco Points</Text>
         </View>
         <Image
           source={require('../../assets/EcoBuddy_logo.jpeg')}
@@ -149,6 +149,13 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
+
+      <View style={styles.quickActions}>
+        <TouchableOpacity onPress={() => router.push('/features/wasteHistory')}>
+          <Calendar size={24} color={Colors.primary.green} />
+          <Text style={styles.greeting}>View Waste History</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -156,7 +163,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   header: {
     flexDirection: 'row',
@@ -168,7 +175,7 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.accent.darkGray,
+    color: Colors.secondary.white,
   },
   points: {
     fontSize: 24,
@@ -177,8 +184,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   avatar: {
-    width: 48,
-    height: 48,
+    width: 55,
+    height: 55,
     borderRadius: 24,
   },
   statsContainer: {
@@ -188,7 +195,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -216,7 +223,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    color: Colors.accent.darkGray,
+    color: Colors.secondary.white,
     marginBottom: 16,
   },
   activityList: {
@@ -241,12 +248,12 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Medium',
-    color: Colors.accent.darkGray,
+    color: Colors.text.secondary,
   },
   activityMeta: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.accent.darkGray,
+    color: Colors.text.darker,
     marginTop: 4,
   },
   actionGrid: {
@@ -255,7 +262,7 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -299,7 +306,7 @@ const styles = StyleSheet.create({
   },
   helpItem: {
     flexDirection: 'row',
-    backgroundColor: Colors.accent.lightGray,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 12,
     gap: 12,
@@ -325,7 +332,7 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -347,5 +354,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.accent.darkGray,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 24,
+  },
+  quickActionText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.accent.darkGray,
+    marginLeft: 8,
   },
 });

@@ -191,7 +191,7 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   header: {
     padding: 24,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.accent.darkGray,
+    color: Colors.text.darker,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
-    color: Colors.accent.darkGray,
+    color: Colors.text.darker,
   },
   activeTabText: {
     color: Colors.primary.green,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   post: {
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   challengeCard: {
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',

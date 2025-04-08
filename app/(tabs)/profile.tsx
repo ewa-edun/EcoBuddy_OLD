@@ -157,7 +157,7 @@ export default function ProfileScreen() {
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('logout')}>
-        <LogOut size={20} color={Colors.accent.darkGray} />
+        <LogOut size={20} color={Colors.text.darker} />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -167,12 +167,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   header: {
     padding: 24,
     paddingTop: 60,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.background.main,
   },
   profileSection: {
     flexDirection: 'row',
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontFamily: 'PlusJakartaSans-Bold',
-    color: Colors.accent.darkGray,
+    color: Colors.primary.green,
     marginBottom: 4,
   },
   badgeContainer: {
@@ -208,16 +208,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.primary.green + '20',
+    backgroundColor: Colors.text.darker + '20',
   },
   editButtonText: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
-    color: Colors.primary.green,
+    color: Colors.text.darker,
   },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   },
   achievementCard: {
     width: 200,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     borderRadius: 16,
     padding: 16,
     marginRight: 16,
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     color: Colors.primary.green,
   },
   menuContainer: {
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.cream,
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -355,6 +355,6 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Medium',
-    color: Colors.accent.darkGray,
+    color: Colors.text.darker,
   },
 });
