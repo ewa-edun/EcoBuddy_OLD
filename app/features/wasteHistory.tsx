@@ -77,14 +77,14 @@ const styles = StyleSheet.create({
     color: Colors.text.accent,
   },
   backButton: {
-    backgroundColor: Colors.primary.teal,
+    backgroundColor: Colors.primary.beige,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     margin: 24,
   },
   backButtonText: {
-    color: Colors.text.primary,
+    color: Colors.text.darker,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },

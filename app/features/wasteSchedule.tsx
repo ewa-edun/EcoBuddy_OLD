@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: 'PlusJakartaSans-Bold',
-    color: Colors.text.primary,
+    color: Colors.primary.green,
     marginBottom: 8,
   },
   subtitle: {
@@ -250,12 +250,12 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   weightInput: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.primary.beige,
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.text.primary,
+    color: Colors.accent.darkGray,
   },
   pointsText: {
     fontSize: 14,
@@ -315,14 +315,14 @@ const styles = StyleSheet.create({
     color: Colors.text.accent,
   },
   submitButton: {
-    backgroundColor: Colors.primary.teal,
+    backgroundColor: Colors.primary.beige,
     margin: 24,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   submitButtonText: {
-    color: Colors.text.primary,
+    color: Colors.text.darker,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },

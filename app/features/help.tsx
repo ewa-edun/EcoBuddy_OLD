@@ -110,7 +110,7 @@ export default function HelpScreen() {
         <View style={styles.locationContainer}>
           <MapPin size={24} color={Colors.primary.green} />
           <Text style={styles.locationText}>
-            123 Eco Street{'\n'}Green City, EC 12345
+            123 Eco Street{'\n'}Lagos, Nigeria
           </Text>
         </View>
       </View>
@@ -121,22 +121,22 @@ export default function HelpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondary.white,
+    backgroundColor: Colors.primary.lightTeal,
   },
   header: {
     padding: 24,
-    backgroundColor: Colors.primary.green,
+    backgroundColor: Colors.background.main,
   },
   title: {
     fontSize: 28,
     fontFamily: 'PlusJakartaSans-Bold',
-    color: Colors.secondary.white,
+    color: Colors.primary.green,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.secondary.white,
+    color: Colors.text.darker,
     opacity: 0.9,
   },
   section: {
@@ -145,11 +145,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    color: Colors.accent.darkGray,
+    color: Colors.secondary.white,
     marginBottom: 16,
   },
   faqItem: {
-    backgroundColor: Colors.accent.lightGray,
+    backgroundColor: Colors.primary.cream,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   contactItem: {
     alignItems: 'center',
-    backgroundColor: Colors.accent.lightGray,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 12,
     width: '30%',
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accent.lightGray,
+    backgroundColor: Colors.primary.cream,
     padding: 16,
     borderRadius: 12,
   },

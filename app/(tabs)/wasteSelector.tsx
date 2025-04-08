@@ -2,9 +2,8 @@ import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'rea
 import { Colors } from '../constants/Colors';
 import { Info } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
-//import { Camera as VisionCamera, useCameraDevice } from 'react-native-vision-camera';
 import { router } from 'expo-router';
-import { Camera } from 'expo-camera';
+import { Camera, CameraType } from 'expo-camera';
 
 type WasteCategory = {
   id: string;
@@ -49,9 +48,7 @@ export default function WasteSelectorScreen() {
   const [selectedCategory, setSelectedCategory] = useState<WasteCategory | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const device = useCameraDevice('back');
-  const camera = useRef<VisionCamera>(null);
-  const [cameraRef, setCameraRef] = useState<Camera | null>(null);
+  const cameraRef = useRef<Camera>(null);
 
   useEffect(() => {
     (async () => {
@@ -74,11 +71,9 @@ export default function WasteSelectorScreen() {
   };
 
   const handleCameraCapture = async () => {
-    if (cameraRef) {
+    if (cameraRef.current) {
       try {
-        const photo = await cameraRef.takePictureAsync();
-        // Here you would process the photo and classify the waste
-        // For now, we'll just close the camera
+        const photo = await cameraRef.current.takePictureAsync();
         setShowCamera(false);
       } catch (error) {
         console.error('Error taking picture:', error);
@@ -93,16 +88,13 @@ export default function WasteSelectorScreen() {
     if (hasPermission === false) {
       return <View style={styles.container}><Text>No access to camera</Text></View>;
     }
-    if (!device) {
-      return <View style={styles.container}><Text>No camera device found</Text></View>;
-    }
 
     return (
       <View style={styles.container}>
         <Camera
-          ref={ref => setCameraRef(ref)}
+          ref={cameraRef}
           style={styles.camera}
-          type={Camera.Constants.Type.back}
+          type={CameraType.back}
         >
           <View style={styles.cameraControls}>
             <TouchableOpacity
@@ -131,8 +123,7 @@ export default function WasteSelectorScreen() {
       </View>
 
       <TouchableOpacity style={styles.scanButton} onPress={handleScanPress}>
-        <Camera size={24} color={Colors.secondary.white} />
-        <Text style={styles.scanButtonText}>Scan Waste</Text>
+      <Text style={styles.scanButtonText}>Scan Waste</Text>
       </TouchableOpacity>
 
       <View style={styles.divider}>
@@ -187,26 +178,26 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: 'PlusJakartaSans-Bold',
-    color: Colors.text.primary,
+    color: Colors.primary.green,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.text.secondary,
+    color: Colors.text.primary,
   },
   scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary.teal,
+    backgroundColor: Colors.primary.beige,
     margin: 24,
     padding: 16,
     borderRadius: 12,
     gap: 8,
   },
   scanButtonText: {
-    color: Colors.text.primary,
+    color: Colors.text.darker,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },
@@ -232,7 +223,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   categoryCard: {
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.primary.lightTeal,
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
