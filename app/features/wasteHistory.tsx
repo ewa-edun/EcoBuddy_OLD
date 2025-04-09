@@ -22,7 +22,7 @@ export default function WasteHistoryScreen() {
             <Text style={styles.statusTitle}>{status.charAt(0).toUpperCase() + status.slice(1)} Transactions</Text>
             {transactions.filter(tx => tx.status === status).map(tx => (
               <View key={tx.id} style={styles.transactionItem}>
-                <Text style={styles.transactionText}>{tx.type} - {tx.date} - {tx.points} points</Text>
+                <Text style={styles.transactionText}>{tx.type}  -  {tx.date} {'\n'}{tx.points} points</Text>
                 {status === 'unsuccessful' && <Text style={styles.reasonText}>Reason: {tx.reason}</Text>}
               </View>
             ))}
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: 'PlusJakartaSans-Bold',
-    color: Colors.text.primary,
+    color: Colors.primary.green,
   },
   transactionList: {
     padding: 24,

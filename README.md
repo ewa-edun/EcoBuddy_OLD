@@ -122,6 +122,7 @@ EcoBuddy supports:
 - Integerate Firebase auth and firestore.
 - Integerate Gemini API for chatbot and newsletter/blog posts.
 
+- Scan waste button, referrals code button, back to home button on waste page, submit waste button on waste schedule, and claim rewards button (this one is green) need better styling.
 ## Pages/Fixes for future
 - Edit Profile Page
 

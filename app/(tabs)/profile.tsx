@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    color: Colors.accent.darkGray,
+    color: Colors.secondary.white,
     marginBottom: 16,
   },
   achievementsScroll: {
