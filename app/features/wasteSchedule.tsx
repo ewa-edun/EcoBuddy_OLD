@@ -89,8 +89,7 @@ export default function WasteScheduleScreen() {
       return;
     }
 
-    // Here you would typically make an API call to submit the waste
-    // For now, we'll just navigate to the history page
+    // Here you would typically make an API call to submit the waste, For now, we'll just navigate to the history page
     router.push('/features/wasteHistory');
   };
 
@@ -103,7 +102,7 @@ export default function WasteScheduleScreen() {
 
       <View style={styles.infoCard}>
         <View style={styles.infoHeader}>
-          <Info size={20} color={Colors.primary.teal} />
+          <Info size={20} color={Colors.primary.blue} />
           <Text style={styles.infoTitle}>Recycling Guidelines</Text>
         </View>
         <Text style={styles.infoText}>{wasteInfo.description}</Text>
@@ -116,7 +115,7 @@ export default function WasteScheduleScreen() {
 
       <View style={styles.weightCard}>
         <View style={styles.weightHeader}>
-          <Scale size={20} color={Colors.primary.teal} />
+          <Scale size={20} color={Colors.secondary.yellow} />
           <Text style={styles.weightTitle}>Waste Weight</Text>
         </View>
         <TextInput
@@ -131,7 +130,7 @@ export default function WasteScheduleScreen() {
 
       <View style={styles.mapCard}>
         <View style={styles.mapHeader}>
-          <MapPin size={20} color={Colors.primary.teal} />
+          <MapPin size={20} color={Colors.primary.red} />
           <Text style={styles.mapTitle}>Drop-off Locations</Text>
         </View>
         <MapView

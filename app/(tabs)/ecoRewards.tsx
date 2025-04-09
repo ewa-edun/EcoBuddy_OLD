@@ -1,6 +1,8 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Gift, TrendingUp, Award } from 'lucide-react-native';
+import { Link } from 'expo-router';
+
+import { Gift, TrendingUp, Award, Coins } from 'lucide-react-native';
 
 export default function EcoRewardsScreen() {
   return (
@@ -31,7 +33,7 @@ export default function EcoRewardsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Available Rewards</Text>
         <View style={styles.rewardsList}>
-          {[1, 2, 3].map((item) => (
+          {[1, 2].map((item) => (
             <TouchableOpacity key={item} style={styles.rewardCard}>
               <View style={styles.rewardIcon}>
                 <Gift size={24} color={Colors.primary.green} />
@@ -44,6 +46,13 @@ export default function EcoRewardsScreen() {
           ))}
         </View>
       </View>
+
+      <Link href="/features/claimRewards" asChild>
+      <TouchableOpacity style={styles.claimButton}>
+        <Coins size={24} color={Colors.secondary.yellow} />
+        <Text style={styles.claimButtonText}>Claim Rewards</Text>
+      </TouchableOpacity>
+      </Link>
     </ScrollView>
   );
 }
@@ -143,5 +152,20 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.primary.green,
     marginTop: 4,
+  },
+  claimButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.background.modal,
+    margin: 24,
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  claimButtonText: {
+    color: Colors.secondary.white,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
 }); 

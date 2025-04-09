@@ -112,51 +112,34 @@ EcoBuddy supports:
 
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
-## Pages
-- Onboarding screen
-- Registration screen
-- Home
-- Game
-- User profile
-- Help\FAQ
-- AI Chatbot
-- Waste Selector
-- Eco Points and rewards page
-- Recycling educational page with ai generated newsletter and human blogs articles.
-- Community post and engagement.
 
 
 ## Pages/Fixes to do today
 - Waste selector page:
- - The camera is working now. So when the image is taken, let it be displayed and sows them the button to submit for verification. 
-
-- Create claim rewards page.
-- Forgot password page.
-- Integerate Firebase auth and firestore
-- Integerate Gemini API for chatbot.
+ - The camera is working now. So when the image is taken, let it be displayed with the type of waste it is written below it and the button to submit for verification is shown below. 
+- Post on community page
+- Post blog article on education page.
+- Integerate Firebase auth and firestore.
+- Integerate Gemini API for chatbot and newsletter/blog posts.
 
 ## Pages/Fixes for future
-- Need new pages as babies to the main page
-   - Claim rewards page
-   - Edit profile page
-   - Settings page
-   - Post on community page
-   - Post blog article on education page.
-   - Forgot password page.
+- Edit Profile Page
 
-- Delete Account on profile page
+- View full blog articlue page.
 
-- Customize the not found page to have ecobuddy stuff on it.
+- Add a feture that generates personalized referral code for each user.
 
-- Add a referrals page where there's a referral code and how many people they've referred. For every referral you get 300 points. This would be a profile page link to the page.
+- AI for chatbot, for newspaper/blog, and for the eco question game.
 
-- AI for chatbot, for newspaper/blog, and for image recognizer(will train a model for this one).
+- After image is taken, the model (which i will train and link later) decides what type of waste it is. Ask AI for more clarification and workflow for this with the model. After successful identification of the image let it take you to the next page. Also handle image and file handling here.
 
- - After image is taken, the model (which i will train and link later) decides what type of waste it is. Ask AI for more clarification and workflow for this with the model. After successful identification of the image let it take you to the next page. Also handle image and file handling here.
+- On home page: The hello john thats first seen should say welcome {name}. the name that was entered in the create account file and this name should be saved in the database so that it displays when the person logis in again.
 
 - On home page: add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
 
-- On home page: The hello john thats first seen should say welcome {name}. the name that was entered in the create account file and this name should be saved in the database so that it displays when the person logis in again.
+- Need a Leaderboard page with the full list of people and points from the game and there's a second one for how much kg of waste the person has recycled.
+
+- On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
 
 - Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
 
@@ -177,7 +160,8 @@ EcoBuddy supports:
       - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
       - 10 Questions, 10 point each.
 
--On community, add better active chalenges where users can gain points as well.
+
+
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)

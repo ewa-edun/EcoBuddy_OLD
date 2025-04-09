@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare, Calendar } from 'lucide-react-native';
-import { router } from 'expo-router';
+import { router, Link } from 'expo-router';
 
 export default function HomeScreen() {
   const handleQuickAction = (action: 'scan' | 'redeem') => {
@@ -150,12 +150,12 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View style={styles.quickActions}>
-        <TouchableOpacity onPress={() => router.push('/features/wasteHistory')}>
-          <Calendar size={24} color={Colors.primary.green} />
-          <Text style={styles.greeting}>View Waste History</Text>
-        </TouchableOpacity>
-      </View>
+      <Link href="/features/wasteHistory" asChild>
+      <TouchableOpacity style={styles.claimButton}>
+        <Calendar size={24} color={Colors.secondary.yellow} />
+        <Text style={styles.claimButtonText}>View Waste History</Text>
+      </TouchableOpacity>
+      </Link>
     </ScrollView>
   );
 }
@@ -366,5 +366,20 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.accent.darkGray,
     marginLeft: 8,
+  },
+  claimButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.background.modal,
+    margin: 24,
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  claimButtonText: {
+    color: Colors.secondary.white,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
 });

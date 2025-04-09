@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Heart, MessageCircle, Share2, Award, Users, Trophy } from 'lucide-react-native';
+import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 
 type Post = {
@@ -51,7 +51,7 @@ const posts: Post[] = [
       badge: 'Rising Star',
     },
     content: 'Started a neighborhood recycling initiative in Abuja! Join us every Saturday morning. Together we can make our city cleaner. 💚',
-    image: 'https://images.unsplash.com/photo-1591193443107-10485832c3d1?w=800',
+    image: 'https://t3.ftcdn.net/jpg/02/65/81/10/360_F_265811094_pS3hVVc7wpi0nbTtpNJ3mDY5MrOzgliL.jpg',
     likes: 312,
     comments: 42,
     timeAgo: '6h ago',
@@ -61,11 +61,19 @@ const posts: Post[] = [
 export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState<'feed' | 'challenges'>('feed');
 
+  const handlePost = () => {
+    // Logic to navigate to the post creation page
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Community</Text>
         <Text style={styles.subtitle}>Connect with eco-warriors</Text>
+        <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+          <Plus size={20} color={Colors.text.primary} />
+          <Text style={styles.postButtonText}>Post</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.statsContainer}>
@@ -401,5 +409,18 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: Colors.primary.green,
     borderRadius: 2,
+  },
+  postButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background.modal,
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  postButtonText: {
+    marginLeft: 5,
+    color: Colors.text.primary,
+    fontSize: 16,
   },
 });
