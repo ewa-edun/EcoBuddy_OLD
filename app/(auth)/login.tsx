@@ -15,6 +15,11 @@ export default function Login() {
     router.replace('/(tabs)/home');
   };
 
+  const handleForgotPassword = () => {
+    // TODO: Implement forgot password logic
+    router.replace('/forgotPassword');
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -62,7 +67,7 @@ export default function Login() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotPassword}>
+          <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -121,7 +126,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accent.lightGray,
+    backgroundColor: Colors.primary.cream,
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,

@@ -128,13 +128,10 @@ EcoBuddy supports:
 
 ## Pages/Fixes to do today
 - Waste selector page:
- - The camera is not working rn so fix that.  
- 
- FOR THIS WEEK:
+ - The camera is working now. So when the image is taken, let it be displayed and sows them the button to submit for verification. 
 
-- Customize the not found page to have ecobuddy stuff on it.
-- Create settings and edit profile page.
 - Create claim rewards page.
+- Forgot password page.
 - Integerate Firebase auth and firestore
 - Integerate Gemini API for chatbot.
 
@@ -145,6 +142,9 @@ EcoBuddy supports:
    - Settings page
    - Post on community page
    - Post blog article on education page.
+   - Forgot password page.
+
+- Delete Account on profile page
 
 - Customize the not found page to have ecobuddy stuff on it.
 

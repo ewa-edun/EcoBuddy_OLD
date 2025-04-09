@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Award, Gift, Settings, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut } from 'lucide-react-native';
+import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 const achievements = [
@@ -47,9 +47,9 @@ const menuItems = [
     color: Colors.secondary.yellow,
   },
   {
-    id: 'settings',
-    title: 'Settings',
-    icon: Settings,
+    id: 'referrals',
+    title: 'Referrals',
+    icon: Share2 ,
     color: Colors.accent.darkGray,
   },
 ];
@@ -61,15 +61,20 @@ export default function ProfileScreen() {
         router.push('/(tabs)/ecoRewards');
         break;
       case 'progress':
-        router.push('/(tabs)/wasteSelector');
+        router.push('/features/wasteHistory');
         break;
       case 'help':
         router.push('/features/help');
         break;
-      case 'settings':
-        // Handle settings navigation
+      case 'referrals':
+        router.push('/features/referrals');
         break;
-      case 'logout':
+      case 'changepassword':
+        // Handle logout
+        break;
+        case 'logout':
+        // Handle logout
+        break;case 'deleteaccount':
         // Handle logout
         break;
     }
@@ -156,9 +161,19 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('changepassword')}>
+        <Key size={20} color={Colors.primary.blue} />
+        <Text style={styles.changePasswordText}>Change Password</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('logout')}>
         <LogOut size={20} color={Colors.text.darker} />
         <Text style={styles.logoutText}>Log Out</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('deleteaccount')}>
+        <Trash2 size={20} color={Colors.primary.red} />
+        <Text style={styles.deleteText}>Delete Account</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -352,9 +367,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: Colors.accent.lightGray + '20',
   },
+  changePasswordText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.primary.blue,
+  },
   logoutText: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.text.darker,
+  },
+  deleteText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.primary.red,
   },
 });

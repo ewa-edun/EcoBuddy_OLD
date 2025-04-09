@@ -9,6 +9,7 @@ export const Colors = {
       cream: '#FFFDD0',
       green: '#4CAF50',
       blue: '#2196F3',
+      red: '#e30e0e',
     },
     secondary: {
       yellow: '#FFC107',
