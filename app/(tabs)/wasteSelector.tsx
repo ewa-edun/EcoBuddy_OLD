@@ -54,6 +54,7 @@ export default function WasteSelectorScreen() {
   const toggleFacing = () => {
     setFacing((prev) => (prev === "back" ? "front" : "back"));
   };
+  const [wasteType, setWasteType] = useState<string | null>(null); // To store identified waste type
 
   useEffect(() => {
     (async () => {
@@ -66,15 +67,6 @@ export default function WasteSelectorScreen() {
     setShowCamera(true);
   };
 
-  const handleSubmitPress = () => {
-    if (selectedCategory) {
-      router.push({
-        pathname: '/features/wasteSchedule',
-        params: { wasteType: selectedCategory.id }
-      });
-    }
-  };
-
   const handleCameraCapture = async () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync().catch(error => {
@@ -83,8 +75,21 @@ export default function WasteSelectorScreen() {
       if (photo) {
         setUri(photo.uri);
         setShowCamera(false);
+        // Here you would typically identify the waste type based on the image
+        // For demonstration, let's assume we set it to a default category
+        setWasteType('Plastic Bottles'); // Example of identified waste type
+        setSelectedCategory(wasteCategories.find(category => category.name === 'Plastic Bottles') || null);
       }
     }  
+  };
+
+  const handleSubmitPress = () => {
+    if (selectedCategory) {
+      router.push({
+        pathname: '/features/wasteSchedule',
+        params: { wasteType: selectedCategory.id }
+      });
+    }
   };
 
   if (showCamera) {
@@ -129,8 +134,15 @@ export default function WasteSelectorScreen() {
       </View>
 
       <TouchableOpacity style={styles.scanButton} onPress={handleScanPress}>
-      <Text style={styles.scanButtonText}>Scan Waste</Text>
+        <Text style={styles.scanButtonText}>Scan Waste</Text>
       </TouchableOpacity>
+
+      {uri && (
+        <View style={styles.capturedImageContainer}>
+          <Image source={{ uri }} style={styles.capturedImage} />
+          <Text style={styles.wasteTypeText}>Identified Waste: {wasteType}</Text>
+        </View>
+      )}
 
       <View style={styles.divider}>
         <View style={styles.line} />
@@ -142,10 +154,7 @@ export default function WasteSelectorScreen() {
         {wasteCategories.map((category) => (
           <TouchableOpacity
             key={category.id}
-            style={[
-              styles.categoryCard,
-              selectedCategory?.id === category.id && styles.selectedCard,
-            ]}
+            style={[styles.categoryCard, selectedCategory?.id === category.id && styles.selectedCard]}
             onPress={() => setSelectedCategory(category)}>
             <Image source={{ uri: category.image }} style={styles.categoryImage} />
             <View style={styles.categoryContent}>
@@ -168,6 +177,7 @@ export default function WasteSelectorScreen() {
           </TouchableOpacity>
         </View>
       )}
+
     </ScrollView>
   );
 }
@@ -315,16 +325,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   captureButtonText: {
-    width: 70,
-    height: 70,
-    borderRadius: 30,
-    backgroundColor: Colors.background.card,
-    borderWidth: 2,
-    borderColor: Colors.text.primary,
+    color: Colors.text.primary,
     fontSize: 17,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    textAlign: 'center',
-
   },
   closeButton: {
     width: 80,
@@ -335,14 +338,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButtonText: {
-    width: 70,
-    height: 70,
-    borderRadius: 30,
-    backgroundColor: Colors.background.card,
-    borderWidth: 2,
-    borderColor: Colors.text.primary,
-    fontSize: 17,    
+    color: Colors.text.primary,
+    fontSize: 17,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    textAlign: 'center',
   },
-})
+  capturedImageContainer: {
+    margin: 24,
+    alignItems: 'center',
+  },
+  capturedImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  wasteTypeText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.text.primary,
+  },
+});

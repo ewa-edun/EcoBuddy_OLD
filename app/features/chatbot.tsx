@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Send } from 'lucide-react-native';
+import { getGeminiResponse } from '@lib/gemini/geminiService';
 
 type Message = {
   id: string;
@@ -22,7 +23,7 @@ export default function ChatbotScreen() {
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputText.trim()) return;
 
     const newMessage: Message = {
@@ -40,21 +41,31 @@ export default function ChatbotScreen() {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
 
-    // Simulate bot response
-    setTimeout(() => {
+    // Fetch bot response from Gemini API
+    try {
+      const botResponseText = await getGeminiResponse(inputText);
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'I understand your question. Let me help you with that...',
+        text: botResponseText,
         sender: 'bot',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botResponse]);
-      
+
       // Scroll to bottom after bot response
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
-    }, 1000);
+    } catch (error) {
+      console.error('Error fetching bot response:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        text: 'Sorry, I could not fetch a response at this time.',
+        sender: 'bot',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
   };
 
   return (
