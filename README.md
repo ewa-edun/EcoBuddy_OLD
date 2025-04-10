@@ -83,7 +83,7 @@ EcoBuddy supports:
 - **Firebase Firestore** – For Leaderboard data.
 
 ### **🤖 AI & Machine Learning**
-- **TensorFlow.js** – AI-powered item recognition
+- **Teachable Machine** – AI-powered item recognition
 - **Gemini API** – Chatbot integration
 
 ### **📍 GPS & Maps**
@@ -108,33 +108,41 @@ EcoBuddy supports:
 - Add IOT support for Smart Home Integration
      - Users with smart home devices can sync them with EcoBuddy.
      - AI-driven waste monitoring and feedback on recycling habits.
-
+- Dark Mode / Theme Options
+- Past chats of AI Chatbot
+- SMS Notifications.
 
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 
 
 ## Pages/Fixes to do today
-- Waste selector page:
- - The camera is working now. So when the image is taken, let it be displayed with the type of waste it is written below it and the button to submit for verification is shown below. 
-- Post on community page
+- Waste selector page:So when the image is taken, let it be displayed with the type of waste it is written below it and the button to submit for verification is shown below. 
+
+- Once the edit image is clicked, it shows them an image picker from their device and they can change their pf to the image they want.
+
+- Post on community page.
+
 - Post blog article on education page.
+
 - Integerate Firebase auth and firestore.
-- Integerate Gemini API for chatbot and newsletter/blog posts.
+   - On home page: The hello john thats first seen should say welcome {name}. the name that was entered in the create account file.
+   - Logout, change password, forgot password, and delete account be handled by firebase.
 
-- Scan waste button, referrals code button, back to home button on waste page, submit waste button on waste schedule, and claim rewards button (this one is green) need better styling.
+- Integerate Gemini API.
+      - AI for chatbot, for newspaper/blog, and for the eco question game.
+
+
 ## Pages/Fixes for future
-- Edit Profile Page
+- Loading States: Showing spinners or placeholders while data loads (like blog posts, community posts, game, or leaderboard)
 
-- View full blog articlue page.
+- Follow and Followers logic.
+
+- View full blog article page.
 
 - Add a feture that generates personalized referral code for each user.
 
-- AI for chatbot, for newspaper/blog, and for the eco question game.
-
 - After image is taken, the model (which i will train and link later) decides what type of waste it is. Ask AI for more clarification and workflow for this with the model. After successful identification of the image let it take you to the next page. Also handle image and file handling here.
-
-- On home page: The hello john thats first seen should say welcome {name}. the name that was entered in the create account file and this name should be saved in the database so that it displays when the person logis in again.
 
 - On home page: add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
 
@@ -161,7 +169,11 @@ EcoBuddy supports:
       - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
       - 10 Questions, 10 point each.
 
+- Need Stuctured Logic for points to cash and data conversion.
 
+- Need API's to handle claim rewards for both data and cash.
+
+- Need database for user image, blog posts, community posts, waste history, past chats (optional / future feature)
 
 
 ## 🚀 Getting Started

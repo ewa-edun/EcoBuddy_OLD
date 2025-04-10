@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         color: Colors.primary.green,
+        fontFamily: 'PlusJakartaSans-Bold',
     },
     infoCard: {
         backgroundColor: Colors.background.modal,
@@ -111,11 +112,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
         color: Colors.secondary.white,
-
+        fontFamily: 'PlusJakartaSans-SemiBold',
     },
     infoText: {
         fontSize: 16,
         color: Colors.text.secondary,
+    fontFamily: 'PlusJakartaSans-Regular',
     },
     input: {
         height: 40,
@@ -143,6 +145,8 @@ const styles = StyleSheet.create({
     },
     radioText: {
         color: Colors.text.darker,
+    fontFamily: 'PlusJakartaSans-Regular',
+
     },
     checkboxContainer: {
         flexDirection: 'row',
@@ -176,12 +180,13 @@ const styles = StyleSheet.create({
     submitButton: {
         backgroundColor: Colors.primary.green,
         padding: 10,
-        borderRadius: 5,
+        borderRadius: 12,
         alignItems: 'center',
     },
     submitButtonText: {
         color: Colors.text.primary,
         fontSize: 18,
+        fontFamily: 'PlusJakartaSans-SemiBold',
     },
 });
 

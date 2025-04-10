@@ -190,20 +190,20 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.text.primary,
+    color: Colors.text.darker,
   },
   scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary.beige,
+    backgroundColor: Colors.primary.green,
     margin: 24,
     padding: 16,
     borderRadius: 12,
     gap: 8,
   },
   scanButtonText: {
-    color: Colors.text.darker,
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },

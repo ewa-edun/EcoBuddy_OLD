@@ -1,7 +1,9 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut } from 'lucide-react-native';
+import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { useState } from 'react';
 
 const achievements = [
   {
@@ -55,6 +57,29 @@ const menuItems = [
 ];
 
 export default function ProfileScreen() {
+  const [avatar, setAvatar] = useState(Image.resolveAssetSource(require('../../assets/user icon.png')).uri);
+  //const [avatar, setAvatar] = useState(require('../../assets/user icon.png').uri || '');
+
+  const handleImagePicker = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setAvatar(result.assets[0].uri);
+    }
+  };
+
   const handleMenuPress = (route: string) => {
     switch (route) {
       case 'rewards':
@@ -84,10 +109,7 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
-          <Image
-            source={require('../../assets/user icon.png')}
-            style={styles.avatar}
-          />
+        <Image source={{ uri: avatar }} style={styles.avatar} />
           <View style={styles.profileInfo}>
             <Text style={styles.name}>John Doe</Text>
             <View style={styles.badgeContainer}>
@@ -95,8 +117,8 @@ export default function ProfileScreen() {
               <Text style={styles.badge}>Gold Member</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.editButton}>
-            <Text style={styles.editButtonText}>Edit Profile</Text>
+          <TouchableOpacity style={styles.editButton} onPress={handleImagePicker}>
+            <Text style={styles.editButtonText}>Edit image</Text>
           </TouchableOpacity>
         </View>
 

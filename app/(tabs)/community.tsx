@@ -422,5 +422,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     color: Colors.text.primary,
     fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
   },
 });

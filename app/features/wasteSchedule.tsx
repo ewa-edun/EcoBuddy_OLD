@@ -314,14 +314,14 @@ const styles = StyleSheet.create({
     color: Colors.text.accent,
   },
   submitButton: {
-    backgroundColor: Colors.primary.beige,
+    backgroundColor: Colors.primary.green,
     margin: 24,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   submitButtonText: {
-    color: Colors.text.darker,
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
   },

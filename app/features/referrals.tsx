@@ -57,15 +57,17 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 40,
         color: Colors.primary.green,
+        fontFamily: 'PlusJakartaSans-Bold',
     },
     code: {
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 20,
         color: Colors.text.darker,
+    fontFamily: 'PlusJakartaSans-SemiBold',
     },
     copyButton: {
-        backgroundColor: Colors.primary.beige,
+        backgroundColor: Colors.primary.green,
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
@@ -74,15 +76,21 @@ const styles = StyleSheet.create({
     copyButtonText: {
         color: Colors.text.primary,
         fontSize: 18,
+    fontFamily: 'PlusJakartaSans-Regular',
+
     },
     info: {
         fontSize: 16,
         marginBottom: 10,
         color: Colors.text.secondary,
+    fontFamily: 'PlusJakartaSans-Regular',
+
     },
     referredCount: {
         fontSize: 16,
         color: Colors.text.secondary,
+    fontFamily: 'PlusJakartaSans-Regular',
+
     },
     section: {
         marginTop: 20,
