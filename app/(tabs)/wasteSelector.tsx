@@ -118,6 +118,7 @@ export default function WasteSelectorScreen() {
               style={styles.closeButton}
               onPress={() => setShowCamera(false)}
             >
+
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -323,6 +324,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.card,
     justifyContent: 'center',
     alignItems: 'center',
+    marginEnd: 10,
   },
   captureButtonText: {
     color: Colors.text.primary,
@@ -336,6 +338,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.card,
     justifyContent: 'center',
     alignItems: 'center',
+    marginStart:10,
   },
   closeButtonText: {
     color: Colors.text.primary,

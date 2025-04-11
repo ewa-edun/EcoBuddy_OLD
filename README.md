@@ -339,3 +339,70 @@ A QR code will come up in the terminal after you run number 5 command. Scan it a
 │   │   └── chatbot.ts               # Chatbot logic
 │   │
 │   └── maps.ts                      # Google Maps API helpers
+
+{
+  name: 'EcoBuddy',
+  slug: 'EcoBuddy',
+  version: '1.0.0',
+  orientation: 'portrait',
+  icon: './assets/images/icon.png',
+  scheme: 'ecobuddy',
+  userInterfaceStyle: 'automatic',
+  newArchEnabled: true,
+  plugins: [
+    'expo-router',
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/images/splash-icon.png',
+        imageWidth: 200,
+        resizeMode: 'contain',
+        backgroundColor: '#ffffff'
+      }
+    ],
+    [
+      'expo-camera',
+      {
+        CameraPermission: 'Allow EcoBuddy to access your camera for waste scanning.'
+      }
+    ]
+  ],
+  description: undefined,
+  sdkVersion: '52.0.0',
+  platforms: [
+    'ios',
+    'android',
+    'web'
+  ],
+  currentFullName: '@anonymous/EcoBuddy',
+  originalFullName: '@anonymous/EcoBuddy',
+  ios: {
+    supportsTablet: true
+  },
+  android: {
+    permissions: [
+      'android.permission.CAMERA',
+      'android.permission.RECORD_AUDIO'
+    ],
+    adaptiveIcon: {
+      foregroundImage: './assets/images/adaptive-icon.png',
+      backgroundColor: '#ffffff'
+    }
+  },
+  web: {
+    bundler: 'metro',
+    output: 'static',
+    favicon: './assets/images/favicon.png'
+  },
+  experiments: {
+    typedRoutes: true
+  },
+  extra: {
+    router: {
+      origin: false
+    }
+  },
+  androidStatusBar: {
+    backgroundColor: '#ffffff'
+  }
+}

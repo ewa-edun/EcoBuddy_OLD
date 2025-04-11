@@ -26,7 +26,7 @@ const Referrals = () => {
                 You have referred {referredCount} people.
             </Text>
 
-            <View style={styles.section}>
+        <View style={styles.section}>
         <Text style={styles.sectionTitle}>People Referred</Text>
         <View style={styles.activityList}>
           {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
     },
     section: {
         marginTop: 20,
+        marginBottom:30,
       },
       sectionTitle: {
         fontSize: 20,
