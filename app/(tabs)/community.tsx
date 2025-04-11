@@ -2,6 +2,7 @@ import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'rea
 import { Colors } from '../constants/Colors';
 import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus } from 'lucide-react-native';
 import { useState } from 'react';
+import { router } from 'expo-router';
 
 type Post = {
   id: string;
@@ -62,7 +63,7 @@ export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState<'feed' | 'challenges'>('feed');
 
   const handlePost = () => {
-    // Logic to navigate to the post creation page
+    router.replace('/features/createPost');
   };
 
   return (

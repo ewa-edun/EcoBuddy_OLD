@@ -14,7 +14,6 @@ export default function RegisterScreen() {
   });
 
   const handleRegister = () => {
-    // Handle registration logic here
     router.replace('/(tabs)/home');
   };
 

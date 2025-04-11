@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Link } from 'expo-router';
+import { Link,  router } from 'expo-router';
 import { BookOpen, MessageSquare, TrendingUp, Plus } from 'lucide-react-native';
 
 type Article = {
@@ -41,7 +41,7 @@ const articles: Article[] = [
 
 export default function EducationScreen() {
   const handlePost = () => {
-    // Logic to navigate to the post creation page
+    router.replace('/features/createBlogArticle');
   };
 
   return (

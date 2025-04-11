@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Keyboa
 import { Colors } from '../constants/Colors';
 import { Send } from 'lucide-react-native';
 import { getGeminiResponse } from '@lib/gemini/geminiService';
+import FloatingDots from '../components/FloatingDots';
 
 type Message = {
   id: string;
@@ -22,8 +23,10 @@ export default function ChatbotScreen() {
   ]);
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
+    setLoading(true);
     if (!inputText.trim()) return;
 
     const newMessage: Message = {
@@ -66,6 +69,7 @@ export default function ChatbotScreen() {
       };
       setMessages(prev => [...prev, errorMessage]);
     }
+    setLoading(false);
   };
 
   return (
@@ -115,6 +119,7 @@ export default function ChatbotScreen() {
             </View>
           </View>
         ))}
+        {loading && <FloatingDots />}
       </ScrollView>
 
       <View style={styles.inputContainer}>

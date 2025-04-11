@@ -114,6 +114,12 @@ export default function HelpScreen() {
           </Text>
         </View>
       </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          Want to sponsor EcoBuddy and our mission? Kindly contact us through our official email. Thank you very much.
+        </Text>
+      </View>
     </ScrollView>
   );
 }
@@ -204,5 +210,16 @@ const styles = StyleSheet.create({
     color: Colors.accent.darkGray,
     marginLeft: 12,
     lineHeight: 20,
+  },
+  footer: {
+    padding: 16,
+    backgroundColor: Colors.background.card,
+    alignItems: 'center',
+  },
+  footerText: {
+    color: Colors.secondary.white,
+    textAlign: 'center',
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
   },
 });

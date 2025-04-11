@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { GEMINI_API_KEY } from '../gemini/config'; // Fixed unterminated string literal
 
-const GEMINI_API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent'; 
+const GEMINI_API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'; 
 
 interface GeminiResponse {
   candidates: Array<{

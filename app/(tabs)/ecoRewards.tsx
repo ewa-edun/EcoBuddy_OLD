@@ -1,7 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Link } from 'expo-router';
-
 import { Gift, TrendingUp, Award, Coins } from 'lucide-react-native';
 
 export default function EcoRewardsScreen() {

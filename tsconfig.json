@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "paths": {
       "@lib/*": ["./lib/*"],
-      "@app/*": ["./app/*"]
+      "@app/*": ["./app/*"],
+      "@hook/*": ["./hook/*"],
     }
   },
   "include": [

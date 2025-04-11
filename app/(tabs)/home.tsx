@@ -30,7 +30,7 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hello, Ewa</Text>
+          <Text style={styles.greeting}>Hello, Edun Ewaoluwa</Text>
           <Text style={styles.points}>5000 Eco Points</Text>
         </View>
         <Image

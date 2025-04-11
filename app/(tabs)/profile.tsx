@@ -58,7 +58,9 @@ const menuItems = [
 
 export default function ProfileScreen() {
   const [avatar, setAvatar] = useState(Image.resolveAssetSource(require('../../assets/user icon.png')).uri);
-  //const [avatar, setAvatar] = useState(require('../../assets/user icon.png').uri || '');
+  const [name, setName] = useState('Edun Ewaoluwa'); // Placeholder for name
+  const [email, setEmail] = useState('ewaoluwa123@example.com'); // Placeholder for email
+  const [phoneNumber, setPhoneNumber] = useState('+234 123 456 7890'); // Placeholder for phone number
 
   const handleImagePicker = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -109,18 +111,27 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
-        <Image source={{ uri: avatar }} style={styles.avatar} />
+          <Image source={{ uri: avatar }} style={styles.avatar} />
           <View style={styles.profileInfo}>
-            <Text style={styles.name}>John Doe</Text>
+            <Text style={styles.name}>{name}</Text>
             <View style={styles.badgeContainer}>
               <Award size={16} color={Colors.secondary.yellow} />
               <Text style={styles.badge}>Gold Member</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.editButton} onPress={handleImagePicker}>
-            <Text style={styles.editButtonText}>Edit image</Text>
-          </TouchableOpacity>
         </View>
+
+        <View>
+          <View style={styles.editSection}>
+            <TouchableOpacity style={styles.editButton} onPress={handleImagePicker}>
+              <Text style={styles.editButtonText}>Edit image</Text>
+            </TouchableOpacity>
+             <View style={styles.contactInfo}>
+                <Text style={styles.contactText}>{email}</Text>
+                <Text style={styles.contactText}>{phoneNumber}</Text>
+              </View>
+          </View>
+       </View>
 
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
@@ -214,7 +225,6 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
   },
   avatar: {
     width: 80,
@@ -242,13 +252,13 @@ const styles = StyleSheet.create({
     color: Colors.secondary.yellow,
   },
   editButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: Colors.text.darker + '20',
   },
   editButtonText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.text.darker,
   },
@@ -403,5 +413,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.primary.red,
+  },
+  editSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  contactInfo: {
+    marginLeft: 12,
+    justifyContent: 'center',
+  },
+  contactText: {
+    fontSize: 15,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
   },
 });

@@ -111,30 +111,30 @@ EcoBuddy supports:
 - Dark Mode / Theme Options
 - Past chats of AI Chatbot
 - SMS Notifications.
+- NEW GAME: Memory Match Eco Edition
+    - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
+    - Points: +20 per match, 3 minutes.
 
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 
 ## Pages/Fixes to do today
-- Post on community page.
-
-- Post blog article on education page and View full blog article page.
-
-- Follow and Followers logic.
-
 - Integerate Firebase auth and firestore.
    - On home page: The hello john thats first seen should say welcome {name}. the name that was entered in the create account file.
    - Logout, change password, forgot password, and delete account be handled by firebase.
 
-- Integerate Gemini API.
-      - AI for chatbot, for newspaper/blog, and for the eco question game.
-
-- Let the image that user uploads be displayed on all pages that user icon appears (chatbot, community)
+- Let the image that user uploads on their profile page be displayed on all pages that user icon appears (chatbot, community, community post etc)
 
 ## Pages/Fixes for future
-- Add a feture that generates personalized referral code for each user.
+- View full blog article page.
+- Follow and Followers logic, as well as notifications of all sorts.
 
-- Loading States: Showing spinners or placeholders while data loads (like blog posts, community posts, game, or leaderboard)
+- Integerate Gemini API.
+      - For newspaper/blog, and for the eco question game.
+
+- Referrals:
+   - Add a feture that generates personalized referral code for each user.
+   - Add a place where they can enter other people's referral code as well.
 
 - After image is taken, the model (which i will train and link later) decides what type of waste it is.
 
@@ -148,26 +148,33 @@ EcoBuddy supports:
 
   - Game 1: **Trash Sort Challenge**
       - Users must quickly drag and drop different waste items (plastic, metal, glass, paper) into the correct recycling bins before time runs out.
-      - 10 items, 2 minutes. 10 point each
+      - 10 items, 1:30/2 minutes. 10 point each
       - Incorrect sorting results in a small point deduction and once the timer is over, it shows their points before the timer ran out.
 
-  - Game 2:**Memory Match: Eco Edition**
-     - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
-     - Points: +20 per match, 3 minutes.
+  - Game 2:**Wordle Eco Edition**
+     - Like the wordle game but the words are eco related.
+     - Points: 5 tries, 100 points automatically and -20 points for each miss, 1:30/2 minutes.
 
   - Game 3:**Recycle Match**
       - A puzzle game where users match three or more of the same recyclable items (like candy crush but with waste items).
-      - 5 matches, 20 points each
+      - 5 matches, 20 points each, 3 minutes.
 
   - Game 4:Eco Quiz Show
       - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
-      - 10 Questions, 10 point each.
+      - 10 Questions, 10 point each, 2 minutes.
+
+-  Charity Donations where users can donate used items to charities to reduce landfill waste.
+
+-  Mobile Kiosk (For Offline Users)
+   - Local scrap collectors (mallams) can register as agents.
+   - Kiosks allow internet-free participation in recycling efforts.
+   - Strengthens local recycling ecosystems.
 
 - Need Stuctured Logic for points to cash and data conversion.
 
 - Need API's to handle claim rewards for both data and cash.
 
-- Need database for user profile image, blog posts, community posts, waste history, past chats (optional / future feature)
+- Need database for user profile image, blog posts, community posts, waste history.
 
 
 ## 🚀 Getting Started
