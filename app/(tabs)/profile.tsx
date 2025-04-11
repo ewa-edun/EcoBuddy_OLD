@@ -1,9 +1,16 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAuth, updatePassword, deleteUser, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
+import { doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '@lib/firebase/firebaseConfig';
+
+const auth = getAuth();
+const storage = getStorage();
 
 const achievements = [
   {
@@ -57,30 +64,69 @@ const menuItems = [
 ];
 
 export default function ProfileScreen() {
+  const [userData, setUserData] = useState({
+    name: 'Loading...',
+    email: 'Loading...',
+    phone: 'Loading...',
+    points: 0,
+    recycled: 0,
+    rewards: 0,
+    photoURL: ''
+  });
+
   const [avatar, setAvatar] = useState(Image.resolveAssetSource(require('../../assets/user icon.png')).uri);
-  const [name, setName] = useState('Edun Ewaoluwa'); // Placeholder for name
-  const [email, setEmail] = useState('ewaoluwa123@example.com'); // Placeholder for email
-  const [phoneNumber, setPhoneNumber] = useState('+234 123 456 7890'); // Placeholder for phone number
+  const [loading, setLoading] = useState(true);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
-  const handleImagePicker = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setAvatar(result.assets[0].uri);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (auth.currentUser) {
+        const docRef = doc(db, "users", auth.currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setUserData({
+            name: data.fullName || auth.currentUser?.displayName || 'Eco User',
+            email: auth.currentUser?.email || 'No email',
+            phone: data.phone || 'No phone number',
+            points: data.points || 0,
+            recycled: data.recycled || 0,
+            rewards: data.rewards || 0,
+            photoURL: auth.currentUser?.photoURL || ''
+          });
+          
+          if (auth.currentUser?.photoURL) {
+            setAvatar(auth.currentUser.photoURL);
+          }
+        }
+        setLoading(false);
     }
   };
+
+  fetchUserData();
+}, []);
+
+const handleImagePicker = async () => {
+  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+  if (permissionResult.granted === false) {
+    alert('Permission to access camera roll is required!');
+    return;
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!result.canceled) {
+    setAvatar(result.assets[0].uri);
+  }
+};
 
   const handleMenuPress = (route: string) => {
     switch (route) {
@@ -96,24 +142,134 @@ export default function ProfileScreen() {
       case 'referrals':
         router.push('/features/referrals');
         break;
-      case 'changepassword':
-        // Handle logout
-        break;
-        case 'logout':
-        // Handle logout
-        break;case 'deleteaccount':
-        // Handle logout
-        break;
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      router.replace('/(auth)/login'); // Redirect to login page after logout
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert('Logout Error', 'An error occurred while logging out.');
+    }
+  };
+
+  const handleChangePassword = async () => {
+    Alert.prompt(
+      'Change Password',
+      'Enter your current password',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Next',
+          onPress: async (currentPass) => {
+            if (!currentPass) {
+              Alert.alert('Error', 'Please enter your current password');
+              return;
+            }
+
+            Alert.prompt(
+              'Change Password',
+              'Enter your new password',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Change',
+                  onPress: async (newPass) => {
+                    if (!newPass) {
+                      Alert.alert('Error', 'Please enter a new password');
+                      return;
+                    }
+
+                    const user = auth.currentUser;
+                    if (!user || !user.email) return;
+
+                    try {
+                      // Reauthenticate user
+                      const credential = EmailAuthProvider.credential(
+                        user.email,
+                        currentPass
+                      );
+                      
+                      await reauthenticateWithCredential(user, credential);
+                      await updatePassword(user, newPass);
+                      
+                      Alert.alert('Success', 'Password changed successfully');
+                    } catch (error: any) {
+                      console.error('Password change error:', error);
+                      let errorMessage = 'Failed to change password.';
+                      
+                      if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Current password is incorrect.';
+                      } else if (error.code === 'auth/weak-password') {
+                        errorMessage = 'New password should be at least 6 characters.';
+                      }
+                      
+                      Alert.alert('Error', errorMessage);
+                    }
+                  }
+                }
+              ],
+              'secure-text'
+            );
+          }
+        }
+      ],
+      'secure-text'
+    );
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete your account? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const user = auth.currentUser;
+              if (!user) return;
+              
+              // Delete user data from Firestore
+              await deleteDoc(doc(db, "users", user.uid));
+              
+              // Delete auth account
+              await deleteUser(user);
+              
+              Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
+              router.replace('/(auth)/login');
+            } catch (error: any) {
+              console.error('Delete account error:', error);
+              
+              if (error.code === 'auth/requires-recent-login') {
+                Alert.alert(
+                  'Reauthentication Required',
+                  'Please log in again to confirm account deletion.',
+                  [
+                    { text: 'OK', onPress: () => handleLogout() }
+                  ]
+                );
+              } else {
+                Alert.alert('Error', 'Failed to delete account. Please try again.');
+              }
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
+     <View style={styles.header}>
         <View style={styles.profileSection}>
           <Image source={{ uri: avatar }} style={styles.avatar} />
           <View style={styles.profileInfo}>
-            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.name}>{userData.name}</Text>
             <View style={styles.badgeContainer}>
               <Award size={16} color={Colors.secondary.yellow} />
               <Text style={styles.badge}>Gold Member</Text>
@@ -126,26 +282,26 @@ export default function ProfileScreen() {
             <TouchableOpacity style={styles.editButton} onPress={handleImagePicker}>
               <Text style={styles.editButtonText}>Edit image</Text>
             </TouchableOpacity>
-             <View style={styles.contactInfo}>
-                <Text style={styles.contactText}>{email}</Text>
-                <Text style={styles.contactText}>{phoneNumber}</Text>
-              </View>
+            <View style={styles.contactInfo}>
+              <Text style={styles.contactText}>{userData.email}</Text>
+              <Text style={styles.contactText}>{userData.phone}</Text>
+            </View>
           </View>
-       </View>
+        </View>
 
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>2,450</Text>
+            <Text style={styles.statValue}>{userData.points}</Text>
             <Text style={styles.statLabel}>Points</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>45kg</Text>
+            <Text style={styles.statValue}>{userData.recycled}kg</Text>
             <Text style={styles.statLabel}>Recycled</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>12</Text>
+            <Text style={styles.statValue}>{userData.rewards}</Text>
             <Text style={styles.statLabel}>Rewards</Text>
           </View>
         </View>
@@ -194,17 +350,17 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('changepassword')}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleChangePassword}>
         <Key size={20} color={Colors.primary.blue} />
         <Text style={styles.changePasswordText}>Change Password</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('logout')}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <LogOut size={20} color={Colors.text.darker} />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={() => handleMenuPress('deleteaccount')}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleDeleteAccount}>
         <Trash2 size={20} color={Colors.primary.red} />
         <Text style={styles.deleteText}>Delete Account</Text>
       </TouchableOpacity>

@@ -1,8 +1,13 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Colors } from '../constants/Colors';
 import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react-native';
-import { useState } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '@lib/firebase/firebaseConfig';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import LoadingSpinner from '../components/LoadingSpinner'; 
+
 
 export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,10 +17,58 @@ export default function RegisterScreen() {
     phone: '',
     password: '',
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
-    router.replace('/(tabs)/home');
+    const handleRegister = async () => {
+      if (!formData.email || !formData.password || !formData.fullName) {
+        Alert.alert('Error', 'Please fill in all required fields');
+        return;
+      }
+      
+      setLoading(true);
+      try {
+        // 1. Create the user account
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        
+        // 2. Save additional user data to Firestore
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone || '',
+          points: 0, // Initialize with 0 points
+          recycled: 0, // Initialize with 0kg recycled
+          rewards: 0, // Initialize with 0 rewards
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        });
+
+      console.log('User registered:', userCredential.user);
+      router.replace('/(tabs)/home');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      
+      let errorMessage = 'Registration failed. Please try again.';
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already in use.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password should be at least 6 characters.';
+      }
+      
+      Alert.alert('Registration Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return <LoadingSpinner message="Creating your account..." />;
+  }
 
   return (
     <ScrollView style={styles.container}>

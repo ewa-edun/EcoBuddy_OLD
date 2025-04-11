@@ -1,24 +1,68 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Colors } from '../constants/Colors';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
-
+import { doc, updateDoc } from 'firebase/firestore';
+import { auth, db } from '@lib/firebase/firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // TODO: Implement login logic
-    router.replace('/(tabs)/home');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      
+      // Update last login time in Firestore
+      if (userCredential.user) {
+        await updateDoc(doc(db, "users", userCredential.user.uid), {
+          lastLogin: new Date().toISOString()
+        });
+      }
+      
+      console.log('User logged in:', userCredential.user);
+      router.replace('/(tabs)/home');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      
+      let errorMessage = 'Login failed. Please try again.';
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = 'This account has been disabled.';
+      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        errorMessage = 'Invalid email or password.';
+      }
+      
+      Alert.alert('Login Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
     // TODO: Implement forgot password logic
     router.replace('/forgotPassword');
   };
+
+  if (loading) {
+    return <LoadingSpinner message="Logging in..." />;
+  }
 
   return (
     <KeyboardAvoidingView

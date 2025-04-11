@@ -120,12 +120,48 @@ EcoBuddy supports:
 
 ## Pages/Fixes to do today
 - Integerate Firebase auth and firestore.
-   - On home page: The hello john thats first seen should say welcome {name}. the name that was entered in the create account file.
-   - Logout, change password, forgot password, and delete account be handled by firebase.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User can manage their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Users can create recycling logs, but not modify others'
+    match /recycling_activity/{logId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && 
+                   (resource.data.userId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Public reward listings
+    match /rewards/{rewardId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // User reward claims
+    match /user_rewards/{claimId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && 
+                   (resource.data.userId == request.auth.uid ||
+                    isAdmin());
+    }
+    
+    // Admin check function
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+  }
+}
 
 - Let the image that user uploads on their profile page be displayed on all pages that user icon appears (chatbot, community, community post etc)
 
 ## Pages/Fixes for future
+- After signup, show a simple welcome 'user name' pop-up then take them to the home page.
 - View full blog article page.
 - Follow and Followers logic, as well as notifications of all sorts.
 
@@ -340,69 +376,3 @@ A QR code will come up in the terminal after you run number 5 command. Scan it a
 │   │
 │   └── maps.ts                      # Google Maps API helpers
 
-{
-  name: 'EcoBuddy',
-  slug: 'EcoBuddy',
-  version: '1.0.0',
-  orientation: 'portrait',
-  icon: './assets/images/icon.png',
-  scheme: 'ecobuddy',
-  userInterfaceStyle: 'automatic',
-  newArchEnabled: true,
-  plugins: [
-    'expo-router',
-    [
-      'expo-splash-screen',
-      {
-        image: './assets/images/splash-icon.png',
-        imageWidth: 200,
-        resizeMode: 'contain',
-        backgroundColor: '#ffffff'
-      }
-    ],
-    [
-      'expo-camera',
-      {
-        CameraPermission: 'Allow EcoBuddy to access your camera for waste scanning.'
-      }
-    ]
-  ],
-  description: undefined,
-  sdkVersion: '52.0.0',
-  platforms: [
-    'ios',
-    'android',
-    'web'
-  ],
-  currentFullName: '@anonymous/EcoBuddy',
-  originalFullName: '@anonymous/EcoBuddy',
-  ios: {
-    supportsTablet: true
-  },
-  android: {
-    permissions: [
-      'android.permission.CAMERA',
-      'android.permission.RECORD_AUDIO'
-    ],
-    adaptiveIcon: {
-      foregroundImage: './assets/images/adaptive-icon.png',
-      backgroundColor: '#ffffff'
-    }
-  },
-  web: {
-    bundler: 'metro',
-    output: 'static',
-    favicon: './assets/images/favicon.png'
-  },
-  experiments: {
-    typedRoutes: true
-  },
-  extra: {
-    router: {
-      origin: false
-    }
-  },
-  androidStatusBar: {
-    backgroundColor: '#ffffff'
-  }
-}

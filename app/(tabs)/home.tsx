@@ -1,9 +1,38 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare, Calendar } from 'lucide-react-native';
 import { router, Link } from 'expo-router';
+import { getAuth } from 'firebase/auth'; 
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@lib/firebase/firebaseConfig'; 
+import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
+  const auth = getAuth();
+  const [userData, setUserData] = useState<{fullName?: string, points?: number} | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (auth.currentUser) {
+        try {
+          const docRef = doc(db, "users", auth.currentUser.uid);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            setUserData(docSnap.data());
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const handleQuickAction = (action: 'scan' | 'redeem') => {
     switch (action) {
       case 'scan':
@@ -14,7 +43,7 @@ export default function HomeScreen() {
         break;
     }
   };
-
+  
   const handleFeaturePress = (feature: 'game' | 'chatbot') => {
     switch (feature) {
       case 'game':
@@ -26,12 +55,24 @@ export default function HomeScreen() {
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary.green} />
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
+        <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hello, Edun Ewaoluwa</Text>
-          <Text style={styles.points}>5000 Eco Points</Text>
+          <Text style={styles.greeting}>
+            Hello, {userData?.fullName || 'Eco Warrior'}
+          </Text>
+          <Text style={styles.points}>
+            {userData?.points || '0'} Eco Points
+          </Text>
         </View>
         <Image
           source={require('../../assets/EcoBuddy_logo.jpeg')}
@@ -381,5 +422,11 @@ const styles = StyleSheet.create({
     color: Colors.secondary.white,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.background.main
   },
 });

@@ -1,18 +1,36 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth'; // Import Firebase Auth
+import LoadingSpinner from '../components/LoadingSpinner'; // Import LoadingSpinner
+
+const auth = getAuth(); // Initialize Firebase Auth
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false); // Loading state
 
-    const handlePasswordReset = () => {
-        // Logic for sending password reset email
+    const handlePasswordReset = async () => {
+        setLoading(true);
+        try {
+            await sendPasswordResetEmail(auth, email);
+            Alert.alert('Success', 'Password reset email sent!');
+        } catch (error) {
+            console.error('Password reset error:', error);
+            Alert.alert('Error', 'Failed to send password reset email. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleBackToLogin = () => {
         router.replace('/login');
     };
+
+    if (loading) {
+        return <LoadingSpinner message="Sending reset link..." />;
+    }
 
     return (
         <View style={styles.container}>

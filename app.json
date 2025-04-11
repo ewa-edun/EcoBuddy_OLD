@@ -30,7 +30,7 @@
       "expo-firebase-core",
       {
         "ios": {
-          "googleServicesFile": "./google-services.json"
+          "googleServicesFile": "./GoogleService-Info.plist"
         },
         "android": {
           "googleServicesFile": "./google-services.json"
