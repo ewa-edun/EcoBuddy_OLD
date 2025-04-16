@@ -71,7 +71,8 @@ export default function ProfileScreen() {
     points: 0,
     recycled: 0,
     rewards: 0,
-    photoURL: ''
+    photoURL: '',
+    role: 'myself',
   });
 
   const [avatar, setAvatar] = useState(Image.resolveAssetSource(require('../../assets/user icon.png')).uri);
@@ -94,7 +95,8 @@ export default function ProfileScreen() {
             points: data.points || 0,
             recycled: data.recycled || 0,
             rewards: data.rewards || 0,
-            photoURL: auth.currentUser?.photoURL || ''
+            photoURL: auth.currentUser?.photoURL || '',
+            role: data.role || 'myself',
           });
           
           if (auth.currentUser?.photoURL) {
@@ -156,68 +158,7 @@ const handleImagePicker = async () => {
   };
 
   const handleChangePassword = async () => {
-    Alert.prompt(
-      'Change Password',
-      'Enter your current password',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Next',
-          onPress: async (currentPass) => {
-            if (!currentPass) {
-              Alert.alert('Error', 'Please enter your current password');
-              return;
-            }
-
-            Alert.prompt(
-              'Change Password',
-              'Enter your new password',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Change',
-                  onPress: async (newPass) => {
-                    if (!newPass) {
-                      Alert.alert('Error', 'Please enter a new password');
-                      return;
-                    }
-
-                    const user = auth.currentUser;
-                    if (!user || !user.email) return;
-
-                    try {
-                      // Reauthenticate user
-                      const credential = EmailAuthProvider.credential(
-                        user.email,
-                        currentPass
-                      );
-                      
-                      await reauthenticateWithCredential(user, credential);
-                      await updatePassword(user, newPass);
-                      
-                      Alert.alert('Success', 'Password changed successfully');
-                    } catch (error: any) {
-                      console.error('Password change error:', error);
-                      let errorMessage = 'Failed to change password.';
-                      
-                      if (error.code === 'auth/wrong-password') {
-                        errorMessage = 'Current password is incorrect.';
-                      } else if (error.code === 'auth/weak-password') {
-                        errorMessage = 'New password should be at least 6 characters.';
-                      }
-                      
-                      Alert.alert('Error', errorMessage);
-                    }
-                  }
-                }
-              ],
-              'secure-text'
-            );
-          }
-        }
-      ],
-      'secure-text'
-    );
+    router.push('/(auth)/changePassword');
   };
 
   const handleDeleteAccount = async () => {
@@ -265,11 +206,12 @@ const handleImagePicker = async () => {
 
   return (
     <ScrollView style={styles.container}>
-     <View style={styles.header}>
+      <View style={styles.header}>
         <View style={styles.profileSection}>
           <Image source={{ uri: avatar }} style={styles.avatar} />
           <View style={styles.profileInfo}>
             <Text style={styles.name}>{userData.name}</Text>
+            <Text style={styles.role}>{userData.role}</Text>
             <View style={styles.badgeContainer}>
               <Award size={16} color={Colors.secondary.yellow} />
               <Text style={styles.badge}>Gold Member</Text>
@@ -280,8 +222,8 @@ const handleImagePicker = async () => {
         <View>
           <View style={styles.editSection}>
             <TouchableOpacity style={styles.editButton} onPress={handleImagePicker}>
-              <Text style={styles.editButtonText}>Edit image</Text>
-            </TouchableOpacity>
+            <Text style={styles.editButtonText}>Edit image</Text>
+          </TouchableOpacity>
             <View style={styles.contactInfo}>
               <Text style={styles.contactText}>{userData.email}</Text>
               <Text style={styles.contactText}>{userData.phone}</Text>
@@ -395,6 +337,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'PlusJakartaSans-Bold',
     color: Colors.primary.green,
+    marginBottom: 4,
+  },
+  role: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.accent.darkGray,
     marginBottom: 4,
   },
   badgeContainer: {

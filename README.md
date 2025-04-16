@@ -100,9 +100,6 @@ EcoBuddy supports:
 
 ---
 
-## 💡 Nearest Future Improvements
-- Develop a web version for desktop users.
-
 ## 💡 Future Improvements
 - Partner with telecom providers for broader reward options.
 - Add IOT support for Smart Home Integration
@@ -118,67 +115,50 @@ EcoBuddy supports:
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 
-## Pages/Fixes to do today
-- Integerate Firebase auth and firestore.
+LEADERBOARD, GAME UI, FIREBASE INTEGRATION
 
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // User can manage their own profile
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Users can create recycling logs, but not modify others'
-    match /recycling_activity/{logId} {
-      allow create: if request.auth != null;
-      allow read: if request.auth != null && 
-                   (resource.data.userId == request.auth.uid || 
-                    isAdmin());
-    }
-    
-    // Public reward listings
-    match /rewards/{rewardId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    
-    // User reward claims
-    match /user_rewards/{claimId} {
-      allow create: if request.auth != null;
-      allow read: if request.auth != null && 
-                   (resource.data.userId == request.auth.uid ||
-                    isAdmin());
-    }
-    
-    // Admin check function
-    function isAdmin() {
-      return request.auth.token.admin == true;
-    }
-  }
-}
-
-- Let the image that user uploads on their profile page be displayed on all pages that user icon appears (chatbot, community, community post etc)
-
-## Pages/Fixes for future
-- After signup, show a simple welcome 'user name' pop-up then take them to the home page.
-- View full blog article page.
-- Follow and Followers logic, as well as notifications of all sorts.
-
-- Integerate Gemini API.
-      - For newspaper/blog, and for the eco question game.
-
-- Referrals:
-   - Add a feture that generates personalized referral code for each user.
-   - Add a place where they can enter other people's referral code as well.
-
-- After image is taken, the model (which i will train and link later) decides what type of waste it is.
+## Pages/Fixes to do
+- Firebase auth and firestore.
+   - Integerate in Leaderboard for game and waste recycled, posts on community and blog, points gotten, rewards claimed and method of claiming, profile levels (eco warrior and the likes), referrals logic, waste history, phone number/bank account on claim rewards page.
+   - Follow and Followers logic, as well as notifications of all sorts.
 
 - On home page: add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
 
 - Need a Leaderboard page with the full list of people and points from the game and there's a second one for how much kg of waste the person has recycled.
 
 - On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
+
+- View full blog article page.
+
+- Add more profile levels and achievements.
+
+- Add more loading screens to make the ux better.
+- After signup, show a simple welcome 'user name' pop-up then take them to the home page.
+
+- Let the image that user uploads on their profile page be displayed on all pages that user icon appears (chatbot, community, community post etc)
+
+- Integerate Gemini API.
+      - For newspaper/blog, and for the eco question game.
+
+- Referrals:
+   - Add a feature that generates personalized referral code for each user (make it the user id).
+   - Order: FULLNAME12345   Example: EDUNOLUWADAMILOLA42531
+   - Add a place where they can enter other people's referral code as well.
+
+- After image is taken, the model (which i will train and link later) decides what type of waste it is.
+
+- Add location and dynamic maps. Also more centers for pick-up.
+
+-  Charity Donations where users can donate used items to charities to reduce landfill waste.
+
+-  Mobile Kiosk (For Offline Users)
+   - Local scrap collectors (mallams) can register as agents.
+   - Kiosks allow internet-free participation in recycling efforts.
+   - Strengthens local recycling ecosystems.
+
+- Need Stuctured Logic for points to cash and data conversion.
+
+- Need API's to handle claim rewards for both data and cash.
 
 - Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
 
@@ -198,19 +178,6 @@ service cloud.firestore {
   - Game 4:Eco Quiz Show
       - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
       - 10 Questions, 10 point each, 2 minutes.
-
--  Charity Donations where users can donate used items to charities to reduce landfill waste.
-
--  Mobile Kiosk (For Offline Users)
-   - Local scrap collectors (mallams) can register as agents.
-   - Kiosks allow internet-free participation in recycling efforts.
-   - Strengthens local recycling ecosystems.
-
-- Need Stuctured Logic for points to cash and data conversion.
-
-- Need API's to handle claim rewards for both data and cash.
-
-- Need database for user profile image, blog posts, community posts, waste history.
 
 
 ## 🚀 Getting Started

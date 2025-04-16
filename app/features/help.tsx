@@ -110,7 +110,7 @@ export default function HelpScreen() {
         <View style={styles.locationContainer}>
           <MapPin size={24} color={Colors.primary.green} />
           <Text style={styles.locationText}>
-            123 Eco Street{'\n'}Lagos, Nigeria
+          American Corner Ikeja, Vibranium Valley, 42 Local Airport Road,{'\n'} Ikeja, Lagos, Nigeria.
           </Text>
         </View>
       </View>

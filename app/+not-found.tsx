@@ -26,11 +26,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.main,
   },
   text: {
-    fontSize: 20,
+    fontSize: 27,
     fontWeight: 600,
+    color: Colors.primary.green,
   },
   link: {
+    fontSize: 17,
     marginTop: 15,
     paddingVertical: 15,
+    color: Colors.text.primary,
   },
 });

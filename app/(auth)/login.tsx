@@ -56,7 +56,6 @@ export default function Login() {
   };
 
   const handleForgotPassword = () => {
-    // TODO: Implement forgot password logic
     router.replace('/forgotPassword');
   };
 

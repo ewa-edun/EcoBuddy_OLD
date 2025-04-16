@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth'; // Import Firebase Auth
-import LoadingSpinner from '../components/LoadingSpinner'; // Import LoadingSpinner
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-const auth = getAuth(); // Initialize Firebase Auth
+const auth = getAuth(); 
 
-const ForgotPassword = () => {
+export const ForgotPassword = () => {
     const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false); // Loading state
+    const [loading, setLoading] = useState(false); 
 
-    const handlePasswordReset = async () => {
+  const handlePasswordReset = async () => {
         setLoading(true);
         try {
             await sendPasswordResetEmail(auth, email);
             Alert.alert('Success', 'Password reset email sent!');
+            router.replace('/(auth)/login');
         } catch (error) {
             console.error('Password reset error:', error);
             Alert.alert('Error', 'Failed to send password reset email. Please try again.');
@@ -25,7 +26,7 @@ const ForgotPassword = () => {
     };
 
     const handleBackToLogin = () => {
-        router.replace('/login');
+        router.replace('/(auth)/login');
     };
 
     if (loading) {
@@ -56,6 +57,8 @@ const ForgotPassword = () => {
     );
 };
 
+export default ForgotPassword;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -83,7 +86,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.background.modal,
     },
     button: {
-        backgroundColor: Colors.primary.beige,
+        backgroundColor: Colors.primary.green,
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
@@ -104,5 +107,3 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
 });
-
-export default ForgotPassword;

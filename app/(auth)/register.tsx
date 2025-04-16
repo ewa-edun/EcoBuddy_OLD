@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Colors } from '../constants/Colors';
-import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { User, Mail, Phone, Lock, Eye, EyeOff, UserCog } from 'lucide-react-native';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@lib/firebase/firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import LoadingSpinner from '../components/LoadingSpinner'; 
-
+import LoadingSpinner from '../components/LoadingSpinner';
+import RNPickerSelect from 'react-native-picker-select';
 
 export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,35 +16,38 @@ export default function RegisterScreen() {
     email: '',
     phone: '',
     password: '',
+    role: 'myself',
   });
   const [loading, setLoading] = useState(false);
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
-    const handleRegister = async () => {
-      if (!formData.email || !formData.password || !formData.fullName) {
-        Alert.alert('Error', 'Please fill in all required fields');
-        return;
-      }
+  const handleRegister = async () => {
+    if (!formData.email || !formData.password || !formData.fullName) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      // 1. Create the user account
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
       
-      setLoading(true);
-      try {
-        // 1. Create the user account
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          formData.email,
-          formData.password
-        );
-        
-        // 2. Save additional user data to Firestore
-        await setDoc(doc(db, "users", userCredential.user.uid), {
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone || '',
-          points: 0, // Initialize with 0 points
-          recycled: 0, // Initialize with 0kg recycled
-          rewards: 0, // Initialize with 0 rewards
-          createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString()
-        });
+      // 2. Save additional user data to Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone || '',
+        role: formData.role,
+        points: 0,
+        recycled: 0,
+        rewards: 0,
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString()
+      });
 
       console.log('User registered:', userCredential.user);
       router.replace('/(tabs)/home');
@@ -140,6 +143,31 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity
+            style={styles.inputContainer}
+            onPress={() => setShowRoleDropdown(!showRoleDropdown)}
+          >
+            <UserCog size={20} color={Colors.accent.darkGray} style={styles.inputIcon} />
+            <Text style={styles.roleText}>
+              {formData.role === 'myself' ? 'Myself' : 'Agent'}
+            </Text>
+            <RNPickerSelect
+              onValueChange={(value) => {
+                setFormData({ ...formData, role: value });
+                setShowRoleDropdown(false);
+              }}
+              items={[
+                { label: 'Myself', value: 'myself' },
+                { label: 'Agent (someone else)', value: 'agent' },
+              ]}
+              style={pickerSelectStyles}
+              placeholder={{ label: 'Select your role...', value: null }}
+              useNativeAndroidPickerStyle={false}
+              onUpArrow={() => setShowRoleDropdown(false)}
+              onDownArrow={() => setShowRoleDropdown(false)}
+            />
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>
@@ -165,17 +193,17 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
-    paddingTop: 40,
+    paddingTop: 36,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 15,
   },
   logo: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 24,
+    marginBottom: 10,
   },
   title: {
     fontSize: 32,
@@ -218,7 +246,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 14,
   },
   buttonText: {
     color: Colors.secondary.white,
@@ -228,7 +256,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 13,
   },
   footerText: {
     fontSize: 14,
@@ -239,5 +267,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-SemiBold',
     color: Colors.primary.beige,
+  },
+  roleText: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.accent.darkGray,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: Colors.accent.lightGray,
+    borderRadius: 8,
+    color: Colors.accent.darkGray,
+    paddingRight: 30,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: Colors.accent.lightGray,
+    borderRadius: 8,
+    color: Colors.accent.darkGray,
+    paddingRight: 20,
   },
 });
