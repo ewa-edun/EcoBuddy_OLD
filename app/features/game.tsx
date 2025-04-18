@@ -39,11 +39,13 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Bold',
     color: Colors.primary.green,
     marginBottom: 20,
+    textAlign: 'center', // Added for better appearance
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginBottom: 40,
   },
 });
 

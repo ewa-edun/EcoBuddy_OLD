@@ -4,12 +4,13 @@
     "strict": true,
     "jsx": "react-native",
     "lib": ["dom", "esnext"],
-    "types": ["jest", "react-native"],
+    "types": ["jest", "react-native", "node"],
     "esModuleInterop": true,
     "paths": {
       "@lib/*": ["./lib/*"],
       "@app/*": ["./app/*"],
       "@hook/*": ["./hook/*"],
+      "expo-router": ["./node_modules/expo-router"],
     }
   },
   "include": [

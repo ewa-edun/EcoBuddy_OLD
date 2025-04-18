@@ -1,11 +1,12 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare, Calendar } from 'lucide-react-native';
+import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare, Calendar, HelpingHand, Store } from 'lucide-react-native';
 import { router, Link } from 'expo-router';
 import { getAuth } from 'firebase/auth'; 
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@lib/firebase/firebaseConfig'; 
 import { useEffect, useState } from 'react';
+import LeaderboardPreview from '../components/LeaderboardPreview';
 
 export default function HomeScreen() {
   const auth = getAuth();
@@ -44,13 +45,19 @@ export default function HomeScreen() {
     }
   };
   
-  const handleFeaturePress = (feature: 'game' | 'chatbot') => {
+  const handleFeaturePress = (feature: 'game' | 'chatbot' | 'charity' | 'kiosk') => {
     switch (feature) {
       case 'game':
         router.push('/features/game');
         break;
       case 'chatbot':
         router.push('/features/chatbot');
+        break;
+      case 'charity':
+        router.push('/features/charity');
+        break;
+      case 'kiosk':
+        router.push('/features/kiosk');
         break;
     }
   };
@@ -135,6 +142,30 @@ export default function HomeScreen() {
             <Text style={styles.featureText}>AI Assistant</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.featureGrid}>
+        <TouchableOpacity 
+            style={styles.featureCard}
+            onPress={() => handleFeaturePress('charity')}>
+            <View style={[styles.featureIcon, { backgroundColor: Colors.primary.green + '20' }]}>
+              <HelpingHand size={24} color={Colors.primary.green} />
+            </View>
+            <Text style={styles.featureText}>Charity/Donations</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.featureCard}
+            onPress={() => handleFeaturePress('kiosk')}>
+            <View style={[styles.featureIcon, { backgroundColor: Colors.primary.blue + '20' }]}>
+              <Store size={24} color={Colors.primary.blue} />
+            </View>
+            <Text style={styles.featureText}>Mobile Kiosk</Text>
+          </TouchableOpacity>
+      </View>
+      </View>
+
+
+      <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Leaderboard</Text>
+        <LeaderboardPreview />
       </View>
 
       <View style={styles.section}>
@@ -370,6 +401,7 @@ const styles = StyleSheet.create({
   featureGrid: {
     flexDirection: 'row',
     gap: 16,
+    marginBottom: 10,
   },
   featureCard: {
     flex: 1,

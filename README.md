@@ -115,16 +115,13 @@ EcoBuddy supports:
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 
-LEADERBOARD, GAME UI, FIREBASE INTEGRATION
+LEADERBOARD, FIREBASE INTEGRATION
 
 ## Pages/Fixes to do
 - Firebase auth and firestore.
    - Integerate in Leaderboard for game and waste recycled, posts on community and blog, points gotten, rewards claimed and method of claiming, profile levels (eco warrior and the likes), referrals logic, waste history, phone number/bank account on claim rewards page.
-   - Follow and Followers logic, as well as notifications of all sorts.
 
-- On home page: add leaderboard in between the additional features and quick actions menu. The leaderboard would have 2 sections, one showing the game points, and the second one would show the kg of waste donated for recycling already.
-
-- Need a Leaderboard page with the full list of people and points from the game and there's a second one for how much kg of waste the person has recycled.
+   - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
 
 - On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
 
@@ -135,7 +132,6 @@ LEADERBOARD, GAME UI, FIREBASE INTEGRATION
 - Add more loading screens to make the ux better.
 - After signup, show a simple welcome 'user name' pop-up then take them to the home page.
 
-- Let the image that user uploads on their profile page be displayed on all pages that user icon appears (chatbot, community, community post etc)
 
 - Integerate Gemini API.
       - For newspaper/blog, and for the eco question game.
@@ -159,6 +155,8 @@ LEADERBOARD, GAME UI, FIREBASE INTEGRATION
 - Need Stuctured Logic for points to cash and data conversion.
 
 - Need API's to handle claim rewards for both data and cash.
+
+- Let the image that user uploads on their profile page be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc)
 
 - Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
 

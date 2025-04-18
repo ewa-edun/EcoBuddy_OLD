@@ -77,6 +77,27 @@ export default function FeaturesLayout() {
           headerShown: true,
         }}
       />
+      <Stack.Screen
+        name="leaderboard"
+        options={{
+          title: 'Leaderboard',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="charity"
+        options={{
+          title: 'Charity/Donations',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+      name="kiosk"
+      options={{
+        title: 'Mobile Kiosk',
+        headerShown: true,
+      }}
+    />
     </Stack>
   );
 } 

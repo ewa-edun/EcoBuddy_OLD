@@ -21,7 +21,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: '48%',
+    width: '46%',
     height: 150,
     margin: 5,
     borderRadius: 10,
