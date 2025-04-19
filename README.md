@@ -112,6 +112,10 @@ EcoBuddy supports:
 
  TOTAL: 38,784 IMAGES
 
+
+MODEL 1. Shoes, tyres, trash, organic waste
+MODEL 2. Paper & Cardboard, plastic, glass, E-Waste
+MODEL 3. Metal and Clothes
 ---
 
 ## 💡 Future Improvements

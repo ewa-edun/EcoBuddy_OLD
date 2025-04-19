@@ -4,12 +4,16 @@ import { Info } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
 import { router } from 'expo-router';
 import { Camera, CameraType, CameraView } from 'expo-camera';
+import * as tf from '@tensorflow/tfjs';
+import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 type WasteCategory = {
   id: string;
   name: string;
   points: number;
- // image: any;
+  // image: any;
   image: string;
   description: string;
   rules?: string[];
@@ -96,13 +100,33 @@ const categories: WasteCategory[] = [
     name: "Non-Recyclable & Trash",
     points: 0,
     image: 'https://www.stephensons.com/media/catalog/product/2/9/29238.jpg?width=700&height=700&canvas=700,700&optimize=high&bg-color=255,255,255&fit=bounds',
-  //image: require("@/assets/images/non-recyclable.png"),
     description: "Items that cannot be recycled.",
     rules: ["Hazardous Waste", "Styrofoam", "Plastic wrap", "Dirty diapers"],
     nonRecyclable: true,
     reason: "Mixed materials or contamination",
   },
   
+];
+
+const modelConfigs = [
+  {
+    name: 'main',
+    modelJson: require('../../assets/model1/model.json'),
+    weights: require('../../assets/model1/weights.bin'),
+    classes: ["Shoes","Non-Recyclable & Trash","Organic Waste","Tyres"]
+  },
+  {
+    name: 'shoes',
+    modelJson: require('../../assets/model2/model.json'),
+    weights: require('../../assets/model2/weights.bin'),
+    classes: ["Paper & Cardboard","Plastic Bottles & Containers","Glass Bottles & Jars","Electronic Waste"]
+  },
+  {
+    name: 'tyres',
+    modelJson: require('../../assets/model3/model.json'),
+    weights: require('../../assets/model3/weights.bin'),
+    classes: ["Metal Cans & Scraps","Clothes & Textiles"]
+  }
 ];
 
 export default function WasteSelectorScreen() {
@@ -112,11 +136,10 @@ export default function WasteSelectorScreen() {
   const cameraRef = useRef<CameraView>(null);
   const [facing, setFacing] = useState<CameraType>('back');
   const [uri, setUri] = useState<string | null>(null);
-  const toggleFacing = () => {
-    setFacing((prev) => (prev === "back" ? "front" : "back"));
-  };
   const [wasteType, setWasteType] = useState<string | null>(null);
   const [pointsEarned, setPointsEarned] = useState<number | null>(null);
+  const [isModelLoading, setIsModelLoading] = useState(true);
+  const [models, setModels] = useState<{[key: string]: tf.LayersModel} | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -125,29 +148,168 @@ export default function WasteSelectorScreen() {
     })();
   }, []);
 
+  useEffect(() => {
+    const loadModels = async () => {
+      setIsModelLoading(true);
+      try {
+        await tf.ready();
+        
+        const loadedModels: {[key: string]: tf.LayersModel} = {};
+        for (const config of modelConfigs) {
+          loadedModels[config.name] = await tf.loadLayersModel(
+            bundleResourceIO(config.modelJson, config.weights)
+          );
+        }
+        setModels(loadedModels);
+        console.log('Models loaded successfully');
+      } catch (error) {
+        console.error('Error loading models:', error);
+      } finally {
+        setIsModelLoading(false);
+      }
+    };
+  
+    loadModels();
+  }, []);
+
   const handleScanPress = () => {
     setShowCamera(true);
   };
 
   const handleCameraCapture = async () => {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync().catch(error => {
-        console.error('Error taking picture:', error);
-      });
-      if (photo) {
-        setUri(photo.uri);
-        setShowCamera(false);
-        
-//setWasteType('Plastic Bottles'); 
-//setSelectedCategory(wasteCategories.find(category => category.name === 'Plastic Bottles') || null);
-
-        // For demo purposes, we'll randomly identify a waste type
+    if (cameraRef.current && models) {
+      try {
+        const photo = await cameraRef.current.takePictureAsync();
+        if (photo) {
+          setUri(photo.uri);
+          setShowCamera(false);
+  
+          // Process the image
+          const processedImageTensor = await processImage(photo.uri);
+          
+          // Run predictions
+          const predictions = await Promise.all([
+            models.main.predict(processedImageTensor) as tf.Tensor,
+            models.shoes.predict(processedImageTensor) as tf.Tensor,
+            models.tyres.predict(processedImageTensor) as tf.Tensor
+          ]);
+          
+          // Convert to arrays
+          const predictionArrays = await Promise.all(
+            predictions.map(async p => Array.from(await p.data()))
+          );
+  
+          // Combine results
+          const allClasses = [
+            ...modelConfigs[0].classes,
+            ...modelConfigs[1].classes,
+            ...modelConfigs[2].classes
+          ];
+  
+          const allPredictions = [
+            ...predictionArrays[0],
+            ...predictionArrays[1], 
+            ...predictionArrays[2]
+          ];
+  
+          // Get top prediction
+          const maxIndex = allPredictions.indexOf(Math.max(...allPredictions));
+          const predictedClass = allClasses[maxIndex];
+          const confidence = allPredictions[maxIndex];
+          
+          console.log("Predicted class:", predictedClass, "with confidence:", confidence);
+  
+          // Find matching category
+          const matchedCategory = categories.find(cat => 
+            cat.name.toLowerCase().includes(predictedClass.toLowerCase()) ||
+            predictedClass.toLowerCase().includes(cat.name.toLowerCase())
+          );
+  
+          if (matchedCategory) {
+            setSelectedCategory(matchedCategory);
+            setWasteType(matchedCategory.name);
+            setPointsEarned(matchedCategory.points);
+            console.log("Matched category:", matchedCategory.name);
+          } else {
+            // Fallback to "Non-Recyclable & Trash" if no match is found
+            const fallbackCategory = categories.find(cat => cat.id === "10");
+            if (fallbackCategory) {
+              setSelectedCategory(fallbackCategory);
+              setWasteType(fallbackCategory.name);
+              setPointsEarned(fallbackCategory.points);
+              console.log("Using fallback category:", fallbackCategory.name);
+            } else {
+              setWasteType('Unknown');
+              setPointsEarned(0);
+              console.log("No matching category found");
+            }
+          }
+  
+          // Clean up tensors
+          processedImageTensor.dispose();
+          predictions.forEach(p => p.dispose());
+        }
+      } catch (error) {
+        console.error('Error processing image:', error);
+        // Fallback to a random category when model fails
         const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
         setSelectedCategory(randomCategory);
         setWasteType(randomCategory.name);
         setPointsEarned(randomCategory.points);
       }
-    }  
+    } else if (cameraRef.current) {
+      // Fallback if models aren't loaded
+      try {
+        const photo = await cameraRef.current.takePictureAsync();
+        if (photo) {
+          setUri(photo.uri);
+          setShowCamera(false);
+          
+          // For demo purposes, use a random category
+          const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
+          setSelectedCategory(randomCategory);
+          setWasteType(randomCategory.name);
+          setPointsEarned(randomCategory.points);
+        }
+      } catch (error) {
+        console.error('Error taking picture:', error);
+      }
+    }
+  };
+
+  // Image processing function for TensorFlow.js
+  const processImage = async (uri: string) => {
+    try {
+      // Resize the image to 224x224 (standard for many image models)
+      const manipResult = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 224, height: 224 } }],
+        { format: ImageManipulator.SaveFormat.JPEG }
+      );
+      
+      // Read the file as base64
+      const imgB64 = await FileSystem.readAsStringAsync(manipResult.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      // Convert base64 to tensor
+      const imgBuffer = tf.util.encodeString(imgB64, 'base64').buffer;
+      const raw = new Uint8Array(imgBuffer);
+      
+      // Decode JPEG
+      const imageTensor = decodeJpeg(raw);
+      
+      // Normalize to [0, 1] and add batch dimension
+      const normalized = imageTensor.toFloat().div(tf.scalar(255.0)).expandDims(0);
+      
+      // Clean up original tensor
+      imageTensor.dispose();
+      
+      return normalized;
+    } catch (error) {
+      console.error('Image processing error:', error);
+      throw error;
+    }
   };
 
   const handleSubmitPress = () => {
@@ -156,17 +318,18 @@ export default function WasteSelectorScreen() {
         pathname: '/features/wasteSchedule',
         params: { wasteType: selectedCategory.id }
       });
-    }
+    }  
   };
 
-  if (showCamera) {
-    if (hasPermission === null) {
-      return <View style={styles.container}><Text>Requesting camera permission...</Text></View>;
-    }
-    if (hasPermission === false) {
-      return <View style={styles.container}><Text>No access to camera</Text></View>;
-    }
+  if (hasPermission === null) {
+    return <View style={styles.container}><Text>Requesting camera permission...</Text></View>;
+  }
+  
+  if (hasPermission === false) {
+    return <View style={styles.container}><Text>No access to camera</Text></View>;
+  }
 
+  if (showCamera) {
     return (
       <View style={styles.container}>
         <CameraView
@@ -193,6 +356,15 @@ export default function WasteSelectorScreen() {
     );
   }
 
+  if (isModelLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text style={styles.loadingText}>Loading AI models...</Text>
+        <Text style={styles.subtitleText}>This may take a moment.</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -201,7 +373,7 @@ export default function WasteSelectorScreen() {
       </View>
 
       <TouchableOpacity style={styles.scanButton} onPress={handleScanPress}>
-        <Text style={styles.scanButtonText}>Scan Waste</Text>
+      <Text style={styles.scanButtonText}>Scan Waste</Text>
       </TouchableOpacity>
 
       {uri && (
@@ -241,7 +413,6 @@ export default function WasteSelectorScreen() {
             key={category.id}
             style={[styles.categoryCard, selectedCategory?.id === category.id && styles.selectedCard]}
             onPress={() => setSelectedCategory(category)}>
-{/*<Image source={{ uri: category.image }} {category.image} style={styles.categoryImage} />*/} 
             <Image source={{ uri: category.image }} style={styles.categoryImage} />
             <View style={styles.categoryContent}>
               <Text style={styles.categoryName}>{category.name}</Text>
@@ -510,5 +681,20 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 20,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.primary.green,
+    marginBottom: 8,
+  },
+  subtitleText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.secondary,
   },
 });
