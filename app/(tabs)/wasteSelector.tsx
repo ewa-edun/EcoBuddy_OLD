@@ -7,7 +7,10 @@ import { Camera, CameraType, CameraView } from 'expo-camera';
 import * as tf from '@tensorflow/tfjs';
 import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
+//import { manipulateAsync, SaveFormat } from 'expo-image';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { Asset } from 'expo-asset';
 
 type WasteCategory = {
   id: string;
@@ -108,26 +111,28 @@ const categories: WasteCategory[] = [
   
 ];
 
-const modelConfigs = [
-  {
-    name: 'main',
-    modelJson: require('../../assets/model1/model.json'),
-    weights: require('../../assets/model1/weights.bin'),
-    classes: ["Shoes","Non-Recyclable & Trash","Organic Waste","Tyres"]
-  },
-  {
-    name: 'shoes',
-    modelJson: require('../../assets/model2/model.json'),
-    weights: require('../../assets/model2/weights.bin'),
-    classes: ["Paper & Cardboard","Plastic Bottles & Containers","Glass Bottles & Jars","Electronic Waste"]
-  },
-  {
-    name: 'tyres',
-    modelJson: require('../../assets/model3/model.json'),
-    weights: require('../../assets/model3/weights.bin'),
-    classes: ["Metal Cans & Scraps","Clothes & Textiles"]
-  }
-];
+const model1 = {
+  model: require('../../assets/model1/model.json'),
+  weights: require('../../assets/model1/weights.bin'),
+  classes: ["Shoes","Non-Recyclable & Trash","Organic Waste","Tyres"]
+};
+
+const model2 = {
+  model: require('../../assets/model2/model.json'),
+  weights: require('../../assets/model2/weights.bin'),
+  classes: ["Paper & Cardboard","Plastic Bottles & Containers","Glass Bottles & Jars","Electronic Waste"]
+};
+
+const model3 = {
+  model: require('../../assets/model3/model.json'),
+  weights: require('../../assets/model3/weights.bin'),
+  classes: ["Metal Cans & Scraps","Clothes & Textiles"]
+};
+
+let modelsLoaded = false;
+let model1Instance: tf.LayersModel;
+let model2Instance: tf.LayersModel;
+let model3Instance: tf.LayersModel;
 
 export default function WasteSelectorScreen() {
   const [selectedCategory, setSelectedCategory] = useState<WasteCategory | null>(null);
@@ -150,22 +155,28 @@ export default function WasteSelectorScreen() {
 
   useEffect(() => {
     const loadModels = async () => {
-      setIsModelLoading(true);
       try {
         await tf.ready();
         
-        const loadedModels: {[key: string]: tf.LayersModel} = {};
-        for (const config of modelConfigs) {
-          loadedModels[config.name] = await tf.loadLayersModel(
-            bundleResourceIO(config.modelJson, config.weights)
-          );
-        }
-        setModels(loadedModels);
-        console.log('Models loaded successfully');
+        // Load all models in parallel
+        [model1Instance, model2Instance, model3Instance] = await Promise.all([
+          tf.loadLayersModel(bundleResourceIO(model1.model, model1.weights)),
+          tf.loadLayersModel(bundleResourceIO(model2.model, model2.weights)),
+          tf.loadLayersModel(bundleResourceIO(model3.model, model3.weights))
+        ]);
+    
+        // Warm up models
+        const warmupTensor = tf.zeros([1, 224, 224, 3]);
+        await Promise.all([
+          model1Instance.predict(warmupTensor),
+          model2Instance.predict(warmupTensor),
+          model3Instance.predict(warmupTensor)
+        ]);
+        modelsLoaded = true;
+        console.log('All models loaded and warmed up');
       } catch (error) {
-        console.error('Error loading models:', error);
-      } finally {
-        setIsModelLoading(false);
+        console.error('Model loading error:', error);
+        throw error;
       }
     };
   
@@ -177,9 +188,9 @@ export default function WasteSelectorScreen() {
   };
 
   const handleCameraCapture = async () => {
-    if (cameraRef.current && models) {
+    if (cameraRef.current && modelsLoaded) {
       try {
-        const photo = await cameraRef.current.takePictureAsync();
+        const photo = await cameraRef.current.takePictureAsync({ quality: 1, base64: true });
         if (photo) {
           setUri(photo.uri);
           setShowCamera(false);
@@ -187,57 +198,79 @@ export default function WasteSelectorScreen() {
           // Process the image
           const processedImageTensor = await processImage(photo.uri);
           
-          // Run predictions
+          // Run predictions from all three models
           const predictions = await Promise.all([
-            models.main.predict(processedImageTensor) as tf.Tensor,
-            models.shoes.predict(processedImageTensor) as tf.Tensor,
-            models.tyres.predict(processedImageTensor) as tf.Tensor
+            model1Instance.predict(processedImageTensor) as tf.Tensor,
+            model2Instance.predict(processedImageTensor) as tf.Tensor,
+            model3Instance.predict(processedImageTensor) as tf.Tensor
           ]);
           
           // Convert to arrays
-          const predictionArrays = await Promise.all(
-            predictions.map(async p => Array.from(await p.data()))
-          );
-  
-          // Combine results
-          const allClasses = [
-            ...modelConfigs[0].classes,
-            ...modelConfigs[1].classes,
-            ...modelConfigs[2].classes
-          ];
-  
-          const allPredictions = [
-            ...predictionArrays[0],
-            ...predictionArrays[1], 
-            ...predictionArrays[2]
-          ];
-  
-          // Get top prediction
-          const maxIndex = allPredictions.indexOf(Math.max(...allPredictions));
-          const predictedClass = allClasses[maxIndex];
-          const confidence = allPredictions[maxIndex];
+          const predictionArrays = await Promise.all([
+            Array.from(await (predictions[0] as tf.Tensor).data()),
+            Array.from(await (predictions[1] as tf.Tensor).data()),
+            Array.from(await (predictions[2] as tf.Tensor).data())
+          ]);
           
-          console.log("Predicted class:", predictedClass, "with confidence:", confidence);
-  
-          // Find matching category
-          const matchedCategory = categories.find(cat => 
-            cat.name.toLowerCase().includes(predictedClass.toLowerCase()) ||
-            predictedClass.toLowerCase().includes(cat.name.toLowerCase())
+          // Get top prediction from each model
+          const topPredictions = [
+            { class: model1.classes[findMaxIndex(predictionArrays[0])], confidence: Math.max(...predictionArrays[0]) },
+            { class: model2.classes[findMaxIndex(predictionArrays[1])], confidence: Math.max(...predictionArrays[1]) },
+            { class: model3.classes[findMaxIndex(predictionArrays[2])], confidence: Math.max(...predictionArrays[2]) }
+          ];
+          
+          console.log("Top predictions:", JSON.stringify(topPredictions));
+          
+          // Find the prediction with highest confidence
+          const bestPrediction = topPredictions.reduce((prev, current) => 
+            (current.confidence > prev.confidence) ? current : prev
           );
-  
+          
+          console.log("Best prediction:", bestPrediction.class, "with confidence:", bestPrediction.confidence);
+          
+          // Try to find an exact match first
+          let matchedCategory = categories.find(cat => 
+            cat.name.toLowerCase() === bestPrediction.class.toLowerCase()
+          );
+          
+          // If no exact match, try partial matching
+          if (!matchedCategory) {
+            matchedCategory = categories.find(cat => 
+              cat.name.toLowerCase().includes(bestPrediction.class.toLowerCase()) ||
+              bestPrediction.class.toLowerCase().includes(cat.name.toLowerCase())
+            );
+          }
+          
+          // If still no match, look for keywords in all predictions
+          if (!matchedCategory) {
+            const allWords = topPredictions.flatMap(p => p.class.toLowerCase().split(/\s+/));
+            
+            for (const category of categories) {
+              const categoryWords = category.name.toLowerCase().split(/\s+/);
+              const matchCount = categoryWords.filter(word => 
+                allWords.includes(word) && word.length > 3 // only count meaningful words
+              ).length;
+              
+              if (matchCount > 0) {
+                matchedCategory = category;
+                break;
+              }
+            }
+          }
+          
           if (matchedCategory) {
             setSelectedCategory(matchedCategory);
             setWasteType(matchedCategory.name);
             setPointsEarned(matchedCategory.points);
             console.log("Matched category:", matchedCategory.name);
           } else {
-            // Fallback to "Non-Recyclable & Trash" if no match is found
+            // Fallback to non-recyclable if no match is found
             const fallbackCategory = categories.find(cat => cat.id === "10");
             if (fallbackCategory) {
               setSelectedCategory(fallbackCategory);
               setWasteType(fallbackCategory.name);
               setPointsEarned(fallbackCategory.points);
-              console.log("Using fallback category:", fallbackCategory.name);
+              console.log("Using fallback Non-Recyclable category");
             } else {
               setWasteType('Unknown');
               setPointsEarned(0);
@@ -251,11 +284,19 @@ export default function WasteSelectorScreen() {
         }
       } catch (error) {
         console.error('Error processing image:', error);
-        // Fallback to a random category when model fails
-        const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
-        setSelectedCategory(randomCategory);
-        setWasteType(randomCategory.name);
-        setPointsEarned(randomCategory.points);
+        // Fallback to a reasonable default when model fails
+        const fallbackCategory = categories.find(cat => cat.id === "2"); // Default to plastic as it's common
+        if (fallbackCategory) {
+          setSelectedCategory(fallbackCategory);
+          setWasteType(fallbackCategory.name);
+          setPointsEarned(fallbackCategory.points);
+        } else {
+          // Random fallback if plastic category not found
+          const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
+          setSelectedCategory(randomCategory);
+          setWasteType(randomCategory.name);
+          setPointsEarned(randomCategory.points);
+        }
       }
     } else if (cameraRef.current) {
       // Fallback if models aren't loaded
@@ -265,11 +306,19 @@ export default function WasteSelectorScreen() {
           setUri(photo.uri);
           setShowCamera(false);
           
-          // For demo purposes, use a random category
-          const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
-          setSelectedCategory(randomCategory);
-          setWasteType(randomCategory.name);
-          setPointsEarned(randomCategory.points);
+          // Default to plastic bottles as fallback
+          const fallbackCategory = categories.find(cat => cat.id === "2");
+          if (fallbackCategory) {
+            setSelectedCategory(fallbackCategory);
+            setWasteType(fallbackCategory.name);
+            setPointsEarned(fallbackCategory.points);
+          } else {
+            // For demo purposes, use a random category
+            const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
+            setSelectedCategory(randomCategory);
+            setWasteType(randomCategory.name);
+            setPointsEarned(randomCategory.points);
+          }
         }
       } catch (error) {
         console.error('Error taking picture:', error);
@@ -277,14 +326,32 @@ export default function WasteSelectorScreen() {
     }
   };
 
-  // Image processing function for TensorFlow.js
+  // Add helper function to find the index of the maximum value in an array
+  const findMaxIndex = (arr: number[]): number => {
+    let maxIndex = 0;
+    let maxValue = arr[0];
+    
+    for (let i = 1; i < arr.length; i++) {
+      if (arr[i] > maxValue) {
+        maxValue = arr[i];
+        maxIndex = i;
+      }
+    }
+    
+    return maxIndex;
+  };
+
+  // Improve the image processing function
   const processImage = async (uri: string) => {
     try {
       // Resize the image to 224x224 (standard for many image models)
       const manipResult = await ImageManipulator.manipulateAsync(
         uri,
-        [{ resize: { width: 224, height: 224 } }],
-        { format: ImageManipulator.SaveFormat.JPEG }
+        [
+          { resize: { width: 224, height: 224 } },
+          { crop: { originX: 0, originY: 0, width: 224, height: 224 } }
+        ],
+        { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
       );
       
       // Read the file as base64
@@ -300,7 +367,7 @@ export default function WasteSelectorScreen() {
       const imageTensor = decodeJpeg(raw);
       
       // Normalize to [0, 1] and add batch dimension
-      const normalized = imageTensor.toFloat().div(tf.scalar(255.0)).expandDims(0);
+      const normalized = tf.cast(imageTensor, 'float32').div(tf.scalar(255.0)).expandDims(0);
       
       // Clean up original tensor
       imageTensor.dispose();
@@ -425,7 +492,7 @@ export default function WasteSelectorScreen() {
       {selectedCategory && !uri && (
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
-            <Info size={20} color={Colors.primary.blue} />
+              <Info size={20} color={Colors.primary.blue} />
             <Text style={styles.infoTitle}>Recycling Guidelines</Text>
           </View>
           <Text style={styles.infoText}>{selectedCategory.description}</Text>
@@ -488,6 +555,9 @@ const styles = StyleSheet.create({
     margin: 24,
     marginTop: 0,
     marginBottom: 16,
+  },
+  icon: {
+   color: '#2196F3',
   },
   line: {
     flex: 1,

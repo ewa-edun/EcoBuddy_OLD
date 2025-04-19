@@ -75,6 +75,10 @@
     },
     "androidStatusBar": {
       "backgroundColor": "#0C4242"
-    }
+    },
+    "assetBundlePatterns": [
+      "**/*",
+      "assets/model1/*"
+    ]
   }
 }
