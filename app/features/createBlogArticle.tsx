@@ -16,7 +16,11 @@ export default function CreateBlogArticle() {
 // Here you would typically save the article to your backend or state management, for demonstration, we will just navigate back with the content
     router.push({
       pathname: '/(tabs)/education',
-      params: { newArticle: { content: articleContent, readTime, isExpert } },
+      params: { 
+        articleContent: articleContent,
+        readTime: readTime.toString(),
+        isExpert: isExpert.toString()
+      },
     });
   };
 

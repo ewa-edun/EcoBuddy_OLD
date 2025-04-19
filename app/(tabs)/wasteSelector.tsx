@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Info } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
@@ -133,6 +133,50 @@ let modelsLoaded = false;
 let model1Instance: tf.LayersModel;
 let model2Instance: tf.LayersModel;
 let model3Instance: tf.LayersModel;
+let loadingProgress = 0;
+
+// After model definitions, add a mapping between model outputs and categories
+const categoryMapping = {
+  "Paper & Cardboard": ["paper", "cardboard", "paper & cardboard"],
+  "Plastic Bottles & Containers": ["plastic", "bottle", "container", "plastic bottles", "plastic bottles & containers"],
+  "Glass Bottles & Jars": ["glass", "bottle", "jar", "glass bottles", "glass bottles & jars"],
+  "Metal Cans & Scraps": ["metal", "can", "scrap", "metal cans", "metal cans & scraps"],
+  "Electronic Waste": ["electronic", "e-waste", "e waste", "electronic waste"],
+  "Clothes & Textiles": ["clothes", "textile", "fabric", "clothes & textiles"],
+  "Tyres": ["tyre", "tire", "tyres", "tires", "rubber tire"],
+  "Organic Waste": ["organic", "food", "compost", "organic waste"],
+  "Shoes": ["shoe", "shoes", "footwear"],
+  "Non-Recyclable & Trash": ["trash", "non-recyclable", "garbage", "waste", "non-recyclable & trash"]
+};
+
+// Add a weights object to prioritize certain categories when multiple matches are found
+const categoryPriority = {
+  "Plastic Bottles & Containers": 1.2,  // Give plastic a higher priority based on your feedback
+  "Paper & Cardboard": 1.1,
+  "Glass Bottles & Jars": 1.1,
+  "Metal Cans & Scraps": 1.1,
+  "Electronic Waste": 1.05,
+  "Clothes & Textiles": 1.0,
+  "Tyres": 1.0,
+  "Organic Waste": 1.0,
+  "Shoes": 1.0,
+  "Non-Recyclable & Trash": 0.7  // Lower priority for non-recyclable
+};
+
+// Add the missing findMaxIndex function
+const findMaxIndex = (arr: number[]): number => {
+  let maxIndex = 0;
+  let maxValue = arr[0];
+  
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] > maxValue) {
+      maxValue = arr[i];
+      maxIndex = i;
+    }
+  }
+  
+  return maxIndex;
+};
 
 export default function WasteSelectorScreen() {
   const [selectedCategory, setSelectedCategory] = useState<WasteCategory | null>(null);
@@ -144,7 +188,28 @@ export default function WasteSelectorScreen() {
   const [wasteType, setWasteType] = useState<string | null>(null);
   const [pointsEarned, setPointsEarned] = useState<number | null>(null);
   const [isModelLoading, setIsModelLoading] = useState(true);
-  const [models, setModels] = useState<{[key: string]: tf.LayersModel} | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState('Initializing...');
+  const [loadingPercentage, setLoadingPercentage] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Add a useEffect to handle model loading timeout
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    
+    if (isModelLoading) {
+      // Set a timeout to automatically stop loading after 15 seconds
+      timeout = setTimeout(() => {
+        if (isModelLoading) {
+          setIsModelLoading(false);
+          console.warn('Model loading timed out, proceeding without models');
+        }
+      }, 15000); // 15 seconds timeout
+    }
+    
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isModelLoading]);
 
   useEffect(() => {
     (async () => {
@@ -155,28 +220,50 @@ export default function WasteSelectorScreen() {
 
   useEffect(() => {
     const loadModels = async () => {
+      setIsModelLoading(true);
       try {
+        // Update loading status
+        setLoadingStatus('Preparing TensorFlow...');
+        setLoadingPercentage(10);
         await tf.ready();
+        setLoadingPercentage(20);
         
-        // Load all models in parallel
-        [model1Instance, model2Instance, model3Instance] = await Promise.all([
-          tf.loadLayersModel(bundleResourceIO(model1.model, model1.weights)),
-          tf.loadLayersModel(bundleResourceIO(model2.model, model2.weights)),
-          tf.loadLayersModel(bundleResourceIO(model3.model, model3.weights))
-        ]);
-    
-        // Warm up models
+        // Load models with progress updates
+        setLoadingStatus('Loading main classification model...');
+        model1Instance = await tf.loadLayersModel(
+          bundleResourceIO(model1.model, model1.weights)
+        );
+        setLoadingPercentage(50);
+        
+        setLoadingStatus('Loading secondary models...');
+        model2Instance = await tf.loadLayersModel(
+          bundleResourceIO(model2.model, model2.weights)
+        );
+        setLoadingPercentage(70);
+        
+        model3Instance = await tf.loadLayersModel(
+          bundleResourceIO(model3.model, model3.weights)
+        );
+        setLoadingPercentage(90);
+        
+        // Warm up the models
+        setLoadingStatus('Finalizing...');
         const warmupTensor = tf.zeros([1, 224, 224, 3]);
         await Promise.all([
           model1Instance.predict(warmupTensor),
           model2Instance.predict(warmupTensor),
           model3Instance.predict(warmupTensor)
         ]);
+        warmupTensor.dispose();
+        
         modelsLoaded = true;
+        setLoadingPercentage(100);
         console.log('All models loaded and warmed up');
       } catch (error) {
         console.error('Model loading error:', error);
-        throw error;
+      } finally {
+        // Important: Always make sure this gets called to exit loading state
+        setIsModelLoading(false);
       }
     };
   
@@ -188,170 +275,439 @@ export default function WasteSelectorScreen() {
   };
 
   const handleCameraCapture = async () => {
-    if (cameraRef.current && modelsLoaded) {
+    if (!cameraRef.current) {
+      console.error("Camera reference is null");
+      Alert.alert("Error", "Camera not available. Please try again.");
+      return;
+    }
+
+    if (isProcessing) {
+      console.log("Still processing previous capture, please wait");
+      return;
+    }
+
+    try {
+      // Take a single photo first to verify camera is working
+      setIsProcessing(true);
+      
+      const initialPhoto = await cameraRef.current.takePictureAsync({
+        quality: 1,
+        base64: true,
+        skipProcessing: false
+      });
+      
+      // Check if photo was successfully taken
+      if (!initialPhoto || !initialPhoto.uri) {
+        throw new Error("Failed to capture initial photo");
+      }
+      
+      // Display the captured image immediately
+      setUri(initialPhoto.uri);
+      setShowCamera(false);
+      
+      // If models aren't loaded, use basic fallback
+      if (!modelsLoaded) {
+        console.log("Models not loaded, using manual category selection");
+        return;
+      }
+      
+      // Take additional photos for better prediction (if first one succeeded)
+      const photos = [initialPhoto];
       try {
-        const photo = await cameraRef.current.takePictureAsync({ quality: 1, base64: true });
-        if (photo) {
-          setUri(photo.uri);
-          setShowCamera(false);
-  
-          // Process the image
-          const processedImageTensor = await processImage(photo.uri);
-          
-          // Run predictions from all three models
-          const predictions = await Promise.all([
-            model1Instance.predict(processedImageTensor) as tf.Tensor,
-            model2Instance.predict(processedImageTensor) as tf.Tensor,
-            model3Instance.predict(processedImageTensor) as tf.Tensor
-          ]);
-          
-          // Convert to arrays
-          const predictionArrays = await Promise.all([
-            Array.from(await (predictions[0] as tf.Tensor).data()),
-            Array.from(await (predictions[1] as tf.Tensor).data()),
-            Array.from(await (predictions[2] as tf.Tensor).data())
-          ]);
-          
-          // Get top prediction from each model
-          const topPredictions = [
-            { class: model1.classes[findMaxIndex(predictionArrays[0])], confidence: Math.max(...predictionArrays[0]) },
-            { class: model2.classes[findMaxIndex(predictionArrays[1])], confidence: Math.max(...predictionArrays[1]) },
-            { class: model3.classes[findMaxIndex(predictionArrays[2])], confidence: Math.max(...predictionArrays[2]) }
-          ];
-          
-          console.log("Top predictions:", JSON.stringify(topPredictions));
-          
-          // Find the prediction with highest confidence
-          const bestPrediction = topPredictions.reduce((prev, current) => 
-            (current.confidence > prev.confidence) ? current : prev
-          );
-          
-          console.log("Best prediction:", bestPrediction.class, "with confidence:", bestPrediction.confidence);
-          
-          // Try to find an exact match first
-          let matchedCategory = categories.find(cat => 
-            cat.name.toLowerCase() === bestPrediction.class.toLowerCase()
-          );
-          
-          // If no exact match, try partial matching
-          if (!matchedCategory) {
-            matchedCategory = categories.find(cat => 
-              cat.name.toLowerCase().includes(bestPrediction.class.toLowerCase()) ||
-              bestPrediction.class.toLowerCase().includes(cat.name.toLowerCase())
-            );
-          }
-          
-          // If still no match, look for keywords in all predictions
-          if (!matchedCategory) {
-            const allWords = topPredictions.flatMap(p => p.class.toLowerCase().split(/\s+/));
+        // Add a short delay before taking more photos
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Try to take 2 more photos if possible
+        for (let i = 0; i < 2; i++) {
+          if (cameraRef.current) {
+            const photo = await cameraRef.current.takePictureAsync({
+              quality: 1,
+              base64: true,
+              skipProcessing: false
+            });
             
-            for (const category of categories) {
-              const categoryWords = category.name.toLowerCase().split(/\s+/);
-              const matchCount = categoryWords.filter(word => 
-                allWords.includes(word) && word.length > 3 // only count meaningful words
-              ).length;
+            if (photo && photo.uri) {
+              photos.push(photo);
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+          }
+        }
+      } catch (additionalPhotosError) {
+        console.log("Couldn't take additional photos, continuing with the first one", additionalPhotosError);
+      }
+      
+      // Disable automatic plastic fallback
+      let useDefaultFallback = false;
+      
+      // Process photos and make predictions
+      if (photos.length > 0) {
+        try {
+          const allResults = await Promise.all(photos.map(async (photo) => {
+            if (!photo.uri) {
+              throw new Error("Photo URI is undefined");
+            }
+            
+            const processedImageTensor = await processImage(photo.uri);
+            
+            // Get predictions from all models
+            const predictions = await Promise.all([
+              model1Instance.predict(processedImageTensor) as tf.Tensor,
+              model2Instance.predict(processedImageTensor) as tf.Tensor,
+              model3Instance.predict(processedImageTensor) as tf.Tensor
+            ]);
+            
+            // Get prediction arrays
+            const predictionArrays = await Promise.all([
+              Array.from(await (predictions[0] as tf.Tensor).data()),
+              Array.from(await (predictions[1] as tf.Tensor).data()),
+              Array.from(await (predictions[2] as tf.Tensor).data())
+            ]);
+            
+            // Clean up tensors
+            processedImageTensor.dispose();
+            predictions.forEach(p => p.dispose());
+            
+            // Return the top prediction from each model
+            return [
+              { 
+                class: model1.classes[findMaxIndex(predictionArrays[0])], 
+                confidence: Math.max(...predictionArrays[0]) 
+              },
+              { 
+                class: model2.classes[findMaxIndex(predictionArrays[1])], 
+                confidence: Math.max(...predictionArrays[1]) 
+              },
+              { 
+                class: model3.classes[findMaxIndex(predictionArrays[2])], 
+                confidence: Math.max(...predictionArrays[2]) 
+              }
+            ];
+          }));
+          
+          // Fix automatic plastic bottle bias by adjusting confidence thresholds
+          // and requiring stronger evidence for plastic bottles
+          
+          // Combine results from all photos
+          const aggregatedResults: {[key: string]: {count: number, confidenceSum: number}} = {};
+          
+          // For each photo's results
+          allResults.forEach(photoResults => {
+            // For each model's top prediction
+            photoResults.forEach(prediction => {
+              const className = prediction.class;
+              if (!aggregatedResults[className]) {
+                aggregatedResults[className] = { count: 0, confidenceSum: 0 };
+              }
+              aggregatedResults[className].count += 1;
+              aggregatedResults[className].confidenceSum += prediction.confidence;
+            });
+          });
+          
+          // Convert to array and sort by weighted score, with reduced bias for plastic
+          const rankedPredictions = Object.entries(aggregatedResults)
+            .map(([className, stats]) => {
+              // Apply special handling to reduce plastic bias
+              let priorityMultiplier = getCategoryPriority(className) || 1.0;
               
-              if (matchCount > 0) {
-                matchedCategory = category;
+              // Reduce plastic priority if confidence is low
+              if (className.toLowerCase().includes("plastic") && stats.confidenceSum / stats.count < 0.7) {
+                priorityMultiplier = 0.9; // Reduce priority for plastic with low confidence
+              }
+              
+              return {
+                class: className,
+                count: stats.count,
+                avgConfidence: stats.confidenceSum / stats.count,
+                // Adjusted score calculation
+                score: stats.count * (stats.confidenceSum / stats.count) * priorityMultiplier
+              };
+            })
+            .sort((a, b) => b.score - a.score);
+          
+          console.log("Ranked predictions:", JSON.stringify(rankedPredictions));
+          
+          // Only match plastic if confidence is reasonably high
+          let matchedCategory = null;
+          
+          // First pass: Try direct matches with confidence thresholds
+          for (const prediction of rankedPredictions) {
+            // Skip low confidence plastic predictions
+            if (prediction.class.toLowerCase().includes("plastic") && prediction.avgConfidence < 0.7) {
+              console.log("Skipping low confidence plastic prediction:", prediction.class, prediction.avgConfidence);
+              continue;
+            }
+            
+            // For other categories, use normal matching
+            // 1. Try direct match
+            const directMatch = categories.find(cat => 
+              cat.name.toLowerCase() === prediction.class.toLowerCase()
+            );
+            
+            if (directMatch) {
+              matchedCategory = directMatch;
+              console.log("Found direct match:", directMatch.name, "confidence:", prediction.avgConfidence);
+              break;
+            }
+            
+            // 2. Try keyword mapping
+            const matchedName = findCategoryByKeywords(prediction.class);
+            if (matchedName) {
+              const keywordMatch = categories.find(cat => 
+                cat.name.toLowerCase() === matchedName.toLowerCase()
+              );
+              
+              if (keywordMatch) {
+                // For plastic, require higher confidence
+                if (matchedName.toLowerCase().includes("plastic") && prediction.avgConfidence < 0.65) {
+                  console.log("Skipping low confidence plastic keyword match");
+                  continue;
+                }
+                
+                matchedCategory = keywordMatch;
+                console.log("Found keyword match:", keywordMatch.name, "from", prediction.class);
+                break;
+              }
+            }
+            
+            // 3. Try partial matching (but not for plastic with low confidence)
+            if (!prediction.class.toLowerCase().includes("plastic") || prediction.avgConfidence > 0.65) {
+              const partialMatch = categories.find(cat => 
+                cat.name.toLowerCase().includes(prediction.class.toLowerCase()) ||
+                prediction.class.toLowerCase().includes(cat.name.toLowerCase())
+              );
+              
+              if (partialMatch) {
+                matchedCategory = partialMatch;
+                console.log("Found partial match:", partialMatch.name);
                 break;
               }
             }
           }
           
-          if (matchedCategory) {
-            setSelectedCategory(matchedCategory);
-            setWasteType(matchedCategory.name);
-            setPointsEarned(matchedCategory.points);
-            console.log("Matched category:", matchedCategory.name);
-          } else {
-            // Fallback to non-recyclable if no match is found
-            const fallbackCategory = categories.find(cat => cat.id === "10");
-            if (fallbackCategory) {
-              setSelectedCategory(fallbackCategory);
-              setWasteType(fallbackCategory.name);
-              setPointsEarned(fallbackCategory.points);
-              console.log("Using fallback Non-Recyclable category");
-            } else {
-              setWasteType('Unknown');
-              setPointsEarned(0);
-              console.log("No matching category found");
+          // If no match yet, try word matching but with stricter rules for plastic
+          if (!matchedCategory) {
+            const allWords = rankedPredictions.flatMap(p => 
+              p.class.toLowerCase().split(/\s+/)
+            );
+            
+            // Score each category by word matches weighted by prediction scores
+            const categoryScores = categories.map(category => {
+              const categoryWords = category.name.toLowerCase().split(/\s+/);
+              let score = 0;
+              
+              // Count matching words
+              categoryWords.forEach(word => {
+                if (word.length > 2 && allWords.includes(word)) {
+                  // Apply special rule for "plastic" word
+                  if (word === "plastic") {
+                    // Check if any prediction with plastic has high confidence
+                    const plasticPredictions = rankedPredictions.filter(p => 
+                      p.class.toLowerCase().includes("plastic")
+                    );
+                    
+                    if (plasticPredictions.length > 0 && plasticPredictions[0].avgConfidence > 0.6) {
+                      score += getCategoryPriority(category.name) || 1.0;
+                    } else {
+                      // Lower score for plastic if no high confidence predictions
+                      score += 0.5;
+                    }
+                  } else {
+                    score += getCategoryPriority(category.name) || 1.0;
+                  }
+                }
+              });
+              
+              return { category, score };
+            });
+            
+            // Sort by score and pick the best
+            categoryScores.sort((a, b) => b.score - a.score);
+            
+            if (categoryScores[0].score > 0) {
+              matchedCategory = categoryScores[0].category;
+              console.log("Found word match:", matchedCategory.name);
             }
           }
-  
-          // Clean up tensors
-          processedImageTensor.dispose();
-          predictions.forEach(p => p.dispose());
-        }
-      } catch (error) {
-        console.error('Error processing image:', error);
-        // Fallback to a reasonable default when model fails
-        const fallbackCategory = categories.find(cat => cat.id === "2"); // Default to plastic as it's common
-        if (fallbackCategory) {
-          setSelectedCategory(fallbackCategory);
-          setWasteType(fallbackCategory.name);
-          setPointsEarned(fallbackCategory.points);
-        } else {
-          // Random fallback if plastic category not found
-          const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
-          setSelectedCategory(randomCategory);
-          setWasteType(randomCategory.name);
-          setPointsEarned(randomCategory.points);
-        }
-      }
-    } else if (cameraRef.current) {
-      // Fallback if models aren't loaded
-      try {
-        const photo = await cameraRef.current.takePictureAsync();
-        if (photo) {
-          setUri(photo.uri);
-          setShowCamera(false);
           
-          // Default to plastic bottles as fallback
-          const fallbackCategory = categories.find(cat => cat.id === "2");
-          if (fallbackCategory) {
-            setSelectedCategory(fallbackCategory);
-            setWasteType(fallbackCategory.name);
-            setPointsEarned(fallbackCategory.points);
+          // Apply the matched category or show options to the user
+          if (matchedCategory) {
+            // Special case for plastic - always ask user to confirm if confidence isn't very high
+            if (matchedCategory.name.toLowerCase().includes("plastic") && 
+                rankedPredictions.length > 0 && 
+                rankedPredictions[0].avgConfidence < 0.8) {
+              
+              // Find the next best non-plastic category
+              const alternativeCategory = categories.find(cat => 
+                !cat.name.toLowerCase().includes("plastic") && 
+                cat.id !== matchedCategory?.id
+              );
+              
+              // Ask user to confirm
+              Alert.alert(
+                "Confirm Waste Type",
+                `Is this ${matchedCategory.name}?`,
+                [
+                  {
+                    text: "Yes",
+                    onPress: () => {
+                      setSelectedCategory(matchedCategory);
+                      setWasteType(matchedCategory!.name);
+                      setPointsEarned(matchedCategory!.points);
+                    }
+                  },
+                  {
+                    text: alternativeCategory ? `No, it's ${alternativeCategory.name}` : "No",
+                    onPress: () => {
+                      if (alternativeCategory) {
+                        setSelectedCategory(alternativeCategory);
+                        setWasteType(alternativeCategory.name);
+                        setPointsEarned(alternativeCategory.points);
+                      } else {
+                        // Just use matched category if no alternative
+                        setSelectedCategory(matchedCategory);
+                        setWasteType(matchedCategory!.name);
+                        setPointsEarned(matchedCategory!.points);
+                      }
+                    }
+                  },
+                  {
+                    text: "Choose Manually",
+                    onPress: () => {
+                      // Leave without setting category so user can select manually
+                    }
+                  }
+                ]
+              );
+            } else {
+              setSelectedCategory(matchedCategory);
+              setWasteType(matchedCategory.name);
+              setPointsEarned(matchedCategory.points);
+              console.log("Final matched category:", matchedCategory.name);
+            }
           } else {
-            // For demo purposes, use a random category
-            const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
-            setSelectedCategory(randomCategory);
-            setWasteType(randomCategory.name);
-            setPointsEarned(randomCategory.points);
+            // Always show confirmation if we're uncertain
+            useDefaultFallback = true;
           }
+        } catch (processingError) {
+          console.error('Error processing predictions:', processingError);
+          useDefaultFallback = true;
         }
-      } catch (error) {
-        console.error('Error taking picture:', error);
+      } else {
+        useDefaultFallback = true;
       }
+      
+      // Only use fallback if needed
+      if (useDefaultFallback) {
+        // Let user choose instead of defaulting to plastic
+        Alert.alert(
+          "Couldn't Identify Waste",
+          "We couldn't identify this waste type automatically. Please select manually.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Do nothing, let the user select manually
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error processing image:', error);
+      // Show error to user
+      Alert.alert(
+        "Camera Error",
+        "There was a problem capturing the image. Please try again.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  // Add helper function to find the index of the maximum value in an array
-  const findMaxIndex = (arr: number[]): number => {
-    let maxIndex = 0;
-    let maxValue = arr[0];
+  // Helper function to find category name by keywords
+  const findCategoryByKeywords = (predictionClass: string): string | null => {
+    predictionClass = predictionClass.toLowerCase();
     
-    for (let i = 1; i < arr.length; i++) {
-      if (arr[i] > maxValue) {
-        maxValue = arr[i];
-        maxIndex = i;
+    for (const [categoryName, keywords] of Object.entries(categoryMapping)) {
+      for (const keyword of keywords) {
+        if (predictionClass.includes(keyword)) {
+          return categoryName;
+        }
       }
     }
     
-    return maxIndex;
+    return null;
+  };
+
+  // Helper function to get the priority weight for a category
+  const getCategoryPriority = (categoryName: string): number => {
+    // Use type assertion to tell TypeScript this is a valid key
+    if (Object.keys(categoryPriority).includes(categoryName)) {
+      return categoryPriority[categoryName as keyof typeof categoryPriority] || 1.0;
+    }
+    return 1.0; // Default priority if not found
+  };
+
+  // Helper function to find the best possible category match for a class
+  const findBestCategoryForClass = (className: string): WasteCategory | null => {
+    // Try through our mapping first
+    const mappedName = findCategoryByKeywords(className);
+    if (mappedName) {
+      const category = categories.find(cat => 
+        cat.name.toLowerCase() === mappedName.toLowerCase()
+      );
+      if (category) return category;
+    }
+    
+    // Try partial matches
+    for (const category of categories) {
+      if (
+        category.name.toLowerCase().includes(className.toLowerCase()) ||
+        className.toLowerCase().includes(category.name.toLowerCase())
+      ) {
+        return category;
+      }
+    }
+    
+    // If it contains "plastic" anywhere, return plastic
+    if (className.toLowerCase().includes("plastic")) {
+      return categories.find(cat => cat.id === "2") || null;
+    }
+    
+    return null;
+  };
+
+  // Helper function for fallback logic
+  const fallbackToDefault = () => {
+    // Default to plastic bottles as fallback
+    const plasticCategory = categories.find(cat => cat.id === "2");
+    if (plasticCategory) {
+      setSelectedCategory(plasticCategory);
+      setWasteType(plasticCategory.name);
+      setPointsEarned(plasticCategory.points);
+    } else {
+      // Use a random category if plastic not found (shouldn't happen)
+      const randomCategory = categories[Math.floor(Math.random() * (categories.length - 1))];
+      setSelectedCategory(randomCategory);
+      setWasteType(randomCategory.name);
+      setPointsEarned(randomCategory.points);
+    }
   };
 
   // Improve the image processing function
   const processImage = async (uri: string) => {
     try {
-      // Resize the image to 224x224 (standard for many image models)
+      // Apply multiple preprocessing techniques for better recognition
       const manipResult = await ImageManipulator.manipulateAsync(
         uri,
         [
-          { resize: { width: 224, height: 224 } },
-          { crop: { originX: 0, originY: 0, width: 224, height: 224 } }
+          // First resize to slightly larger than needed
+          { resize: { width: 300, height: 300 } },
+          // Then crop to ensure we get the center
+          { crop: { originX: 38, originY: 38, width: 224, height: 224 } }
         ],
-        { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
+        { format: ImageManipulator.SaveFormat.JPEG, compress: 0.95 }
       );
       
       // Read the file as base64
@@ -366,13 +722,19 @@ export default function WasteSelectorScreen() {
       // Decode JPEG
       const imageTensor = decodeJpeg(raw);
       
-      // Normalize to [0, 1] and add batch dimension
-      const normalized = tf.cast(imageTensor, 'float32').div(tf.scalar(255.0)).expandDims(0);
+      // Apply advanced preprocessing
+      let processedTensor = tf.cast(imageTensor, 'float32');
       
-      // Clean up original tensor
+      // Normalize to [0, 1]
+      processedTensor = processedTensor.div(tf.scalar(255.0));
+      
+      // Add batch dimension
+      processedTensor = processedTensor.expandDims(0);
+      
+      // Clean up the original tensor
       imageTensor.dispose();
       
-      return normalized;
+      return processedTensor;
     } catch (error) {
       console.error('Image processing error:', error);
       throw error;
@@ -426,8 +788,30 @@ export default function WasteSelectorScreen() {
   if (isModelLoading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
-        <Text style={styles.loadingText}>Loading AI models...</Text>
-        <Text style={styles.subtitleText}>This may take a moment.</Text>
+        <Text style={styles.loadingText}>Loading Waste Recognition AI</Text>
+        <Text style={styles.subtitleText}>{loadingStatus}</Text>
+        
+        <View style={styles.progressBarContainer}>
+          <View 
+            style={[
+              styles.progressBar, 
+              { width: `${loadingPercentage}%` }
+            ]} 
+          />
+        </View>
+        
+        <Text style={styles.percentageText}>{loadingPercentage}%</Text>
+        
+        {loadingPercentage > 80 && (
+          <Text style={styles.almostDoneText}>Almost there...</Text>
+        )}
+        
+        <TouchableOpacity 
+          style={styles.skipButton}
+          onPress={() => setIsModelLoading(false)}
+        >
+          <Text style={styles.skipButtonText}>Skip Loading</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -755,16 +1139,53 @@ const styles = StyleSheet.create({
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   loadingText: {
-    fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontSize: 24,
+    fontFamily: 'PlusJakartaSans-Bold',
     color: Colors.primary.green,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   subtitleText: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.secondary,
+    marginBottom: 30,
+  },
+  progressBarContainer: {
+    width: '80%',
+    height: 10,
+    backgroundColor: Colors.background.card,
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: Colors.primary.green,
+  },
+  percentageText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.primary.green,
+    marginBottom: 20,
+  },
+  almostDoneText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Italic',
+    color: Colors.text.accent,
+    marginBottom: 30,
+  },
+  skipButton: {
+    padding: 10,
+    backgroundColor: Colors.accent.lightGray,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  skipButtonText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
   },
 });

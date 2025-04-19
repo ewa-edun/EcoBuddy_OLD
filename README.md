@@ -164,23 +164,13 @@ MODEL 3. Metal and Clothes
 
 - On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
 
-- Add a review menu on the profile page where they can send reviews of ecobuddy to us or to the app store directly.
-- View full blog article page.
 - Add more profile levels and achievements.
-- Add more loading screens to make the ux better.
-- After signup, show a simple welcome 'user name' pop-up then take them to the home page.
 
 - Integerate Gemini API.
       - For newspaper/blog, and for the eco question game.
 
-- Referrals:
-   - Add a feature that generates personalized referral code for each user (make it the user id).
-   - Order: FULLNAME12345   Example: EDUNOLUWADAMILOLA42531
-   - Add a place where they can enter other people's referral code as well.
-
-- After waste image is taken, the model (which i am currently training and link later) decides what type of waste it is.
+- The model should have better predictions.
     
-
 - Need Stuctured Logic for points to cash and data conversion.
 
 - Need API's 

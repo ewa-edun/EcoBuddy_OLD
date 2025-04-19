@@ -1,137 +1,402 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet, Clipboard, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, Share, Alert, ScrollView } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Share2 } from 'lucide-react-native';
+import { Users, Copy, Share2, Gift } from 'lucide-react-native';
+import { router } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
+import { getAuth } from 'firebase/auth';
+import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '@lib/firebase/firebaseConfig';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-const Referrals = () => {
-    const referralCode = "YOUR_REFERRAL_CODE"; // Replace with actual referral code logic
-    const referredCount = 5; // Replace with actual count from state or props
+const ReferralsScreen = () => {
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [enteredCode, setEnteredCode] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [userData, setUserData] = useState<any>({});
+  const [referralSuccess, setReferralSuccess] = useState<boolean>(false);
+  const auth = getAuth();
 
-    const copyToClipboard = () => {
-        Clipboard.setString(referralCode);
-        alert('Referral code copied to clipboard!');
-    };
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
-    return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.title}>Your Referral Code</Text>
-            <Text style={styles.code}>{referralCode}</Text>
-            <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
-                <Text style={styles.copyButtonText}>Copy Code</Text>
+  const fetchUserData = async () => {
+    try {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          setUserData(data);
+          
+          // Generate referral code based on user's name and ID
+          const fullName = data.fullName || auth.currentUser.displayName || '';
+          const userId = auth.currentUser.uid;
+          const generatedCode = generateReferralCode(fullName, userId);
+          setReferralCode(generatedCode);
+        }
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setLoading(false);
+    }
+  };
+
+  const generateReferralCode = (fullName: string, userId: string) => {
+    // Clean up the name (remove spaces, special characters)
+    const cleanName = fullName.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    // Take first 10 characters of name (or all if shorter)
+    const namePart = cleanName.substring(0, 10);
+    // Take last 5 characters of userId
+    const idPart = userId.substring(userId.length - 5);
+    
+    return `${namePart}${idPart}`;
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await Clipboard.setStringAsync(referralCode);
+      Alert.alert('Copied!', 'Referral code copied to clipboard.');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+
+  const handleShareCode = async () => {
+    try {
+      await Share.share({
+        message: `Join me on EcoBuddy and start your eco-friendly journey! Use my referral code: ${referralCode}`,
+      });
+    } catch (error) {
+      console.error('Failed to share:', error);
+    }
+  };
+
+  const handleSubmitCode = async () => {
+    if (!enteredCode || enteredCode.trim() === '') {
+      Alert.alert('Error', 'Please enter a referral code');
+      return;
+    }
+
+    if (enteredCode === referralCode) {
+      Alert.alert('Error', 'You cannot use your own referral code');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Check if this referral code exists by querying users
+      // This is a simplified approach - in production, you'd use a more efficient query
+      const usersSnapshot = await getDoc(doc(db, "referralCodes", enteredCode));
+      
+      if (usersSnapshot.exists()) {
+        const referrerUserId = usersSnapshot.data().userId;
+        
+        // Update the referrer's points (reward them for the referral)
+        const referrerUserRef = doc(db, "users", referrerUserId);
+        await updateDoc(referrerUserRef, {
+          points: increment(100), // Give 100 points for a successful referral
+          referrals: increment(1)
+        });
+        
+        // Update current user to mark as referred
+        if (auth.currentUser) {
+          const currentUserRef = doc(db, "users", auth.currentUser.uid);
+          await updateDoc(currentUserRef, {
+            referredBy: enteredCode,
+            points: increment(50) // Also give the referred user some points
+          });
+        }
+        
+        setReferralSuccess(true);
+        Alert.alert(
+          'Success!', 
+          'Referral code applied successfully! You and your friend have received bonus points.'
+        );
+        setEnteredCode('');
+      } else {
+        Alert.alert('Invalid Code', 'This referral code does not exist or has expired');
+      }
+    } catch (error) {
+      console.error('Error applying referral code:', error);
+      Alert.alert('Error', 'Failed to apply referral code. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <LoadingSpinner text="Loading referrals..." />;
+  }
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Referrals</Text>
+        <Text style={styles.subtitle}>
+          Invite friends and earn rewards together
+        </Text>
+      </View>
+
+      <View style={styles.rewardsCard}>
+        <View style={styles.rewardIconContainer}>
+          <Gift size={24} color={Colors.primary.green} />
+        </View>
+        <Text style={styles.rewardsTitle}>Referral Rewards</Text>
+        <Text style={styles.rewardsDescription}>
+          Earn 100 points for each friend who signs up using your code. They'll get 300 points too!
+        </Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Your Referral Code</Text>
+        <View style={styles.codeContainer}>
+          <Text style={styles.code}>{referralCode}</Text>
+          <View style={styles.codeActions}>
+            <TouchableOpacity
+              style={styles.codeActionButton}
+              onPress={handleCopyCode}
+            >
+              <Copy size={20} color={Colors.primary.green} />
+              <Text style={styles.actionText}>Copy</Text>
             </TouchableOpacity>
-            <Text style={styles.info}>
-                Earn 300 points for every person you refer!
-            </Text>
-            <Text style={styles.referredCount}>
-                You have referred {referredCount} people.
-            </Text>
-
-        <View style={styles.section}>
-        <Text style={styles.sectionTitle}>People Referred</Text>
-        <View style={styles.activityList}>
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-            <View key={item} style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Share2 size={24} color={Colors.primary.blue} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Person you have referred</Text>
-                <Text style={styles.activityMeta}>+300 points • 2 hours ago</Text>
-              </View>
-            </View>
-          ))}
+            <TouchableOpacity
+              style={styles.codeActionButton}
+              onPress={handleShareCode}
+            >
+              <Share2 size={20} color={Colors.primary.green} />
+              <Text style={styles.actionText}>Share</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Enter a Referral Code</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter code here"
+            placeholderTextColor={Colors.text.secondary}
+            value={enteredCode}
+            onChangeText={setEnteredCode}
+            autoCapitalize="characters"
+          />
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleSubmitCode}
+          >
+            <Text style={styles.submitButtonText}>Apply</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.statsSection}>
+        <View style={styles.statCard}>
+          <View style={styles.statIconContainer}>
+            <Users size={20} color={Colors.primary.green} />
+          </View>
+          <Text style={styles.statValue}>{userData.referrals || 0}</Text>
+          <Text style={styles.statLabel}>Friends Referred</Text>
+        </View>
+        <View style={styles.statCard}>
+          <View style={styles.statIconContainer}>
+            <Gift size={20} color={Colors.primary.green} />
+          </View>
+          <Text style={styles.statValue}>{(userData.referrals || 0) * 100}</Text>
+          <Text style={styles.statLabel}>Points Earned</Text>
+        </View>
+      </View>
+
+      {referralSuccess && (
+        <View style={styles.successCard}>
+          <Text style={styles.successTitle}>Referral Applied!</Text>
+          <Text style={styles.successText}>
+            You've earned 50 points and your friend received 100 points!
+          </Text>
+        </View>
+      )}
     </ScrollView>
-    );
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 10,
-        backgroundColor: Colors.background.main,
-    },
-    title: {
-        fontSize: 35,
-        fontWeight: 'bold',
-        marginBottom: 40,
-        color: Colors.primary.green,
-        fontFamily: 'PlusJakartaSans-Bold',
-    },
-    code: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: Colors.text.darker,
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background.main,
+  },
+  header: {
+    padding: 24,
+    paddingTop: 60,
+  },
+  title: {
+    fontSize: 32,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: Colors.primary.green,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
+  },
+  rewardsCard: {
+    margin: 24,
+    padding: 20,
+    backgroundColor: Colors.primary.lightTeal,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  rewardIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  rewardsTitle: {
+    fontSize: 18,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    },
-    copyButton: {
-        backgroundColor: Colors.primary.green,
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    copyButtonText: {
-        color: Colors.text.primary,
-        fontSize: 18,
+    color: Colors.text.primary,
+    marginBottom: 8,
+  },
+  rewardsDescription: {
+    fontSize: 14,
+    textAlign: 'center',
     fontFamily: 'PlusJakartaSans-Regular',
-
-    },
-    info: {
-        fontSize: 16,
-        marginBottom: 10,
-        color: Colors.text.secondary,
+    color: Colors.text.primary,
+    lineHeight: 20,
+  },
+  section: {
+    padding: 24,
+    paddingTop: 0,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.text.darker,
+    marginBottom: 16,
+  },
+  codeContainer: {
+    backgroundColor: Colors.background.card,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  code: {
+    fontSize: 24,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: Colors.primary.green,
+    letterSpacing: 2,
+    marginBottom: 16,
+  },
+  codeActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  codeActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.background.main,
+  },
+  actionText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.primary.green,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    height: 50,
+    backgroundColor: Colors.background.card,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    color: Colors.text.primary,
     fontFamily: 'PlusJakartaSans-Regular',
-
-    },
-    referredCount: {
-        fontSize: 16,
-        color: Colors.text.secondary,
+    fontSize: 16,
+  },
+  submitButton: {
+    marginLeft: 12,
+    height: 50,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.primary.green,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitButtonText: {
+    color: Colors.text.primary,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontSize: 16,
+  },
+  statsSection: {
+    padding: 24,
+    paddingTop: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: Colors.background.card,
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 8,
+  },
+  statIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary.lightTeal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  statValue: {
+    fontSize: 20,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: Colors.text.primary,
+  },
+  statLabel: {
+    fontSize: 12,
     fontFamily: 'PlusJakartaSans-Regular',
-
-    },
-    section: {
-        marginTop: 20,
-        marginBottom:30,
-      },
-      sectionTitle: {
-        fontSize: 20,
-        fontFamily: 'PlusJakartaSans-SemiBold',
-        color: Colors.secondary.white,
-        marginBottom: 16,
-      },
-      activityList: {
-        gap: 16,
-      },
-      activityItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-      },
-      activityIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: Colors.primary.green + '20',
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
-      activityContent: {
-        flex: 1,
-      },
-      activityTitle: {
-        fontSize: 16,
-        fontFamily: 'PlusJakartaSans-Medium',
-        color: Colors.text.secondary,
-      },
-      activityMeta: {
-        fontSize: 14,
-        fontFamily: 'PlusJakartaSans-Regular',
-        color: Colors.text.darker,
-        marginTop: 4,
-      },
+    color: Colors.text.secondary,
+  },
+  successCard: {
+    margin: 24,
+    marginTop: 0,
+    padding: 16,
+    backgroundColor: Colors.primary.lightTeal,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  successTitle: {
+    fontSize: 18,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: Colors.primary.green,
+    marginBottom: 8,
+  },
+  successText: {
+    fontSize: 14,
+    textAlign: 'center',
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.primary,
+    lineHeight: 20,
+  },
 });
 
-export default Referrals;
+export default ReferralsScreen;

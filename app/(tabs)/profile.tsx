@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, TextInput } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut, Stars, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -148,6 +148,9 @@ const handleImagePicker = async () => {
       case 'referrals':
         router.push('/features/referrals');
         break;
+      case 'review':
+        handleReviewModal();
+        break;
     }
   };
 
@@ -202,6 +205,74 @@ const handleImagePicker = async () => {
                 Alert.alert('Error', 'Failed to delete account. Please try again.');
               }
             }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleReviewModal = () => {
+    Alert.alert(
+      'Share Your Feedback',
+      'How would you like to share your review?',
+      [
+        {
+          text: 'App Store',
+          onPress: () => {
+            // Opens app store for review - update the URL to your actual app store URL
+            Linking.openURL('https://play.google.com/store/apps/details?id=com.ecobuddy.app');
+          }
+        },
+        {
+          text: 'Send to Developers',
+          onPress: () => showFeedbackForm()
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        }
+      ]
+    );
+  };
+
+  const showFeedbackForm = () => {
+
+    Alert.alert(
+      'Feedback for EcoBuddy',
+      'Please send us an email with your feedback:',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Send Email',
+          onPress: () => {
+            // Direct email instead of using a form
+            const subject = encodeURIComponent('EcoBuddy App Feedback');
+            const body = encodeURIComponent('Write your feedback here:');
+            const emailUrl = `mailto:ecobuddy2025@gmail.com?subject=${subject}&body=${body}`;
+            
+            Linking.canOpenURL(emailUrl)
+              .then((supported) => {
+                if (supported) {
+                  return Linking.openURL(emailUrl);
+                } else {
+                  Alert.alert(
+                    'Email Not Available',
+                    'Could not open email client. Please send your feedback to ecobuddy2025@gmail.com',
+                    [{ text: 'OK' }]
+                  );
+                }
+              })
+              .catch((error) => {
+                console.error('Error opening email client:', error);
+                Alert.alert(
+                  'Error',
+                  'Could not open email client. Please try again later.',
+                  [{ text: 'OK' }]
+                );
+              });
           }
         }
       ]
