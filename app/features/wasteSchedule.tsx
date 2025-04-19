@@ -7,47 +7,104 @@ import MapView, { Marker } from 'react-native-maps';
 
 const wasteCategories = {
   '1': {
-    name: 'Plastic Bottles',
-    points: 50,
-    description: 'Clean PET bottles without caps or labels',
+    name: 'Paper & Cardboard',
+    points: 10,
+    description: 'Recyclable paper products.',
     guidelines: [
-      'Remove all caps and labels',
-      'Rinse bottles thoroughly',
-      'Flatten bottles to save space',
-      'No food or liquid residue'
+      'Clean and dry',
+      'No food residue',
+      'Flatten boxes'
     ]
   },
   '2': {
-    name: 'Glass Bottles',
-    points: 75,
-    description: 'Clear or colored glass bottles, no broken pieces',
+    name: 'Plastic Bottles & Containers',
+    points: 15,
+    description: 'Recyclable plastic items.',
     guidelines: [
-      'Remove all caps and labels',
-      'Rinse bottles thoroughly',
-      'No broken glass pieces',
-      'Separate by color if possible'
+      'Rinse containers',
+      'Remove caps',
+      'No plastic bags'
     ]
   },
   '3': {
-    name: 'Aluminum Cans',
-    points: 60,
-    description: 'Clean aluminum beverage cans',
+    name: 'Glass Bottles & Jars',
+    points: 20,
+    description: 'Glass bottles and containers.',
     guidelines: [
-      'Rinse cans thoroughly',
-      'Flatten cans to save space',
-      'No food or liquid residue',
-      'Remove any plastic or paper labels'
+      'Rinse thoroughly',
+      'Remove lids',
+      'No broken glass'
     ]
   },
   '4': {
-    name: 'Paper & Cardboard',
-    points: 40,
-    description: 'Clean, dry paper and cardboard materials',
+    name: 'Metal Cans & Containers',
+    points: 25,
+    description: 'Metal cans and containers.',
     guidelines: [
-      'Flatten cardboard boxes',
-      'Remove any plastic or metal parts',
-      'Keep paper dry and clean',
-      'No food-soiled paper products'
+      'Rinse clean',
+      'Remove labels',
+      'Flatten if possible'
+    ]
+  },
+  '5': {
+    name: 'Batteries & E-Waste',
+    points: 30,
+    description: 'Electronic waste and batteries.',
+    guidelines: [
+      'Keep dry',
+      'Tape battery terminals',
+      'Separate by type'
+    ]
+  },
+  '6': {
+    name: 'Clothes & Textiles',
+    points: 20,
+    description: 'Used clothing and textile items.',
+    guidelines: [
+      'Clean and dry',
+      'Bag items',
+      'Separate by condition'
+    ]
+  },
+  '7': {
+    name: 'Tyres & Rubber',
+    points: 25,
+    description: 'Rubber products and used tyres.',
+    guidelines: [
+      'Clean off debris',
+      'Keep dry',
+      'Stack neatly'
+    ]
+  },
+  '8': {
+    name: 'Organic Waste',
+    points: 15,
+    description: 'Food scraps and yard waste.',
+    guidelines: [
+      'No meat or dairy',
+      'No oils',
+      'Keep free of plastics'
+    ]
+  },
+  '9': {
+    name: 'Scrap Metal',
+    points: 35,
+    description: 'Recyclable metal scraps.',
+    guidelines: [
+      'Remove non-metal parts',
+      'Sort by type',
+      'Handle safely'
+    ]
+  },
+  '10': {
+    name: 'Non-Recyclable',
+    points: 0,
+    description: 'Items that cannot be recycled.',
+    guidelines: [
+      'Hazardous Waste',
+      'Styrofoam',
+      'Plastic wrap',
+      'Dirty diapers'
     ]
   }
 };
@@ -89,7 +146,7 @@ export default function WasteScheduleScreen() {
       return;
     }
 
-    // Here you would typically make an API call to submit the waste, For now, we'll just navigate to the history page
+ // Here you would make an API call to submit the waste, For now, we'll just navigate to the history page
     router.push('/features/wasteHistory');
   };
 

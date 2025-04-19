@@ -75,12 +75,10 @@ EcoBuddy supports:
 ### **📱 Frontend**
 - **React Native (Expo)** – Cross-platform mobile app development
 - **React Navigation** – Smooth navigation between pages
-- **React Native Paper** – UI component library for material design
 
 ### **☁️ Backend & Database**
 - **Firebase** – Authentication and database for real-time data sync.
-- **Cloud Storage** – Stores user images and documents
-- **Firebase Firestore** – For Leaderboard data.
+- **Firebase Firestore** – For database.
 
 ### **🤖 AI & Machine Learning**
 - **Teachable Machine** – AI-powered item recognition
@@ -102,20 +100,41 @@ EcoBuddy supports:
 
 ## 💡 Future Improvements
 - Partner with telecom providers for broader reward options.
-- Add IOT support for Smart Home Integration
-     - Users with smart home devices can sync them with EcoBuddy.
-     - AI-driven waste monitoring and feedback on recycling habits.
 - Dark Mode / Theme Options
 - Past chats of AI Chatbot
 - SMS Notifications.
+- Subscription packages.
 - NEW GAME: Memory Match Eco Edition
     - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
     - Points: +20 per match, 3 minutes.
 
+#### Subscription based features
+1. Add IOT support for Smart Home Integration
+     - Users with smart home devices can sync them with EcoBuddy.
+     - AI-driven waste monitoring and feedback on recycling habits.
+2. Extra Games (3-4): 
+     - AR (Augumented Reality) game. This creates interactive challenges where users can recycle "virtual items" in their real environment like the camera scans their surroundings and finds virtual item and asks them to sort it into the correct bins.
+3. Personalized Recycling Insight: Complile these data (your recent and past recycling activities) from the users recycling activities in a dashboard. It will include the amount of waste recycled,the environmental benefit achieved and comparison to average recycling behaviors.
+     - A user opens their Personal Impact Dashboard in the app after a month of recycling. The dashboard displays the following insights:
+         - Recycling Metrics: "You recycled a total of 200 items this month, including 120 plastic bottles, 50 paper items, and 30 aluminum cans."
+         - Environmental Impact: "Your recycling efforts have saved 250 kg of CO2 emissions, which is equivalent to planting 10 trees!"
+         - Progress Tracking: "You set a goal to recycle 300 items this month. You’re currently at 200 items, with 5 days left to reach your goal!".So they can set recycling goals and the app will help them to achieve It through reminders.This reminders will help them cause the more they recycle the more money and benefit is in it for them 
+         - Comparative Insights: "You recycle 15% more than most users in your area.Keep it up!
+         - Personalized Recommendations:Consider Recycling More Glass and metals as you have recycled less of these compared to others.
+4. Delivery Service for Recyclables that  will come and take the recyclables from their house and straight to the recycling center and priority from kiosks.
+5. Recycling Calendars and Reminders: Users can create calendars to properly schedule their activities for a particular date they have chosen for the pickup of their recyclables and the app reminds them probably every 30min ,1hr or 2hrs (depending on the timing set by the user)
+6. Making the algorithm of the app to only display news and contents regarding the section of recycling the user is most interested in judging by the users recent activity and their searches using the apps AI (this ai stuff requires payment). This feature may be disabled by a user who will like to get news regarding every section of recycling
+7. Virtual Tour of recyling facilities: A 3D model of a recycling facility partner. The user would be able to interact with different sections (sorting,shredding) and learn about each stage of the recycling process and machinery involved. They could also get a recorded video of a recycling facility and watch the behind the scenes that happen at these facilities without physically being there.
+8. Personal communication: one on one chatting with each user. only permitted between subscription users.
+9. Little to No ads displayed for them depending on their subscription plan.
+10. Premium users are able to get scraps from the partners if they are personally interested in it. there'll be a limit on how much they collect. eg 50kg of total goods a month so they dont exploit the feature.
+
+| *Basic* | Free | Casual users (key features, ads, basic challenges, personal with 5 ppl monthly, basic algorithm).|  
+| *EcoPro* | 2500 naira/month, 7000/3 months, 14000/6 months, 28000/year | Power users (lesser ads, games, higher algorithm, calendar, personal communication with 25 ppl monthly, dashboard). |  
+| *EcoPro+* | 5000 naira/month, 14000/3 months, 28000/6 months, 55000/year | Hardcore eco-warriors (ad-free, all features). |  
+
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
-
-LEADERBOARD, FIREBASE INTEGRATION
 
 ## Pages/Fixes to do
 - Firebase auth and firestore.
@@ -126,12 +145,9 @@ LEADERBOARD, FIREBASE INTEGRATION
 - On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
 
 - View full blog article page.
-
 - Add more profile levels and achievements.
-
 - Add more loading screens to make the ux better.
 - After signup, show a simple welcome 'user name' pop-up then take them to the home page.
-
 
 - Integerate Gemini API.
       - For newspaper/blog, and for the eco question game.
@@ -141,22 +157,17 @@ LEADERBOARD, FIREBASE INTEGRATION
    - Order: FULLNAME12345   Example: EDUNOLUWADAMILOLA42531
    - Add a place where they can enter other people's referral code as well.
 
-- After image is taken, the model (which i will train and link later) decides what type of waste it is.
-
-- Add location and dynamic maps. Also more centers for pick-up.
-
--  Charity Donations where users can donate used items to charities to reduce landfill waste.
-
--  Mobile Kiosk (For Offline Users)
-   - Local scrap collectors (mallams) can register as agents.
-   - Kiosks allow internet-free participation in recycling efforts.
-   - Strengthens local recycling ecosystems.
+- After waste image is taken, the model (which i will train and link later) decides what type of waste it is.
+    - This dataset has 15,150 images from 12 different classes of household garbage; paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash. 
 
 - Need Stuctured Logic for points to cash and data conversion.
 
-- Need API's to handle claim rewards for both data and cash.
+- Need API's 
+   - to handle claim rewards for both data and cash.
+   - Waste submission of proper waste allowed.
+   - location and dynamic maps. Also more centers for pick-up.
 
-- Let the image that user uploads on their profile page be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc)
+- Let the profile image be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc)
 
 - Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
 
@@ -176,6 +187,8 @@ LEADERBOARD, FIREBASE INTEGRATION
   - Game 4:Eco Quiz Show
       - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
       - 10 Questions, 10 point each, 2 minutes.
+
+
 
 
 ## 🚀 Getting Started
@@ -313,31 +326,3 @@ A QR code will come up in the terminal after you run number 5 command. Scan it a
 
 
 **Happy coding! 🌱♻️**
-
-
-
-├── components/                      # Reusable UI components
-│   ├── NavBar.tsx                   # Custom tab bar
-│   ├── WasteScanner.tsx             # Item recognition
-│   ├── MapView.tsx                  # Recycling locator
-│   └── ...                          # (Other components)
-│
-├── constants/                       # Config/static data
-│   ├── colors.ts                    # Color scheme (#4CAF50, etc.)
-│   └── firebase.ts                  # Firebase config (API keys)
-│
-├── hooks/                           # Custom hooks
-│   ├── useAuth.ts                   # Auth state (Firebase)
-│   └── useLocation.ts               # GPS logic
-│
-├── lib/                             # Utilities/3rd-party integrations
-│   ├── firebase/                    # Firebase services
-│   │   ├── auth.ts                  # Auth functions
-│   │   ├── firestore.ts             # DB (user points, leaderboard)
-│   │   └── storage.ts               # Image uploads (e.g., waste scans)
-│   │
-│   ├── gemini/                      # AI (Gemini API)
-│   │   └── chatbot.ts               # Chatbot logic
-│   │
-│   └── maps.ts                      # Google Maps API helpers
-

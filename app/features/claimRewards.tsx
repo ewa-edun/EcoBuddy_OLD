@@ -1,7 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
+
+// Define waste category type
+type WasteCategory = {
+  id: string;
+  name: string;
+  points: number;
+};
+
+// List of waste categories matching those in wasteSelector.tsx
+const wasteCategories: WasteCategory[] = [
+  { id: "1", name: "Paper & Cardboard", points: 30 },
+  { id: "2", name: "Plastic Bottles & Containers", points: 35 },
+  { id: "3", name: "Glass Bottles & Jars", points: 40 },
+  { id: "4", name: "Metal Cans & Containers", points: 55 },
+  { id: "5", name: "Batteries & E-Waste", points: 50 },
+  { id: "6", name: "Clothes & Textiles", points: 30 },
+  { id: "7", name: "Tyres & Rubber", points: 75 },
+  { id: "8", name: "Organic Waste", points: 15 },
+  { id: "9", name: "Scrap Metal", points: 65 },
+  { id: "10", name: "Non-Recyclable", points: 0 },
+];
 
 const ClaimRewards = () => {
     const [points, setPoints] = useState('');
@@ -19,12 +40,21 @@ const ClaimRewards = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={styles.header}>Claim Rewards</Text>
             <View style={styles.infoCard}>
-                <Text style={styles.infoTitle}>Conversion Rate</Text>
+                <Text style={styles.infoTitle}>Points to Data Conversion</Text>
                 <Text style={styles.infoText}>1,000 points = 1GB of data</Text>
-                <Text style={styles.infoText}>Please ensure you follow the rules and regulations.</Text>
+                <Text style={styles.infoSubtitle}>Points Earned per Waste Category:</Text>
+                <View style={styles.conversionTable}>
+                    {wasteCategories.map((category) => (
+                        <View key={category.id} style={styles.tableRow}>
+                            <Text style={styles.tableCell}>{category.name}:</Text>
+                            <Text style={styles.tableCell}>{category.points} points</Text>
+                        </View>
+                    ))}
+                </View>
+                <Text style={styles.infoRule}>*Rules and regulations apply.</Text>
             </View>
             <TextInput
                 style={styles.input}
@@ -84,7 +114,7 @@ const ClaimRewards = () => {
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                 <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
@@ -110,7 +140,6 @@ const styles = StyleSheet.create({
     infoTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 10,
         color: Colors.secondary.white,
         fontFamily: 'PlusJakartaSans-SemiBold',
     },
@@ -118,6 +147,31 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.text.secondary,
     fontFamily: 'PlusJakartaSans-Regular',
+    },
+    infoRule: {
+        fontSize: 16,
+        color: Colors.text.darker,
+        fontFamily: 'PlusJakartaSans-Regular',
+    },
+    infoSubtitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 17,
+        marginBottom: 5,
+        color: Colors.secondary.white,
+        fontFamily: 'PlusJakartaSans-SemiBold',
+    },
+    conversionTable: {
+        marginBottom: 20,
+    },
+    tableRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+    },
+    tableCell: {
+        fontSize: 16,
+        color: Colors.text.secondary,
     },
     input: {
         height: 40,
@@ -182,6 +236,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 12,
         alignItems: 'center',
+        marginBottom: 40,
     },
     submitButtonText: {
         color: Colors.text.primary,
