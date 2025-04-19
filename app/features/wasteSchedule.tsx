@@ -8,7 +8,7 @@ import MapView, { Marker } from 'react-native-maps';
 const wasteCategories = {
   '1': {
     name: 'Paper & Cardboard',
-    points: 10,
+    points: 30,
     description: 'Recyclable paper products.',
     guidelines: [
       'Clean and dry',
@@ -18,7 +18,7 @@ const wasteCategories = {
   },
   '2': {
     name: 'Plastic Bottles & Containers',
-    points: 15,
+    points: 35,
     description: 'Recyclable plastic items.',
     guidelines: [
       'Rinse containers',
@@ -28,7 +28,7 @@ const wasteCategories = {
   },
   '3': {
     name: 'Glass Bottles & Jars',
-    points: 20,
+    points: 50,
     description: 'Glass bottles and containers.',
     guidelines: [
       'Rinse thoroughly',
@@ -37,19 +37,21 @@ const wasteCategories = {
     ]
   },
   '4': {
-    name: 'Metal Cans & Containers',
-    points: 25,
+    name: 'Metal Cans & Scraps',
+    points: 65,
     description: 'Metal cans and containers.',
     guidelines: [
+      'Remove non-metal parts and labels',
       'Rinse clean',
-      'Remove labels',
-      'Flatten if possible'
+      'Flatten if possible',
+      "Sort by type", 
+      "Handle safely"
     ]
   },
   '5': {
-    name: 'Batteries & E-Waste',
-    points: 30,
-    description: 'Electronic waste and batteries.',
+    name: 'Electronic Waste',
+    points: 50,
+    description: 'Electronic waste of sorts.',
     guidelines: [
       'Keep dry',
       'Tape battery terminals',
@@ -58,7 +60,7 @@ const wasteCategories = {
   },
   '6': {
     name: 'Clothes & Textiles',
-    points: 20,
+    points: 30,
     description: 'Used clothing and textile items.',
     guidelines: [
       'Clean and dry',
@@ -67,8 +69,8 @@ const wasteCategories = {
     ]
   },
   '7': {
-    name: 'Tyres & Rubber',
-    points: 25,
+    name: 'Tyres',
+    points: 75,
     description: 'Rubber products and used tyres.',
     guidelines: [
       'Clean off debris',
@@ -87,17 +89,17 @@ const wasteCategories = {
     ]
   },
   '9': {
-    name: 'Scrap Metal',
-    points: 35,
-    description: 'Recyclable metal scraps.',
+    name: 'Shoes',
+    points: 45,
+    description: 'Used footwear in recyclable condition.',
     guidelines: [
-      'Remove non-metal parts',
-      'Sort by type',
-      'Handle safely'
+      'Clean off dirt/debris',
+      'Keep pairs together',
+      'Remove insoles if possible'
     ]
   },
   '10': {
-    name: 'Non-Recyclable',
+    name: 'Non-Recyclable & Trash',
     points: 0,
     description: 'Items that cannot be recycled.',
     guidelines: [

@@ -97,6 +97,22 @@ EcoBuddy supports:
 - **Google Cloud Vision** – Image processing for waste sorting
 
 ---
+## Datasets Used:
+   - This dataset has 15,150 images from 12 different classes of household garbage; paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash. 
+   [Garbage classification dataset 1](https://www.kaggle.com/datasets/mostafaabla/garbage-classification)
+
+   - The dataset features 10 distinct classes of garbage with a total of 19,762 images, distributed as follows: Metal: 1020, Glass: 3061, Biological: 997, Paper: 1680, Battery: 944, Trash: 947, Cardboard: 1825, Shoes: 1977, Clothes: 5327, Plastic: 1984
+    [Garbage classification dataset 2](https://www.kaggle.com/datasets/sumn2u/garbage-classification-v2)
+
+   - Tyres 1857 imgs .good and bad tyres: 
+   [Tyre Dataset](https://www.kaggle.com/datasets/rpjinu/tyre-faultfindy?select=Faultfindy)
+
+   - e-waste dataset 3000 img: PCB (Printed Circuit Board), Player, Battery, Microwave, Mobile, Mouse, Printer, Television, Washing Machine, Keyboard
+    [E-Waste Dataset](https://www.kaggle.com/datasets/akshat103/e-waste-image-dataset)
+
+ TOTAL: 38,784 IMAGES
+
+---
 
 ## 💡 Future Improvements
 - Partner with telecom providers for broader reward options.
@@ -144,6 +160,7 @@ EcoBuddy supports:
 
 - On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
 
+- Add a review menu on the profile page where they can send reviews of ecobuddy to us or to the app store directly.
 - View full blog article page.
 - Add more profile levels and achievements.
 - Add more loading screens to make the ux better.
@@ -157,8 +174,8 @@ EcoBuddy supports:
    - Order: FULLNAME12345   Example: EDUNOLUWADAMILOLA42531
    - Add a place where they can enter other people's referral code as well.
 
-- After waste image is taken, the model (which i will train and link later) decides what type of waste it is.
-    - This dataset has 15,150 images from 12 different classes of household garbage; paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash. 
+- After waste image is taken, the model (which i am currently training and link later) decides what type of waste it is.
+    
 
 - Need Stuctured Logic for points to cash and data conversion.
 

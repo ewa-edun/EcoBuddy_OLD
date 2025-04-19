@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut, Plus } from 'lucide-react-native';
+import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut, Stars, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
@@ -61,6 +61,12 @@ const menuItems = [
     icon: Share2 ,
     color: Colors.accent.darkGray,
   },
+  {
+    id: 'review',
+    title: 'Share Review on EcoBuddy',
+    icon: Stars ,
+    color: Colors.primary.lightTeal,
+  },
 ];
 
 export default function ProfileScreen() {
@@ -77,8 +83,6 @@ export default function ProfileScreen() {
 
   const [avatar, setAvatar] = useState(Image.resolveAssetSource(require('../../assets/user icon.png')).uri);
   const [loading, setLoading] = useState(true);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {

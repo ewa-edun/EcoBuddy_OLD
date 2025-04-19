@@ -14,14 +14,14 @@ type WasteCategory = {
 const wasteCategories: WasteCategory[] = [
   { id: "1", name: "Paper & Cardboard", points: 30 },
   { id: "2", name: "Plastic Bottles & Containers", points: 35 },
-  { id: "3", name: "Glass Bottles & Jars", points: 40 },
-  { id: "4", name: "Metal Cans & Containers", points: 55 },
-  { id: "5", name: "Batteries & E-Waste", points: 50 },
+  { id: "3", name: "Glass Bottles & Jars", points: 50 },
+  { id: "4", name: "Metal Cans & Scraps", points: 65 },
+  { id: "5", name: "Electronic Waste", points: 50 },
   { id: "6", name: "Clothes & Textiles", points: 30 },
-  { id: "7", name: "Tyres & Rubber", points: 75 },
+  { id: "7", name: "Tyres", points: 75 },
   { id: "8", name: "Organic Waste", points: 15 },
-  { id: "9", name: "Scrap Metal", points: 65 },
-  { id: "10", name: "Non-Recyclable", points: 0 },
+  { id: "9", name: "Shoes", points: 45 },
+  { id: "10", name: "Non-Recyclable & Trash", points: 0 },
 ];
 
 const ClaimRewards = () => {
@@ -50,7 +50,7 @@ const ClaimRewards = () => {
                     {wasteCategories.map((category) => (
                         <View key={category.id} style={styles.tableRow}>
                             <Text style={styles.tableCell}>{category.name}:</Text>
-                            <Text style={styles.tableCell}>{category.points} points</Text>
+                            <Text style={styles.tablePoints}>{category.points} points</Text>
                         </View>
                     ))}
                 </View>
@@ -145,8 +145,8 @@ const styles = StyleSheet.create({
     },
     infoText: {
         fontSize: 16,
-        color: Colors.text.secondary,
-    fontFamily: 'PlusJakartaSans-Regular',
+        color: Colors.primary.cream,
+        fontFamily: 'PlusJakartaSans-Regular',
     },
     infoRule: {
         fontSize: 16,
@@ -171,7 +171,11 @@ const styles = StyleSheet.create({
     },
     tableCell: {
         fontSize: 16,
-        color: Colors.text.secondary,
+        color: Colors.primary.cream,
+    },
+    tablePoints: {
+        fontSize: 16,
+        color: Colors.primary.beige,
     },
     input: {
         height: 40,
@@ -236,7 +240,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 12,
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 50,
     },
     submitButtonText: {
         color: Colors.text.primary,

@@ -190,14 +190,14 @@ const KioskScreen = () => {
           style={[styles.tab, selectedTab === 'findKiosk' && styles.activeTab]} 
           onPress={() => setSelectedTab('findKiosk')}
         >
-          <MapPin size={18} color={selectedTab === 'findKiosk' ? Colors.secondary.white : Colors.accent.darkGray} />
+          <MapPin size={18} color={selectedTab === 'findKiosk' ? Colors.secondary.white : Colors.text.darker} />
           <Text style={[styles.tabText, selectedTab === 'findKiosk' && styles.activeTabText]}>Find Kiosk</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tab, selectedTab === 'becomeAgent' && styles.activeTab]} 
           onPress={() => setSelectedTab('becomeAgent')}
         >
-          <Handshake size={18} color={selectedTab === 'becomeAgent' ? Colors.secondary.white : Colors.accent.darkGray} />
+          <Handshake size={18} color={selectedTab === 'becomeAgent' ? Colors.secondary.white : Colors.text.darker} />
           <Text style={[styles.tabText, selectedTab === 'becomeAgent' && styles.activeTabText]}>Become Agent</Text>
         </TouchableOpacity>
       </View>
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
-    color: Colors.accent.darkGray,
+    color: Colors.text.darker,
   },
   activeTabText: {
     color: Colors.secondary.white,
