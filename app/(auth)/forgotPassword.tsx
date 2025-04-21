@@ -31,7 +31,7 @@ const auth = getAuth();
     };
 
     if (loading) {
-        return <LoadingSpinner message="Sending reset link..." />;
+        return <LoadingSpinner text="Sending reset link..." />;
     }
 
     return (

@@ -7,6 +7,8 @@ import { getDoc, doc, updateDoc, increment } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '@lib/firebase/firebaseConfig';
 import LoadingSpinner from '../components/LoadingSpinner';
+//import { LinearGradient } from 'expo-linear-gradient';
+//import Markdown from 'react-native-markdown-display';
 
 type BlogArticleParams = {
   id: string;

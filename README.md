@@ -158,7 +158,7 @@ MODEL 3. Metal and Clothes
 
 ## Pages/Fixes to do
 - Firebase auth and firestore.
-   - Integerate in Leaderboard for game and waste recycled, posts on community and blog, points gotten, rewards claimed and method of claiming, profile levels (eco warrior and the likes), referrals logic, waste history, phone number/bank account on claim rewards page.
+   - Integerate in Leaderboard for game and waste recycled, posts on community, points gotten, rewards claimed and method of claiming, profile levels (eco warrior and the likes), waste history, phone number/bank account on claim rewards page.
 
    - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
 

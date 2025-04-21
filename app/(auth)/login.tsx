@@ -60,7 +60,7 @@ export default function Login() {
   };
 
   if (loading) {
-    return <LoadingSpinner message="Logging in..." />;
+    return <LoadingSpinner text="Logging in..." />;
   }
 
   return (

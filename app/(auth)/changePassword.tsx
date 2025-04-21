@@ -38,10 +38,12 @@ const ChangePassword = () => {
                 console.error('Change password error:', error);
                 let errorMessage = 'Failed to change password.';
 
-                if (error.code === 'auth/wrong-password') {
-                    errorMessage = 'Current password is incorrect.';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'New password should be at least 6 characters.';
+                if (error instanceof Error && 'code' in error) {
+                    if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Current password is incorrect.';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMessage = 'New password should be at least 6 characters.';
+                    }
                 }
 
                 Alert.alert('Error', errorMessage);

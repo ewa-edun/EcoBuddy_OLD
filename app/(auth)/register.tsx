@@ -70,7 +70,7 @@ export default function RegisterScreen() {
   };
 
   if (loading) {
-    return <LoadingSpinner message="Creating your account..." />;
+    return <LoadingSpinner text="Creating your account..." />;
   }
 
   return (

@@ -2,27 +2,49 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@lib/firebase/firebaseConfig';
+
+type ArticleFormData = {
+  title: string;
+  content: string;
+  image: string;
+  category: string;
+};
 
 export default function CreateBlogArticle() {
-  const [articleContent, setArticleContent] = useState('');
-  const [readTime, setReadTime] = useState(0); // Placeholder for read time
-  const [isExpert, setIsExpert] = useState(false); // Placeholder for article type
+  const [formData, setFormData] = useState<ArticleFormData>({
+    title: '',
+    content: '',
+    image: '',
+    category: 'Sustainability'
+  });
 
-  const handleArticleSubmit = () => {
-    if (!articleContent.trim()) {
-      Alert.alert('Error', 'Article content cannot be empty.');
-      return;
-    }
-// Here you would typically save the article to your backend or state management, for demonstration, we will just navigate back with the content
-    router.push({
-      pathname: '/(tabs)/education',
-      params: { 
-        articleContent: articleContent,
-        readTime: readTime.toString(),
-        isExpert: isExpert.toString()
-      },
+  const handleSubmit = async () => {
+  try {
+    const docRef = await addDoc(collection(db, 'blogArticles'), {
+      ...formData,
+      author: auth.currentUser?.displayName || 'Admin',
+      date: serverTimestamp(),
+      views: 0,
+      readingTime: calculateReadingTime(formData.content),
     });
+    
+    Alert.alert('Success', 'Article published successfully!');
+    router.replace(`/features/BlogArticle?id=${docRef.id}`);
+  } catch (error) {
+    console.error('Error publishing article:', error);
+    Alert.alert('Error', 'Failed to publish article');
+  }
+ };
+
+  
+  const calculateReadingTime = (content: string) => {
+    const words = content.split(/\s+/).length;
+    const minutes = Math.ceil(words / 200);
+    return `${minutes} min read`;
   };
+  
 
   const handleBack = () => {
     router.replace('/(tabs)/education');
@@ -33,22 +55,25 @@ export default function CreateBlogArticle() {
       <Text style={styles.title}>Create a Blog Article</Text>
       <TextInput
         style={styles.input}
-        placeholder="Write your article here..."
-        value={articleContent}
-        onChangeText={setArticleContent}
-        multiline
-        numberOfLines={4}
-      />
-      <Text style={styles.subtitle}>Estimated Read Time (minutes)</Text>
-
-      <TextInput
-        style={styles.numberinput}
-        placeholder="Estimated Read Time (minutes)"
-        value={readTime.toString()}
-        onChangeText={(text) => setReadTime(Number(text))}
-        keyboardType="numeric"
-      />
-      <TouchableOpacity style={styles.postButton} onPress={handleArticleSubmit}>
+        placeholder="Article Title"
+        value={formData.title}
+        onChangeText={(text) => setFormData({...formData, title: text})}
+   />
+   <TextInput
+       style={styles.input}
+       placeholder="Article Content"
+       value={formData.content}
+       onChangeText={(text) => setFormData({...formData, content: text})}
+       multiline
+    />
+<TextInput
+      style={styles.input}
+      placeholder="Image URL"
+      value={formData.image}
+      onChangeText={(text) => setFormData({...formData, image: text})}
+   />
+      
+      <TouchableOpacity style={styles.postButton} onPress={handleSubmit}>
         <Text style={styles.postButtonText}>Post Article</Text>
       </TouchableOpacity>
 

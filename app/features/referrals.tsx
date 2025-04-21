@@ -98,7 +98,7 @@ const ReferralsScreen = () => {
         // Update the referrer's points (reward them for the referral)
         const referrerUserRef = doc(db, "users", referrerUserId);
         await updateDoc(referrerUserRef, {
-          points: increment(100), // Give 100 points for a successful referral
+          points: increment(300), // Give 300 points for a successful referral
           referrals: increment(1)
         });
         
@@ -107,7 +107,7 @@ const ReferralsScreen = () => {
           const currentUserRef = doc(db, "users", auth.currentUser.uid);
           await updateDoc(currentUserRef, {
             referredBy: enteredCode,
-            points: increment(50) // Also give the referred user some points
+            points: increment(300) // Also give the referred user some points
           });
         }
         
