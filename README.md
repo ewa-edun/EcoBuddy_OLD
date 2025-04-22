@@ -117,6 +117,44 @@ MODEL 1. Shoes, tyres, trash, organic waste
 MODEL 2. Paper & Cardboard, plastic, glass, E-Waste
 MODEL 3. Metal and Clothes
 ---
+## Points and Conversion Rates
+"Paper & Cardboard" points: 30
+"Plastic Bottles & Containers", points: 35 
+"Glass Bottles & Jars", points: 50
+"Metal Cans & Scraps", points: 65
+"Electronic Waste", points: 50
+"Clothes & Textiles", points: 30
+"Tyres", points: 75
+"Organic Waste", points: 15
+"Shoes", points: 45
+"Non-Recyclable & Trash", points: 0
+
+ALL THESE POINTS ARE PER KILOGRAM FOR EACH WASTE.
+
+Referrals: 300 points for the reffered and referee
+Each game session totals 100 points
+
+DAILY DATA TYPE
+50 points = 45 mb          35 NAIRA
+100 points = 95 mb         80 NAIRA
+150 points = 140 mb        115 NAIRA
+200 points = 190 mb        160 NAIRA
+250 points = 235 mb        195 NAIRA
+300 points = 290 mb        240 NAIRA
+350 points = 330 mb        275 NAIRA
+400 points = 380 mb        320 NAIRA
+450 points = 425 mb        355 NAIRA
+500 points = 495 mb        400 NAIRA
+
+WEEKLY DATA TYPE
+600 to 900 points are times 2 of their halves. {600 points is 2 times 300 points for reward.}
+600 points = 580 mb        480 NAIRA
+700 points = 660 mb        550 NAIRA
+800 points = 760 mb        640 NAIRA
+900 points = 850 mb        710 NAIRA
+950 points = 900 points    750 NAIRA
+1000 points = 1100 mb      900 NAIRA
+---
 
 ## 💡 Future Improvements
 - Partner with telecom providers for broader reward options.
@@ -158,7 +196,13 @@ MODEL 3. Metal and Clothes
 
 ## Pages/Fixes to do
 - Firebase auth and firestore.
-   - Integerate in Leaderboard for game and waste recycled, posts on community, points gotten, rewards claimed and method of claiming, profile levels (eco warrior and the likes), waste history, phone number/bank account on claim rewards page.
+   - Integerate in Leaderboard for game and waste recycled, 
+   - posts on community, 
+   - points gotten, 
+   - rewards claimed and method of claiming, 
+   - profile levels (eco warrior and the likes), 
+   - waste history, 
+   - phone number/bank account on claim rewards page.
 
    - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
 
@@ -170,8 +214,6 @@ MODEL 3. Metal and Clothes
       - For newspaper/blog, and for the eco question game.
 
 - The model should have better predictions.
-    
-- Need Stuctured Logic for points to cash and data conversion.
 
 - Need API's 
    - to handle claim rewards for both data and cash.

@@ -24,6 +24,37 @@ const wasteCategories: WasteCategory[] = [
   { id: "10", name: "Non-Recyclable & Trash", points: 0 },
 ];
 
+type PointsConversion = {
+    id: string;
+    name: string;
+    data: number;
+    cash: number;
+  };
+
+  const pointConverions: PointsConversion[] = [
+    { id: "1", name: "50 Points", data: 45, cash: 35 },
+    { id: "2", name: "100 points", data: 95, cash: 80 },
+    { id: "3", name: "200 points", data: 190, cash: 160 },
+    { id: "4", name: "300 points", data: 285, cash: 240 },
+    { id: "5", name: "400 points", data: 380, cash: 320 },
+    { id: "6", name: "500 points", data: 475, cash: 400 },
+    { id: "7", name: "600 points", data: 570, cash: 480 },
+    { id: "8", name: "700 points", data: 665, cash: 560 },
+    { id: "9", name: "800 points", data: 760, cash: 640 },
+    { id: "10", name: "900 points", data: 855, cash: 720 },
+    { id: "12", name: "1000 points", data: 1100, cash: 950 },
+  ];
+
+  type OtherCategories = {
+    id: string;
+    name: string;
+    points: number;
+  };
+
+  const otherCategories: OtherCategories[] = [
+    { id: "1", name: "Referrals", points: 300 },
+    { id: "2", name: "Game Sessions", points: 100 },
+  ];
 const ClaimRewards = () => {
     const [points, setPoints] = useState('');
     const [giftType, setGiftType] = useState('money'); // 'money' or 'data'
@@ -43,11 +74,28 @@ const ClaimRewards = () => {
         <ScrollView style={styles.container}>
             <Text style={styles.header}>Claim Rewards</Text>
             <View style={styles.infoCard}>
-                <Text style={styles.infoTitle}>Points to Data Conversion</Text>
-                <Text style={styles.infoText}>1,000 points = 1GB of data</Text>
-                <Text style={styles.infoSubtitle}>Points Earned per Waste Category:</Text>
+             <Text style={styles.infoTitle}>Points to Data Conversion</Text>
+             <View style={styles.conversionTable}>
+                    {pointConverions.map((category) => (
+                        <View key={category.id} style={styles.tableRow}>
+                            <Text style={styles.tableCell}>{category.name}:</Text>
+                            <Text style={styles.tablePoints}>{category.data} MB</Text>
+                          <Text style={styles.tablePoints}>{category.cash} Naira</Text>
+                        </View>
+                    ))}
+                </View>
+             <Text style={styles.infoSubtitle}>Points Earned per Waste Category:</Text>
                 <View style={styles.conversionTable}>
                     {wasteCategories.map((category) => (
+                        <View key={category.id} style={styles.tableRow}>
+                        <Text style={styles.tableCell}>{category.name}:</Text>
+                        <Text style={styles.tablePoints}>{category.points} points</Text>
+                        </View>
+                    ))}
+                </View>
+                <Text style={styles.infoSubtitle}>Points Earned in Other Ways:</Text>
+                <View style={styles.conversionTable}>
+                    {otherCategories.map((category) => (
                         <View key={category.id} style={styles.tableRow}>
                             <Text style={styles.tableCell}>{category.name}:</Text>
                             <Text style={styles.tablePoints}>{category.points} points</Text>
@@ -140,6 +188,7 @@ const styles = StyleSheet.create({
     infoTitle: {
         fontSize: 20,
         fontWeight: 'bold',
+        marginBottom: 5,
         color: Colors.secondary.white,
         fontFamily: 'PlusJakartaSans-SemiBold',
     },
@@ -156,13 +205,13 @@ const styles = StyleSheet.create({
     infoSubtitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginTop: 17,
+        marginTop: 10,
         marginBottom: 5,
         color: Colors.secondary.white,
         fontFamily: 'PlusJakartaSans-SemiBold',
     },
     conversionTable: {
-        marginBottom: 20,
+        marginBottom: 5,
     },
     tableRow: {
         flexDirection: 'row',

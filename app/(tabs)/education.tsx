@@ -17,8 +17,8 @@ type Article = {
   category: 'Sustainability' | 'Recycling' | 'Community' | 'Technology';
 };
 
-
 export default function EducationScreen() {
+  const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState<Article[]>([]);
 
   useEffect(() => {
@@ -42,6 +42,7 @@ export default function EducationScreen() {
     };
 
     fetchArticles();
+    setLoading(false);
   }, []);
   
   const getCategoryColor = (category: 'Sustainability' | 'Recycling' | 'Community' | 'Technology') => {
@@ -90,7 +91,8 @@ export default function EducationScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Featured Articles</Text>
         <View style={styles.articlesList}>
-          {articles.map((article) => (
+        {articles?.length > 0 ? (
+          articles.map((article) => (
             <TouchableOpacity 
             key={article.id} 
             style={styles.articleCard}
@@ -111,7 +113,10 @@ export default function EducationScreen() {
               <Text style={styles.articleExcerpt}>{article.excerpt}</Text>
             </View>
           </TouchableOpacity>
-          ))}
+          ))
+        ) : (
+          <Text style={styles.noArticle}>No articles found</Text>
+        )}
         </View>
       </View>
 
@@ -178,9 +183,15 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'PlusJakartaSans-SemiBold',
     color: Colors.secondary.white,
+    marginBottom: 16,
+  },
+  noArticle: {
+    fontSize: 15,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.accent.darkGray,
     marginBottom: 16,
   },
   articlesList: {

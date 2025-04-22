@@ -4,7 +4,7 @@ import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, C
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
-import { getAuth, updatePassword, deleteUser, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
+import { getAuth, deleteUser, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
 import { doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '@lib/firebase/firebaseConfig';

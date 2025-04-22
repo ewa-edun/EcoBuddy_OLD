@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, ScrollView, View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@lib/firebase/firebaseConfig';
+import { auth, db, storage } from '@lib/firebase/firebaseConfig';
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 type ArticleFormData = {
   title: string;
@@ -13,6 +15,8 @@ type ArticleFormData = {
 };
 
 export default function CreateBlogArticle() {
+const [loading, setLoading] = useState(false);
+const [imageUri, setImageUri] = useState<string | null>(null);
   const [formData, setFormData] = useState<ArticleFormData>({
     title: '',
     content: '',
@@ -20,10 +24,38 @@ export default function CreateBlogArticle() {
     category: 'Sustainability'
   });
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const uploadImage = async (uri: string) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storageRef = ref(storage, `blogImages/${Date.now()}`);
+    await uploadBytes(storageRef, blob);
+    return await getDownloadURL(storageRef);
+  };
+
   const handleSubmit = async () => {
+    setLoading(true);
   try {
+    let imageUrl = '';
+    if (imageUri) {
+      imageUrl = await uploadImage(imageUri);
+    }
+
     const docRef = await addDoc(collection(db, 'blogArticles'), {
       ...formData,
+      image: imageUrl, // Override text input with uploaded image URL
       author: auth.currentUser?.displayName || 'Admin',
       date: serverTimestamp(),
       views: 0,
@@ -36,6 +68,7 @@ export default function CreateBlogArticle() {
     console.error('Error publishing article:', error);
     Alert.alert('Error', 'Failed to publish article');
   }
+  setLoading(false);
  };
 
   
@@ -51,7 +84,8 @@ export default function CreateBlogArticle() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <View>
       <Text style={styles.title}>Create a Blog Article</Text>
       <TextInput
         style={styles.input}
@@ -66,12 +100,10 @@ export default function CreateBlogArticle() {
        onChangeText={(text) => setFormData({...formData, content: text})}
        multiline
     />
-<TextInput
-      style={styles.input}
-      placeholder="Image URL"
-      value={formData.image}
-      onChangeText={(text) => setFormData({...formData, image: text})}
-   />
+  <TouchableOpacity onPress={pickImage}>
+    <Text>Pick an Image</Text>
+    {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />}
+  </TouchableOpacity>
       
       <TouchableOpacity style={styles.postButton} onPress={handleSubmit}>
         <Text style={styles.postButtonText}>Post Article</Text>
@@ -80,7 +112,8 @@ export default function CreateBlogArticle() {
       <TouchableOpacity style={styles.backButton} onPress={handleBack}>
         <Text style={styles.postButtonText}>Back</Text>
       </TouchableOpacity>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -104,7 +137,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   input: {
-    height: 300,
+    height: 180,
     borderColor: Colors.accent.lightGray,
     borderWidth: 1,
     borderRadius: 8,

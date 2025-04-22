@@ -151,16 +151,16 @@ const categoryMapping = {
 
 // Add a weights object to prioritize certain categories when multiple matches are found
 const categoryPriority = {
-  "Plastic Bottles & Containers": 1.2,  // Give plastic a higher priority based on your feedback
-  "Paper & Cardboard": 1.1,
-  "Glass Bottles & Jars": 1.1,
-  "Metal Cans & Scraps": 1.1,
-  "Electronic Waste": 1.05,
+  "Plastic Bottles & Containers": 1.0, 
+  "Paper & Cardboard": 1.0,
+  "Glass Bottles & Jars": 1.0,
+  "Metal Cans & Scraps": 1.0,
+  "Electronic Waste": 1.0,
   "Clothes & Textiles": 1.0,
   "Tyres": 1.0,
   "Organic Waste": 1.0,
   "Shoes": 1.0,
-  "Non-Recyclable & Trash": 0.7  // Lower priority for non-recyclable
+  "Non-Recyclable & Trash": 1.0 
 };
 
 // Add the missing findMaxIndex function
@@ -406,12 +406,10 @@ export default function WasteSelectorScreen() {
           // Convert to array and sort by weighted score, with reduced bias for plastic
           const rankedPredictions = Object.entries(aggregatedResults)
             .map(([className, stats]) => {
-              // Apply special handling to reduce plastic bias
               let priorityMultiplier = getCategoryPriority(className) || 1.0;
               
-              // Reduce plastic priority if confidence is low
               if (className.toLowerCase().includes("plastic") && stats.confidenceSum / stats.count < 0.7) {
-                priorityMultiplier = 0.9; // Reduce priority for plastic with low confidence
+                priorityMultiplier = 0.9; 
               }
               
               return {

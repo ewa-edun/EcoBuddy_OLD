@@ -1,66 +1,67 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
+import { db } from '@lib/firebase/firebaseConfig';
+import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 
 type Post = {
   id: string;
-  user: {
+  user?: {
     name: string;
     avatar: string;
     badge: string;
   };
   content: string;
   image?: string;
-  likes: number;
+  likes: string[]; // Array of user IDs who liked the post
   comments: number;
-  timeAgo: string;
+  timestamp: string;
 };
-
-const posts: Post[] = [
-  {
-    id: '1',
-    user: {
-      name: 'Olayinka A.',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-      badge: 'Eco Warrior',
-    },
-    content: 'Just completed my monthly recycling goal! 🌱 Together, we collected over 100kg of plastic waste from our community. Proud to be making a difference! #RecyclingHeroes #CleanNigeria',
-    image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800',
-    likes: 245,
-    comments: 18,
-    timeAgo: '2h ago',
-  },
-  {
-    id: '2',
-    user: {
-      name: 'Emmanuel O.',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-      badge: 'Community Leader',
-    },
-    content: 'Organized a recycling workshop at Lagos State University today. Amazing turnout! Let\'s keep spreading awareness about proper waste management. 🌍',
-    likes: 189,
-    comments: 24,
-    timeAgo: '4h ago',
-  },
-  {
-    id: '3',
-    user: {
-      name: 'Chioma N.',
-      avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200',
-      badge: 'Rising Star',
-    },
-    content: 'Started a neighborhood recycling initiative in Abuja! Join us every Saturday morning. Together we can make our city cleaner. 💚',
-    image: 'https://t3.ftcdn.net/jpg/02/65/81/10/360_F_265811094_pS3hVVc7wpi0nbTtpNJ3mDY5MrOzgliL.jpg',
-    likes: 312,
-    comments: 42,
-    timeAgo: '6h ago',
-  },
-];
 
 export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState<'feed' | 'challenges'>('feed');
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch posts from Firestore
+    const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
+      const fetchedPosts = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          user: {
+            name: data.username || "Anonymous", // Fallback if username missing
+            avatar: data.user?.avatar || "https://placehold.co/100x100", // Fallback avatar
+            badge: data.user?.badge || "Member", // Fallback badge
+          },
+          content: data.content,
+          image: data.imageUrl || undefined,
+          likes: data.likes || [],
+          comments: data.comments || 0,
+          timestamp: data.createdAt?.toDate().toLocaleString() || "Just now",
+        };
+      }) as Post[];
+      setPosts(fetchedPosts);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLike = async (postId: string, userId: string) => {
+    const postRef = doc(db, 'posts', postId);
+    const post = posts.find((p) => p.id === postId);
+    if (!post) return;
+
+    const updatedLikes = post.likes.includes(userId)
+      ? post.likes.filter((id) => id !== userId)
+      : [...post.likes, userId];
+
+    await updateDoc(postRef, { likes: updatedLikes });
+  };
 
   const handlePost = () => {
     router.replace('/features/createPost');
@@ -123,27 +124,42 @@ export default function CommunityScreen() {
       <View style={styles.content}>
         {activeTab === 'feed' ? (
           <View style={styles.feed}>
+            {loading ? (
+              <Text style={{ color:Colors.primary.green, textAlign: 'center', marginTop: 20 }}>Loading...</Text>
+            ) : posts.length === 0 ? (
+              <Text style={{ textAlign: 'center', marginTop: 20 }}>No posts available</Text>
+            ) : null}
             {posts.map((post) => (
               <View key={post.id} style={styles.post}>
                 <View style={styles.postHeader}>
-                  <Image source={{ uri: post.user.avatar }} style={styles.avatar} />
+                  <Image source={{ uri: post.user?.avatar ?? "https://placehold.co/100x100" }} style={styles.avatar} />
                   <View style={styles.postHeaderText}>
-                    <Text style={styles.userName}>{post.user.name}</Text>
+                    <Text style={styles.userName}>{post.user?.name ?? "Anonymous"}</Text>
                     <View style={styles.badgeContainer}>
-                      <Text style={styles.badge}>{post.user.badge}</Text>
+                      <Text style={styles.badge}>{post.user?.badge ?? "Member"}</Text>
                     </View>
                   </View>
-                  <Text style={styles.timeAgo}>{post.timeAgo}</Text>
+                  <Text style={styles.timeAgo}>{post.timestamp}</Text>
                 </View>
+                
                 <Text style={styles.postContent}>{post.content}</Text>
                 {post.image && (
                   <Image source={{ uri: post.image }} style={styles.postImage} />
                 )}
                 <View style={styles.postActions}>
-                  <TouchableOpacity style={styles.actionButton}>
-                    <Heart size={20} color={Colors.accent.darkGray} />
-                    <Text style={styles.actionText}>{post.likes}</Text>
-                  </TouchableOpacity>
+                <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => handleLike(post.id, 'currentUserId')}>
+                      <Heart
+                        size={20}
+                        color={
+                          post.likes.includes('currentUserId')
+                            ? Colors.primary.green
+                            : Colors.accent.darkGray
+                        }
+                      />
+                      <Text style={styles.actionText}>{post.likes.length}</Text>
+                    </TouchableOpacity>
                   <TouchableOpacity style={styles.actionButton}>
                     <MessageCircle size={20} color={Colors.accent.darkGray} />
                     <Text style={styles.actionText}>{post.comments}</Text>

@@ -1,22 +1,77 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
+import { db, auth } from '@lib/firebase/firebaseConfig'; 
+import * as ImagePicker from 'expo-image-picker';
+import { storage } from '@lib/firebase/firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function CreatePost() {
   const [postContent, setPostContent] = useState('');
+  const [image, setImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handlePostSubmit = () => {
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadImage = async (uri: string) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storageRef = ref(storage, `posts/${Date.now()}`);
+    await uploadBytes(storageRef, blob);
+    return await getDownloadURL(storageRef);
+  };
+
+  const handlePostSubmit = async () => {
     if (!postContent.trim()) {
       Alert.alert('Error', 'Post content cannot be empty.');
       return;
     }
-    // Here you would typically save the post to your backend or state management
-    // For demonstration, we will just navigate back with the content
+    setIsLoading(true);
+
+    try {
+      let imageUrl = null;
+      if (image) {
+        imageUrl = await uploadImage(image);
+      }
+
+      const postData = {
+        userId: auth.currentUser ? auth.currentUser.uid : null,
+        username: auth.currentUser ? auth.currentUser.displayName : null,
+        content: postContent,
+        imageUrl,
+        createdAt: serverTimestamp(),
+        likes: [],
+        comments: [],
+        shares: [],
+        likedBy: [],
+      };
+
+      await addDoc(collection(db, 'posts'), postData);
+
     router.push({
       pathname: '/(tabs)/community',
-      params: { newPost: postContent },
+      params: { refresh: 'true' },
     });
+  } catch (error) {
+    Alert.alert('Error', 'Failed to create post. Please try again.');
+    console.error(error);
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   const handleBack = () => {
@@ -34,6 +89,10 @@ export default function CreatePost() {
         multiline
         numberOfLines={4}
       />
+      <TouchableOpacity onPress={pickImage}>
+          <Text>Pick an Image</Text>
+          {image && <Image source={{ uri: image }} style={{ width: 100, height: 100 }} />}
+        </TouchableOpacity>
       <TouchableOpacity style={styles.postButton} onPress={handlePostSubmit}>
         <Text style={styles.postButtonText}>Post</Text>
       </TouchableOpacity>
@@ -59,7 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   input: {
-    height: 300,
+    height: 200,
     borderColor: Colors.accent.lightGray,
     borderWidth: 1,
     borderRadius: 8,
