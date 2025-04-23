@@ -89,8 +89,8 @@ export default function CreatePost() {
         multiline
         numberOfLines={4}
       />
-      <TouchableOpacity onPress={pickImage}>
-          <Text>Pick an Image</Text>
+      <TouchableOpacity style={styles.pickImage} onPress={pickImage}>
+          <Text style={styles.pickImageText}>Pick an Image</Text>
           {image && <Image source={{ uri: image }} style={{ width: 100, height: 100 }} />}
         </TouchableOpacity>
       <TouchableOpacity style={styles.postButton} onPress={handlePostSubmit}>
@@ -127,6 +127,19 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.darker,
     marginBottom: 16,
+  },
+  pickImage: {
+    backgroundColor: Colors.background.modal,
+    padding: 12,
+    borderRadius: 30,
+    alignItems: 'center',
+    marginBottom: 16,
+
+  },
+  pickImageText: {
+    color: Colors.text.darker,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   postButton: {
     backgroundColor: Colors.primary.green,

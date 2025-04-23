@@ -100,8 +100,8 @@ const [imageUri, setImageUri] = useState<string | null>(null);
        onChangeText={(text) => setFormData({...formData, content: text})}
        multiline
     />
-  <TouchableOpacity onPress={pickImage}>
-    <Text>Pick an Image</Text>
+  <TouchableOpacity style={styles.pickImage} onPress={pickImage}>
+    <Text style={styles.pickImageText}>Pick an Image</Text>
     {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />}
   </TouchableOpacity>
       
@@ -158,6 +158,18 @@ const styles = StyleSheet.create({
     color: Colors.text.darker,
     marginBottom: 16,
   },
+  pickImage: {
+      backgroundColor: Colors.background.modal,
+      padding: 12,
+      borderRadius: 30,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    pickImageText: {
+      color: Colors.text.darker,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans-SemiBold',
+    },
   postButton: {
     backgroundColor: Colors.primary.green,
     padding: 16,

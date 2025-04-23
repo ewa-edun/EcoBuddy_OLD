@@ -193,11 +193,15 @@ WEEKLY DATA TYPE
 
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
+TODAY: 
+Fix firebase on blog and community page.
+Add loading screen when blog article is being posted.
+DO Quiz and Eco Wordle game.
+Possibly do leaderboard firebase integration.
 
 ## Pages/Fixes to do
 - Firebase auth and firestore.
    - Integerate in Leaderboard for game and waste recycled, 
-   - posts on community, 
    - points gotten, 
    - rewards claimed and method of claiming, 
    - profile levels (eco warrior and the likes), 
@@ -207,7 +211,6 @@ WEEKLY DATA TYPE
    - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
 
 - On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
-
 - Add more profile levels and achievements.
 
 - Integerate Gemini API.
@@ -240,7 +243,6 @@ WEEKLY DATA TYPE
   - Game 4:Eco Quiz Show
       - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
       - 10 Questions, 10 point each, 2 minutes.
-
 
 
 
