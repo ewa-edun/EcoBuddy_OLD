@@ -218,9 +218,11 @@ WEEKLY DATA TYPE
 
 ## Pages/Fixes to do
 - Supabase to store images used in the app.
-   - Let the profile image be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc).
+   - Let the profile image be displayed on leaderboard, community.
    - Community posts images.
    - Blog articles post images.
+
+- handle comments of community page.
 
 - Firestore.
    - Integerate in Leaderboard for game and waste recycled, 

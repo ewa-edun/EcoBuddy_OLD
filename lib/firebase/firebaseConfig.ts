@@ -3,9 +3,11 @@ import { getAuth } from 'firebase/auth';
 import{ getFirestore, serverTimestamp } from 'firebase/firestore';
 //import { getAnalytics } from "firebase/analytics";
 import { getStorage } from 'firebase/storage';
+import { FIREBASE_API_KEY } from '../firebase/config'; // Fixed unterminated string literal
+
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC_Fh1fectq19Qkd4TmkP_F5YLu-t42KyY",
+  apiKey: FIREBASE_API_KEY,
   authDomain: "ecobuddy-de508.firebaseapp.com",
   projectId: "ecobuddy-de508",
   storageBucket: "ecobuddy-de508.firebasestorage.app",

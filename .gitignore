@@ -40,3 +40,5 @@ app-example
 
 # Config files
 /lib/gemini/config.ts
+/lib/firebase/config.ts
+/lib/supabase/config.ts

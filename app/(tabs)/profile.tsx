@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, TextInput } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, TextInput, ActivityIndicator } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, HelpCircle, LogOut, Stars, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -6,11 +6,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
 import { getAuth, deleteUser, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
 import { doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '@lib/firebase/firebaseConfig';
+import { supabase } from '@lib/supabase/client';
+import { uploadAvatar } from '@lib/supabase/storage';
 
 const auth = getAuth();
-const storage = getStorage();
 
 const achievements = [
   {
@@ -117,22 +117,50 @@ export default function ProfileScreen() {
 const handleImagePicker = async () => {
   const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  if (permissionResult.granted === false) {
-    alert('Permission to access camera roll is required!');
+  if (!permissionResult.granted) {
+    Alert.alert('Permission required', 'EcoBuddy needs access to your photos to update your avatar');
     return;
   }
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
     allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
+    aspect: [1, 1],  // Square aspect for avatars
+    quality: 0.8,
   });
 
-  if (!result.canceled) {
-    setAvatar(result.assets[0].uri);
+  if (!result.canceled && auth.currentUser) {
+    try {
+      setLoading(true);
+
+      //Upload image to Supabase
+      const publicUrl = await uploadAvatar(auth.currentUser.uid, result.assets[0].uri);
+      
+      // Update Firebase auth profile
+      await updateProfile(auth.currentUser, { photoURL: publicUrl });
+      
+      // Update Firestore
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        photoURL: publicUrl,
+        avatarLastUpdated: new Date().toISOString()
+      });
+
+      setAvatar(publicUrl);
+      Alert.alert('Success', 'Avatar updated successfully!');
+    } catch (error) {
+      console.error('Error updating avatar:', error);
+      Alert.alert('Error', 'Failed to update avatar');
+    } finally {
+      setLoading(false);
+    }
   }
 };
+
+{loading && (
+  <View style={[styles.avatar, styles.loadingOverlay]}>
+    <ActivityIndicator color={Colors.primary.green} />
+  </View>
+)}
 
   const handleMenuPress = (route: string) => {
     switch (route) {
@@ -283,7 +311,13 @@ const handleImagePicker = async () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
-          <Image source={{ uri: avatar }} style={styles.avatar} />
+        <Image source={{ 
+    uri: avatar || 
+    'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//default-avatar.png' 
+  }} 
+  style={styles.avatar}
+  onError={() => setAvatar('https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//default-avatar.png')}
+  />
           <View style={styles.profileInfo}>
             <Text style={styles.name}>{userData.name}</Text>
             <Text style={styles.role}>{userData.role}</Text>
@@ -566,6 +600,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.accent.darkGray,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoutButton: {
     flexDirection: 'row',

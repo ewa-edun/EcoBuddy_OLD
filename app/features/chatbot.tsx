@@ -1,9 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Send } from 'lucide-react-native';
 import { getGeminiResponse } from '@lib/gemini/geminiService';
 import FloatingDots from '../components/FloatingDots';
+import { getAuth } from 'firebase/auth';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '@lib/firebase/firebaseConfig';
 
 type Message = {
   id: string;
@@ -13,6 +16,7 @@ type Message = {
 };
 
 export default function ChatbotScreen() {
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -72,6 +76,32 @@ export default function ChatbotScreen() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    const fetchUserAvatar = async () => {
+      const user = getAuth().currentUser;
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setUserAvatar(userDoc.data().photoURL || null);
+        }
+      }
+    };
+    
+    fetchUserAvatar();
+  }, []);
+
+  useEffect(() => {
+    const user = getAuth().currentUser;
+    if (!user) return;
+  
+    const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
+      if (doc.exists()) {
+        setUserAvatar(doc.data().photoURL || null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -89,10 +119,14 @@ export default function ChatbotScreen() {
             ]}>
             <View style={styles.messageIcon}>
               {message.sender === 'user' ? (
-                <Image
-                  source={require('../../assets/user icon.png')}
-                  style={styles.avatar}
-                />
+                 <Image
+                 source={userAvatar ? 
+                   { uri: userAvatar } : 
+                   require('../../assets/user icon.png')
+                 }
+                 style={styles.avatar}
+                 onError={() => setUserAvatar(null)}
+               />
               ) : (
                 <Image
                   source={require('../../assets/EcoBuddy_logo.jpeg')}
@@ -174,6 +208,8 @@ const styles = StyleSheet.create({
   avatar: {
     width: '100%',
     height: '100%',
+    borderRadius: 20, // Ensure rounded corners
+    backgroundColor: Colors.accent.lightGray, // Fallback color
   },
   botIcon: {
     width: '100%',
