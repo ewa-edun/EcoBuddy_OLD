@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { getGeminiResponse } from '@lib/gemini/geminiService';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type RootStackParamList = {
@@ -16,6 +16,7 @@ const Quiz = () => {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const validateQuestions = (questions: any[]): boolean => {
@@ -34,7 +35,7 @@ const Quiz = () => {
       try {
         setLoading(true);
         const response = await getGeminiResponse(
-          `Generate exactly 10 multiple-choice questions about recycling, waste management, and eco-friendliness. 
+          `Generate exactly 10 multiple-choice questions about recycling, waste management, sustainability, and eco-friendliness. 
           Format each question EXACTLY like this example:
            [
        {
@@ -92,7 +93,10 @@ const Quiz = () => {
   };
 
   const endGame = () => {
-    navigation.navigate('/games/endingScreen', { score });
+    router.push({
+      pathname: '/games/endingScreen',
+      params: { score }
+    });
   };
 
   if (loading) {

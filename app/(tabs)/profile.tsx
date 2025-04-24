@@ -93,7 +93,7 @@ export default function ProfileScreen() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setUserData({
-            name: data.fullName || auth.currentUser?.displayName || 'Eco User',
+            name: data.fullName || auth.currentUser?.displayName || 'EcoBuddy User',
             email: auth.currentUser?.email || 'No email',
             phone: data.phone || 'No phone number',
             points: data.points || 0,

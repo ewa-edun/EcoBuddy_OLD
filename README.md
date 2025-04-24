@@ -68,8 +68,29 @@ EcoBuddy supports:
 
 ### **9️⃣AI Chatbots**
 - AI chatbots for users to interact with and ask questions.
+
 ---
 
+ Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
+
+  - Game 1: **Trash Sort Challenge**
+      - Users must quickly drag and drop different waste items (plastic, metal, glass, paper) into the correct recycling bins before time runs out.
+      - 10 items, 1:30/2 minutes. 10 point each
+      - Incorrect sorting results in a small point deduction and once the timer is over, it shows their points before the timer ran out.
+
+  - Game 2:**Wordle Eco Edition**
+     - Like the wordle game but the words are eco related.
+     - Points: 5 tries, 100 points automatically and -20 points for each miss, 1:30/2 minutes.
+
+  - Game 3:**Recycle Match**
+      - A puzzle game where users match three or more of the same recyclable items (like candy crush but with waste items).
+      - 5 matches, 20 points each, 3 minutes.
+
+  - Game 4:Eco Quiz Show
+      - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
+      - 10 Questions, 10 point each, 2 minutes.
+
+---
 ## 🛠️ Tech Stack
 
 ### **📱 Frontend**
@@ -193,12 +214,6 @@ WEEKLY DATA TYPE
 
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
-TODAY: 
-Fix firebase on blog and community page.
-Add loading screen when blog article is being posted.
-DO Quiz and Eco Wordle game.
-Possibly do leaderboard firebase integration.
-
 ## Pages/Fixes to do
 - Firebase auth and firestore.
    - Integerate in Leaderboard for game and waste recycled, 
@@ -210,11 +225,14 @@ Possibly do leaderboard firebase integration.
 
    - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
 
+- Supabase to store images used in the app.
+   - Let the profile image be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc).
+   - Community posts images.
+   - Blog articles post images.
+
 - On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
 - Add more profile levels and achievements.
-
-- Integerate Gemini API.
-      - For newspaper/blog, and for the eco question game.
+- On ending screen, if score is higher than 50, let there be celebration screen where confetti comes out.
 
 - The model should have better predictions.
 
@@ -223,8 +241,6 @@ Possibly do leaderboard firebase integration.
    - Waste submission of proper waste allowed.
    - location and dynamic maps. Also more centers for pick-up.
 
-- Let the profile image be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc)
-
 - Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
 
   - Game 1: **Trash Sort Challenge**
@@ -232,18 +248,9 @@ Possibly do leaderboard firebase integration.
       - 10 items, 1:30/2 minutes. 10 point each
       - Incorrect sorting results in a small point deduction and once the timer is over, it shows their points before the timer ran out.
 
-  - Game 2:**Wordle Eco Edition**
-     - Like the wordle game but the words are eco related.
-     - Points: 5 tries, 100 points automatically and -20 points for each miss, 1:30/2 minutes.
-
   - Game 3:**Recycle Match**
       - A puzzle game where users match three or more of the same recyclable items (like candy crush but with waste items).
       - 5 matches, 20 points each, 3 minutes.
-
-  - Game 4:Eco Quiz Show
-      - A trivia game with questions on recycling, waste management, and sustainability (questions genreated by ai).
-      - 10 Questions, 10 point each, 2 minutes.
-
 
 
 ## 🚀 Getting Started

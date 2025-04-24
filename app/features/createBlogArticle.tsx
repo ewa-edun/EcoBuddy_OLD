@@ -63,8 +63,11 @@ const [imageUri, setImageUri] = useState<string | null>(null);
       content: formData.content,
       image: imageUrl,
       category: formData.category,
-      author: auth.currentUser.displayName || 'Admin',
-      authorId: auth.currentUser.uid, // Store author ID for reference
+      author: {
+        name: auth.currentUser.displayName || 'Anonymous',
+        id: auth.currentUser.uid,
+        avatar: auth.currentUser.photoURL || null
+      },
       date: serverTimestamp(),
       views: 0,
       readingTime: calculateReadingTime(formData.content),

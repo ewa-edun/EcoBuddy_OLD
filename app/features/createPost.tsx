@@ -57,17 +57,17 @@ export default function CreatePost() {
 
       const postData = {
         userId: user.uid,
-      user: { // Store complete user info
-        name: user.displayName || "EcoBuddy User", // Fallback name
-        avatar: user.photoURL || null, // User's profile photo
-        badge: "Member" // Default badge
-      },
+        author: {
+          id: user.uid,
+          name: user.displayName || "EcoBuddy User",
+          avatar: user.photoURL || "https://placehold.co/100x100",
+          badge: "Member"
+        },
         content: postContent,
         imageUrl,
         createdAt: serverTimestamp(),
         likes: [],
-        comments: [],
-        shares: [],
+        comments: 0,
         likedBy: [],
       };
 

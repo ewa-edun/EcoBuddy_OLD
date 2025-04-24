@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Share } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -33,10 +33,10 @@ export default function CommunityScreen() {
         const data = doc.data();
         return {
           id: doc.id,
-          user: {
-            name: data.username || "Anonymous", // Fallback if username missing
-            avatar: data.user?.avatar || "https://placehold.co/100x100", // Fallback avatar
-            badge: data.user?.badge || "Member", // Fallback badge
+          user: data.author || { // Fallback to anonymous if author data missing
+            name: "EcoBuddy User",
+            avatar: "https://placehold.co/100x100",
+            badge: "Member"
           },
           content: data.content,
           image: data.imageUrl || undefined,
@@ -62,6 +62,16 @@ export default function CommunityScreen() {
       : [...post.likes, userId];
 
     await updateDoc(postRef, { likes: updatedLikes });
+  };
+
+const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Check Out my post on EcoBuddy and start your eco-friendly journey!`,
+      });
+    } catch (error) {
+      console.error('Failed to share:', error);
+    }
   };
 
   const handlePost = () => {
@@ -164,11 +174,11 @@ export default function CommunityScreen() {
                       />
                       <Text style={styles.actionText}>{post.likes.length}</Text>
                     </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity style={styles.actionButton}>
                     <MessageCircle size={20} color={Colors.accent.darkGray} />
                     <Text style={styles.actionText}>{post.comments}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton}>
+                  <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
                     <Share2 size={20} color={Colors.accent.darkGray} />
                   </TouchableOpacity>
                 </View>

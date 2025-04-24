@@ -47,10 +47,10 @@ export default function EducationScreen() {
   
   const getCategoryColor = (category: 'Sustainability' | 'Recycling' | 'Community' | 'Technology') => {
     const colors = {
-      'Sustainability': Colors.primary.green + '20',
-      'Recycling': Colors.primary.blue + '20',
-      'Community': Colors.secondary.yellow + '20',
-      'Technology': Colors.primary.red + '20',
+      'Sustainability': Colors.primary.green + '70',
+      'Recycling': Colors.primary.blue + '60',
+      'Community': Colors.secondary.yellow + '70',
+      'Technology': Colors.primary.red + '60',
     };
     return colors[category] || Colors.primary.green + '20';
   };

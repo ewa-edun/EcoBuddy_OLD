@@ -15,7 +15,7 @@ interface Article {
   title: string;
   content: string;
   image: string;
-  category: string;
+  category: string | any[]; // Can be string or array of sections
   author: string;
   authorId: string;
   date: Timestamp;
@@ -55,7 +55,12 @@ const BlogArticle = () => {
         const articleData = articleDoc.data();
         setArticle({
           id: articleDoc.id,
-          ...articleData
+          ...articleData,
+          // Ensure author data exists
+        author: articleData.author || {
+          name: 'EcoBuddy Team',
+          avatar: null
+        }
         });
         
         // Increment view count
@@ -103,19 +108,19 @@ const BlogArticle = () => {
               id: 'related1',
               title: 'Global Recycling Trends in 2024',
               image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b',
-              author: 'Sarah Johnson'
+              author: 'Sarah Bunmi'
             },
             {
               id: 'related2',
               title: 'How To Start Composting At Home',
               image: 'https://images.unsplash.com/photo-1595163788995-a027797fd8b2',
-              author: 'Mike Peters'
+              author: 'Mike Chukuwunonye'
             },
             {
               id: 'related3',
               title: 'Plastic-Free Kitchen Swaps',
               image: 'https://images.unsplash.com/photo-1590136019848-8d650328b645',
-              author: 'Emma White'
+              author: 'Bello Susan'
             }
           ]);
         }
@@ -238,7 +243,7 @@ const BlogArticle = () => {
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <User size={16} color={Colors.text.secondary} />
-            <Text style={styles.metaText}>{article.author || 'EcoBuddy Team'}</Text>
+            <Text style={styles.metaText}>{article.author?.name || 'EcoBuddy Team'}</Text>
           </View>
           <View style={styles.metaItem}>
             <Calendar size={16} color={Colors.text.secondary} />
@@ -252,23 +257,23 @@ const BlogArticle = () => {
 
         {/* Main article content */}
         <View style={styles.articleContent}>
-          {article.content ? (
-            // If we have structured content, render it properly
-            article.content.map((section: any, index: number) => (
-              <View key={index} style={styles.section}>
-                {section.title && (
-                  <Text style={styles.sectionTitle}>{section.title}</Text>
-                )}
-                {section.paragraphs && section.paragraphs.map((paragraph: string, pIndex: number) => (
-                  <Text key={pIndex} style={styles.paragraph}>{paragraph}</Text>
-                ))}
-                {section.image && (
-                  <Image source={{ uri: section.image }} style={styles.contentImage} />
-                )}
-                {section.caption && (
-                  <Text style={styles.imageCaption}>{section.caption}</Text>
-                )}
-              </View>
+  {article.content && Array.isArray(article.content) ? (
+    // If we have structured content, render it properly
+    article.content.map((section: any, index: number) => (
+      <View key={index} style={styles.section}>
+        {section.title && (
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+        )}
+        {section.paragraphs && section.paragraphs.map((paragraph: string, pIndex: number) => (
+          <Text key={pIndex} style={styles.paragraph}>{paragraph}</Text>
+        ))}
+        {section.image && (
+          <Image source={{ uri: (require('../../assets/user icon.png')) }} style={styles.contentImage} />
+        )}
+        {section.caption && (
+          <Text style={styles.imageCaption}>{section.caption}</Text>
+        )}
+      </View>
             ))
           ) : (
             // Fallback to a default article structure

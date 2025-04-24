@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { useNavigation, useRouter } from 'expo-router';
+import { useNavigation, useLocalSearchParams, useRouter } from 'expo-router';
 
-const EndingScreen = ({ route }: any) => {
-  const { score } = route.params;
+const EndingScreen = () => {
+  const { score } = useLocalSearchParams();
   const router = useRouter();
 
   return (
