@@ -234,24 +234,12 @@ WEEKLY DATA TYPE
 - Add more profile levels and achievements.
 - On ending screen, if score is higher than 50, let there be celebration screen where confetti comes out.
 
-- The model should have better predictions.
-
 - Need API's 
    - to handle claim rewards for both data and cash.
    - Waste submission of proper waste allowed.
    - location and dynamic maps. Also more centers for pick-up.
 
-- Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
-
-  - Game 1: **Trash Sort Challenge**
-      - Users must quickly drag and drop different waste items (plastic, metal, glass, paper) into the correct recycling bins before time runs out.
-      - 10 items, 1:30/2 minutes. 10 point each
-      - Incorrect sorting results in a small point deduction and once the timer is over, it shows their points before the timer ran out.
-
-  - Game 3:**Recycle Match**
-      - A puzzle game where users match three or more of the same recyclable items (like candy crush but with waste items).
-      - 5 matches, 20 points each, 3 minutes.
-
+- The model should have better predictions.
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)

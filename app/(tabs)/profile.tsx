@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, TextInput } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, CircleHelp as HelpCircle, LogOut, Stars, Plus } from 'lucide-react-native';
+import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, HelpCircle, LogOut, Stars, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
