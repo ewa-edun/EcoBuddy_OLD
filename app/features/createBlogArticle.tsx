@@ -48,30 +48,43 @@ const [imageUri, setImageUri] = useState<string | null>(null);
   const handleSubmit = async () => {
     setLoading(true);
   try {
+    if (!auth.currentUser) {
+      Alert.alert('Error', 'You must be logged in to create articles');
+      return;
+    }
+
     let imageUrl = '';
     if (imageUri) {
       imageUrl = await uploadImage(imageUri);
     }
 
     const docRef = await addDoc(collection(db, 'blogArticles'), {
-      ...formData,
-      image: imageUrl, // Override text input with uploaded image URL
-      author: auth.currentUser?.displayName || 'Admin',
+      title: formData.title,
+      content: formData.content,
+      image: imageUrl,
+      category: formData.category,
+      author: auth.currentUser.displayName || 'Admin',
+      authorId: auth.currentUser.uid, // Store author ID for reference
       date: serverTimestamp(),
       views: 0,
       readingTime: calculateReadingTime(formData.content),
+      lastUpdated: serverTimestamp()
     });
     
     Alert.alert('Success', 'Article published successfully!');
     router.replace(`/features/BlogArticle?id=${docRef.id}`);
   } catch (error) {
     console.error('Error publishing article:', error);
-    Alert.alert('Error', 'Failed to publish article');
+    if ((error as { code: string }).code === 'permission-denied') {
+      Alert.alert('Error', 'You do not have permission to create articles');
+    } else {
+      Alert.alert('Error', 'Failed to publish article');
+    }
+  } finally {
+    setLoading(false);
   }
-  setLoading(false);
  };
 
-  
   const calculateReadingTime = (content: string) => {
     const words = content.split(/\s+/).length;
     const minutes = Math.ceil(words / 200);

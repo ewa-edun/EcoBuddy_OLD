@@ -3,12 +3,26 @@ import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, Share, Act
 import { useLocalSearchParams, router } from 'expo-router';
 import { Colors } from '../constants/Colors';
 import { ArrowLeft, Share2, Bookmark, Clock, Calendar, User } from 'lucide-react-native';
-import { getDoc, doc, updateDoc, increment } from 'firebase/firestore';
+import { getDoc, doc, updateDoc, increment, Timestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '@lib/firebase/firebaseConfig';
 import LoadingSpinner from '../components/LoadingSpinner';
 //import { LinearGradient } from 'expo-linear-gradient';
 //import Markdown from 'react-native-markdown-display';
+
+interface Article {
+  id: string;
+  title: string;
+  content: string;
+  image: string;
+  category: string;
+  author: string;
+  authorId: string;
+  date: Timestamp;
+  views: number;
+  readingTime: string;
+  lastUpdated?: Timestamp;
+}
 
 type BlogArticleParams = {
   id: string;

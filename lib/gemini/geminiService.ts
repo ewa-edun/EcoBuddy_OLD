@@ -5,15 +5,11 @@ const GEMINI_API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/mo
 
 interface GeminiResponse {
   candidates: Array<{
-    content: {
-      parts: Array<{
-        text: string;
-      }>;
-    };
+    content: string;
   }>;
 }
 
-export const getGeminiResponse = async (userMessage: string): Promise<string> => {
+export const getGeminiResponse = async (userMessage: string): Promise<any>  => {
   try {
     const response = await axios.post(
       `${GEMINI_API_ENDPOINT}?key=${GEMINI_API_KEY}`,
@@ -22,26 +18,35 @@ export const getGeminiResponse = async (userMessage: string): Promise<string> =>
           parts: [{
             text: userMessage
           }]
-        }]
+        }],
+        
       },
       {
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 10000 // 10 second timeout
+        timeout: 15000 // 15 second timeout
       }
     );
 
-    const data: GeminiResponse = response.data;
+    const data = response.data;
     
-    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    if (!data.candidates || data.candidates.length === 0) {
       throw new Error('Invalid response structure from Gemini API');
     }
 
-    return data.candidates[0].content.parts[0].text;
-  } catch (error) {
-    const axiosError = error as AxiosError;
-    
+    // Extract the text content
+    const responseText = data.candidates[0].content.parts[0].text;
+
+    try {
+      return JSON.parse(responseText);
+    } catch {
+      return [responseText];
+    }
+
+    } catch (error) {
+      const axiosError = error as AxiosError;
+  
     if (axiosError.response) {
       console.error('Gemini API Error:', {
         status: axiosError.response.status,

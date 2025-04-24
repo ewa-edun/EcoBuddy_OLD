@@ -40,6 +40,11 @@ export default function CreatePost() {
       Alert.alert('Error', 'Post content cannot be empty.');
       return;
     }
+    if (!auth.currentUser) {
+      Alert.alert('Error', 'You must be logged in to post.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -48,9 +53,15 @@ export default function CreatePost() {
         imageUrl = await uploadImage(image);
       }
 
+      const user = auth.currentUser;
+
       const postData = {
-        userId: auth.currentUser ? auth.currentUser.uid : null,
-        username: auth.currentUser ? auth.currentUser.displayName : null,
+        userId: user.uid,
+      user: { // Store complete user info
+        name: user.displayName || "EcoBuddy User", // Fallback name
+        avatar: user.photoURL || null, // User's profile photo
+        badge: "Member" // Default badge
+      },
         content: postContent,
         imageUrl,
         createdAt: serverTimestamp(),

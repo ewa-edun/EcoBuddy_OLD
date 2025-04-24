@@ -23,10 +23,32 @@ const Quiz = () => {
       try {
         setLoading(true);
         const response = await getGeminiResponse(
-          'Generate 10 multiple-choice questions about recycling, waste management, and eco-friendliness. Each question should have 4 options, with one correct answer clearly marked.'
+          `Generate 10 multiple-choice questions about recycling, waste management, and eco-friendliness. 
+          Each question should have the following structure:
+          [
+            {
+              "question": "Which of the following items should not be placed in a recycling bin?",
+              "options": [
+                { "text": "Plastic", "isCorrect": false },
+                { "text": "Glass", "isCorrect": false },
+                { "text": "Used tissue paper", "isCorrect": true },
+                { "text": "Paper", "isCorrect": false }
+              ]
+            },
+            {
+        "question": "Which of the following is considered hazardous waste?",
+        "options": [
+           { "text": "Batteries", "isCorrect": true },
+           { "text": "Cardboard", "isCorrect": false },
+           { "text": "Plastic bottles", "isCorrect": false },
+           { "text": "Glass jars", "isCorrect": false }
+         ]
+      },
+            ...
+          ]
+          Ensure the response is a valid JSON array with 10 questions.`
         );
-        const parsedQuestions = JSON.parse(response); // Assuming the API returns JSON-formatted questions
-        setQuestions(parsedQuestions);
+        setQuestions(response);
       } catch (error) {
         Alert.alert('Error', 'Failed to load questions. Please try again.');
       } finally {
@@ -156,13 +178,17 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   loadingText: {
-    fontSize: 18,
-    color: Colors.text.primary,
+    fontSize: 30,
+    color: Colors.primary.green,
     textAlign: 'center',
+    marginTop: 40,
+    padding: 20,
   },
   errorText: {
-    fontSize: 18,
+    fontSize: 25,
     color: Colors.primary.red,
     textAlign: 'center',
+    marginTop: 40,
+    padding: 20,
   },
 });

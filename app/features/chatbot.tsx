@@ -46,7 +46,7 @@ export default function ChatbotScreen() {
 
     // Fetch bot response from Gemini API
     try {
-      const botResponseText = await getGeminiResponse(inputText);
+      const botResponseText = (await getGeminiResponse(inputText)).join(' ');
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         text: botResponseText,

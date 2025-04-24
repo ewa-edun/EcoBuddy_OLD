@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { db } from '@lib/firebase/firebaseConfig';
 import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+//import UserIcon from '@assets/user icon.png'; // Adjust path as needed
 
 type Post = {
   id: string;
@@ -34,7 +35,7 @@ export default function CommunityScreen() {
           id: doc.id,
           user: {
             name: data.username || "Anonymous", // Fallback if username missing
-            avatar: data.user?.avatar || "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw0PDQ0ODRAPDgsQCA0IDRANDg8NDg0KFRUWFhURExMYHSggGBolGxMTITEhJSkrLi4uFx8zOD8sNygvLisBCgoKDQ0NDg0NDisZHxkrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIAOEA4QMBIgACEQEDEQH/xAAaAAEBAQEBAQEAAAAAAAAAAAAAAwQCBQEH/8QALRABAAECBAUCBQUBAAAAAAAAAAECAwQRMVEhQWFxoYGREhQysdETIkKCwVL/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AP3EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHyqqIB9EpuTycTILfFG5+pCICv6kPvxxuiA0DPEu4uT3BUc01RLoAAAAAAAAAAAAAAAAAEq6+UaA+1XNkwAAAAAAAAAd03N3ADQI0VZdlgAAAAAAAAAAAAAfKpygHFyrl7pgAAAAAJ3L1NOuu0Izip5RHrxBqGWMVPOI+ytu/TPSeoKgAAAO7dXJwA0DmirOOroAAAAAAAAAABK7PHJVnmQAAAAEMRey4Rrz6QtVOUTO0ZvPqnOZmdZnMHwBUAAacPe/jPpP+NLzXoW6s6Ynp5RXQAAAOrc8fCzOvTPD0B9AAAAAAAAABzXpPZFa5oiAAAACd/6KuzC3X/oq7MKoAAAANmF+n+0sbZhfp/tIqwCAAArb0SVtaeoOwAAAAAAAAAcXNElq9JRAAAAB8qjOJjeMnn1RlMxOueT0UMRZz4xrz6gyAKgAA9C3TlTEdPKGGs/yn0/LSigAAAClrSe6atrT1B2AAAAAAAAAAzy0JXI4g4AAAAHFd2mnWeO0ao1YraPeQVuWaauk7wjOFnlMfZ8+aq2jyfNVbR5AjCzzmPutbsUx1nr+Efmqto8nzVW0eQaxljFTzj2la3epnpO0goAAAAvTGUR2SojOfKwAAAAAAAAAADmuM4dAM47uU83ACGIvZcI15zspdr+GmZ56R3YAAFQAAAAABpsX+VXaJaXmtuHrzp46xwRVQdW6c+wO7dPB2AAAAAAAAAAAAACNdOXZYB52Mn6Y7yzNuMsTwmnjERlO7EqAAAAAAAAC+En90xvSg1YOxVM/FPCnL37A0005rRBEPqKAAAAAAAAAAAAAAAAIXsLTVx0q3j/VwHmXMLXTyzjePwg9pxXbpnWInvAPIHpVYOid47S4nA07z4VGAb4wNP8A1Ph1TgqOs95B5ytvD11aRlG88HpUWqadIiPu7RWazhKaeM/unrp7NIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//9k=", //Fallback avatar
+            avatar: data.user?.avatar || "https://placehold.co/100x100", // Fallback avatar
             badge: data.user?.badge || "Member", // Fallback badge
           },
           content: data.content,
@@ -132,15 +133,18 @@ export default function CommunityScreen() {
             {posts.map((post) => (
               <View key={post.id} style={styles.post}>
                 <View style={styles.postHeader}>
-                  <Image source={{ uri: post.user?.avatar ?? "https://placehold.co/100x100" }} style={styles.avatar} />
+                <Image 
+               source={{ uri: post.user?.avatar || "https://placehold.co/100x100" }} 
+               style={styles.avatar} 
+                />
                   <View style={styles.postHeaderText}>
-                    <Text style={styles.userName}>{post.user?.name ?? "Anonymous"}</Text>
-                    <View style={styles.badgeContainer}>
-                      <Text style={styles.badge}>{post.user?.badge ?? "Member"}</Text>
-                    </View>
+                <Text style={styles.userName}>{post.user?.name || "EcoBuddy User"}</Text>
+                  <View style={styles.badgeContainer}>
+                     <Text style={styles.badge}>{post.user?.badge ?? "Member"}</Text>
                   </View>
-                  <Text style={styles.timeAgo}>{post.timestamp}</Text>
                 </View>
+                  <Text style={styles.timeAgo}>{post.timestamp}</Text>
+              </View>
                 
                 <Text style={styles.postContent}>{post.content}</Text>
                 {post.image && (
