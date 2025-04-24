@@ -1,15 +1,15 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/Colors';
 import GameCard from '../components/GameCard';
 import { router } from 'expo-router';
 
 const GameScreen = () => {
-  const games = [
-    { title: 'Sort Trash', route: '/games/sortTrash' },
-    { title: 'Eco Wordle', route: '/games/ecoWordle' },
-    { title: 'Recycle Match', route: '/games/recycleMatch' },
-    { title: 'EcoQuiz', route: '/games/ecoQuiz' },
+  const games: { title: string; route: '/games/rules' | '/games/rules' | '/games/rules' | '/games/rules' }[] = [
+    { title: 'Sort Trash', route: '/games/rules' },
+    { title: 'Eco Wordle', route: '/games/rules' },
+    { title: 'Recycle Match', route: '/games/rules' },
+    { title: 'EcoQuiz', route: '/games/rules' },
   ];
 
   return (
@@ -20,10 +20,28 @@ const GameScreen = () => {
           <GameCard
             key={index}
             title={game.title}
-            onPress={() => router.push(game.route as any)}
+            onPress={() =>
+              router.push({
+                pathname: game.route,
+                params: { title: game.title, route: game.route },
+              })
+            }
           />
         ))}
       </View>
+
+      <TouchableOpacity
+        style={{
+          backgroundColor: Colors.primary.green,
+          padding: 15,
+          borderRadius: 15,
+          alignItems: 'center',
+          marginTop: 20,
+        }}
+        onPress={() => router.push('/(tabs)/home')}
+      >
+        <Text style={{ color: Colors.secondary.white, fontSize: 16, fontFamily: 'PlusJakartaSans-Bold', }}>Back to Home</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };

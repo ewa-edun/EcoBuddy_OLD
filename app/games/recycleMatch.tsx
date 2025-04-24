@@ -22,7 +22,7 @@ const generateGrid = () => {
 const RecycleMatch = () => {
   const [grid, setGrid] = useState<number[][]>(generateGrid());
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(150); // 2:30 minutes
+  const [timeLeft, setTimeLeft] = useState(60); // 60 seconds
   const [selected, setSelected] = useState<{ row: number; col: number } | null>(null);
   const router = useRouter();
 
@@ -56,10 +56,10 @@ const RecycleMatch = () => {
           revertedGrid[row][col] = temp;
           setGrid(revertedGrid);
         }, 500);
-        setScore(score - 10);
+        setScore(score - 4);
       } else {
         // Match found, add points
-        setScore(score + 20);
+        setScore(score + 2);
       }
     } else {
       setSelected({ row, col });
@@ -168,11 +168,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.primary.green,
     fontWeight: 'bold',
+    marginTop: 38,
+
   },
   timerText: {
     fontSize: 18,
     color: Colors.primary.red,
     fontWeight: 'bold',
+    marginTop: 38,
+
   },
   grid: {
     flex: 1,

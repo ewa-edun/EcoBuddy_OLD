@@ -7,6 +7,7 @@
     "types": ["jest", "react-native", "node"],
     "esModuleInterop": true,
     "paths": {
+      "~/*": ["./*"],
       "@lib/*": ["./lib/*"],
       "@app/*": ["./app/*"],
       "@hook/*": ["./hook/*"],

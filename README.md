@@ -301,24 +301,34 @@ npm --v
 
 3. **Install Additional Required Packages**
    ```bash
-   # UI and Icon Libraries
+   
+   npm install react react-native expo
    npm install lucide-react-native
    npm install @expo/vector-icons
-   
-   # Navigation and Routing
+   npm install react-native-svg
    npm install expo-router
    npm install @react-navigation/native
    npm install @react-navigation/stack
-   
-   # UI Components
    npm install react-native-safe-area-context
    npm install react-native-screens
-   
-   # Layout and Styling
    npm install react-native-reanimated
+   npm install react-native-gesture-handler
+   npm install firebase
+   npm install @react-native-firebase/app
+   npm install @react-native-firebase/firestore
+   npm install axios
+   npm install react-native-dotenv
+   npm install expo-constants
+   npm install expo-location
+   npm install expo-permissions
+   npm install expo-camera
+   npm install expo-image-picker
+   npm install @react-native-async-storage/async-storage
+   npm install jest
+   npm install @testing-library/react-native
+   npm install -g expo-cli
    ```
 
-- SKIP THIS NUMBER 4 STEP. I'VE NOT ADDED ANY FUCTIONALITIES YET SO ITS SAFE TO SKIP THIS RIGHT NOW.
 
 4. **Environment Setup**
    Create a `.env` file in the root directory with the following variables:

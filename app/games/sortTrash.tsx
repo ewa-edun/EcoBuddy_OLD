@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { useRouter } from 'expo-router';
 
@@ -12,7 +12,7 @@ const wasteItems = [
   { id: 6, type: 'plastic', image: require('../../assets/wastes/plastic_bag.jpg') },
   { id: 7, type: 'metal', image: require('../../assets/wastes/metal_spoon.jpg') },
   { id: 8, type: 'glass', image: require('../../assets/wastes/glass_bottle.jpg') },
-  { id: 9, type: 'paper', image: require('../../assets/wastes/cardboard_box.jpg') },
+  { id: 9, type: 'paper', image: require('../../assets/wastes/cardboard.jpg') },
   { id: 10, type: 'trash', image: require('../../assets/wastes/food_scraps.jpg') },
 ];
 
@@ -115,11 +115,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.primary.green,
     fontWeight: 'bold',
+    marginTop: 30,
   },
   timerText: {
     fontSize: 18,
     color: Colors.primary.red,
     fontWeight: 'bold',
+    marginTop: 30,
   },
   itemContainer: {
     flex: 1,
@@ -137,11 +139,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   bin: {
-    width: 80,
+    width: 60,
     height: 80,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
+    paddingEnd: 7,
   },
   binText: {
     fontSize: 14,
