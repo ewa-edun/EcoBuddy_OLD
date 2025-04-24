@@ -19,7 +19,10 @@ export const getGeminiResponse = async (userMessage: string): Promise<any>  => {
             text: userMessage
           }]
         }],
-        
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2000 // Increased for quiz questions
+        }
       },
       {
         headers: {
@@ -31,15 +34,20 @@ export const getGeminiResponse = async (userMessage: string): Promise<any>  => {
 
     const data = response.data;
     
-    if (!data.candidates || data.candidates.length === 0) {
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
       throw new Error('Invalid response structure from Gemini API');
     }
 
     // Extract the text content
     const responseText = data.candidates[0].content.parts[0].text;
 
+    // Try to parse as JSON, otherwise return as text
     try {
-      return JSON.parse(responseText);
+      const parsed = JSON.parse(responseText);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+      return [responseText];
     } catch {
       return [responseText];
     }

@@ -18,36 +18,45 @@ const Quiz = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const validateQuestions = (questions: any[]): boolean => {
+      if (!Array.isArray(questions)) return false;
+      
+      return questions.every(q => 
+        typeof q?.question === 'string' &&
+        Array.isArray(q?.options) &&
+        q.options.length === 4 &&
+        q.options.filter((o: any) => o.isCorrect).length === 1
+      );
+    };
+
     // Fetch questions from Gemini API
     const fetchQuestions = async () => {
       try {
         setLoading(true);
         const response = await getGeminiResponse(
-          `Generate 10 multiple-choice questions about recycling, waste management, and eco-friendliness. 
-          Each question should have the following structure:
-          [
-            {
-              "question": "Which of the following items should not be placed in a recycling bin?",
-              "options": [
-                { "text": "Plastic", "isCorrect": false },
-                { "text": "Glass", "isCorrect": false },
-                { "text": "Used tissue paper", "isCorrect": true },
-                { "text": "Paper", "isCorrect": false }
-              ]
-            },
-            {
-        "question": "Which of the following is considered hazardous waste?",
-        "options": [
-           { "text": "Batteries", "isCorrect": true },
-           { "text": "Cardboard", "isCorrect": false },
-           { "text": "Plastic bottles", "isCorrect": false },
-           { "text": "Glass jars", "isCorrect": false }
-         ]
-      },
-            ...
-          ]
-          Ensure the response is a valid JSON array with 10 questions.`
+          `Generate exactly 10 multiple-choice questions about recycling, waste management, and eco-friendliness. 
+          Format each question EXACTLY like this example:
+           [
+       {
+           "question": "Which item is NOT recyclable?",
+           "options": [
+               {"text": "Plastic bottles", "isCorrect": false},
+               {"text": "Pizza boxes with grease", "isCorrect": true},
+               {"text": "Glass jars", "isCorrect": false},
+               {"text": "Aluminum cans", "isCorrect": false}
+             ]
+        }
+    ]
+          
+         Rules:
+    1. Return ONLY the JSON array, no other text
+    2. Each question must have exactly 4 options
+    3. Only one option should be correct (isCorrect: true) and it can be any of the options available from 1 to 4
+    4. Ensure the JSON is valid and parsable`
         );
+        if (!validateQuestions(response)) {
+          throw new Error('Invalid question format received');
+        }
         setQuestions(response);
       } catch (error) {
         Alert.alert('Error', 'Failed to load questions. Please try again.');
@@ -59,7 +68,7 @@ const Quiz = () => {
 
     fetchQuestions();
   }, []);
-
+  
   useEffect(() => {
     // Timer logic
     if (timeLeft > 0) {
@@ -147,15 +156,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.primary.green,
     fontWeight: 'bold',
+    marginTop: 20,
+    padding: 12,
   },
   timerText: {
     fontSize: 18,
     color: Colors.primary.red,
     fontWeight: 'bold',
+    marginTop: 20,
+    padding: 12,
   },
   questionContainer: {
-    marginBottom: 20,
-  },
+    marginTop: 30,
+    },
   questionText: {
     fontSize: 20,
     color: Colors.text.primary,
@@ -175,7 +188,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
-    color: Colors.text.primary,
+    color: Colors.primary.blue,
   },
   loadingText: {
     fontSize: 30,
