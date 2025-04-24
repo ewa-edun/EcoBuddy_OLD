@@ -182,6 +182,8 @@ WEEKLY DATA TYPE
 - Dark Mode / Theme Options
 - Past chats of AI Chatbot
 - SMS Notifications.
+- Community active chalenges: Challenges are created by the admin of the app and elite users(like level 100, premium users, etc) with large followings.
+- Add more profile levels and achievements.
 - Subscription packages.
 - NEW GAME: Memory Match Eco Edition
     - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
@@ -215,24 +217,19 @@ WEEKLY DATA TYPE
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 ## Pages/Fixes to do
-- Firebase auth and firestore.
+- Supabase to store images used in the app.
+   - Let the profile image be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc).
+   - Community posts images.
+   - Blog articles post images.
+
+- Firestore.
    - Integerate in Leaderboard for game and waste recycled, 
    - points gotten, 
    - rewards claimed and method of claiming, 
    - profile levels (eco warrior and the likes), 
    - waste history, 
    - phone number/bank account on claim rewards page.
-
    - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
-
-- Supabase to store images used in the app.
-   - Let the profile image be displayed on all pages that user icon appears (chatbot, leaderboard, community, community post etc).
-   - Community posts images.
-   - Blog articles post images.
-
-- On community, add better active chalenges where users can gain points as well. These challenges are created by the creator of the app and elite users(like level 100 for example) with large followings.
-- Add more profile levels and achievements.
-- On ending screen, if score is higher than 50, let there be celebration screen where confetti comes out.
 
 - Need API's 
    - to handle claim rewards for both data and cash.
