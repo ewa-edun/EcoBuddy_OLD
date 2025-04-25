@@ -52,7 +52,7 @@ export default function CommunityScreen() {
         setCurrentUser({
           id: user.uid,
           name: user.displayName || "EcoBuddy User",
-          avatar: user.photoURL || "https://placehold.co/100x100",
+          avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member" // You can fetch this from a user profile collection if needed
         });
       }
@@ -66,7 +66,7 @@ export default function CommunityScreen() {
           id: doc.id,
           user: data.author || { // Fallback to anonymous if author data missing
             name: "EcoBuddy User",
-            avatar: "https://placehold.co/100x100",
+            avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
             badge: "Member",
             id: data.authorId || "unknown"
           },
@@ -147,7 +147,7 @@ export default function CommunityScreen() {
           user: data.user || {
             id: data.userId,
             name: "EcoBuddy User",
-            avatar: "https://placehold.co/100x100",
+            avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
             badge: "Member"
           },
           content: data.content,
@@ -295,7 +295,7 @@ setPosts(updatedPosts);
               <View key={post.id} style={styles.post}>
                 <View style={styles.postHeader}>
                 <Image 
-               source={{ uri: post.user?.avatar || "https://placehold.co/100x100" }} 
+               source={{ uri: post.user?.avatar || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png" }} 
                style={styles.avatar} 
                 />
                   <View style={styles.postHeaderText}>

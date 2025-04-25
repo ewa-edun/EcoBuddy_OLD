@@ -29,7 +29,7 @@ export default function CreatePost() {
       setUserInfo({
         id: currentUser.uid,
         name: currentUser.displayName || "EcoBuddy User",
-        avatar: currentUser.photoURL || "https://placehold.co/100x100",
+        avatar: currentUser.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
         badge: "Member"
       });
     }
@@ -136,7 +136,7 @@ export default function CreatePost() {
         author: userInfo || {
           id: user.uid,
           name: user.displayName || "EcoBuddy User",
-          avatar: user.photoURL || "https://placehold.co/100x100",
+          avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member"
         },
         content: postContent,
@@ -198,7 +198,7 @@ export default function CreatePost() {
       
       <TouchableOpacity style={styles.pickImage} onPress={pickImage}>
         <Text style={styles.pickImageText}>Pick an Image</Text>
-        {image && <Image source={{ uri: image }} style={{ width: 100, height: 100 }} />}
+        {image && <Image source={{ uri: image }} style={{ width: 100, height: 100, marginTop:10 }} />}
       </TouchableOpacity>
       
       <TouchableOpacity 

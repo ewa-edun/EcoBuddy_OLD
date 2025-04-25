@@ -60,7 +60,7 @@ export default function EducationScreen() {
   };
 
   // Default image in case article doesn't have one
-  const defaultImage = 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b';
+  const defaultImage = 'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/blog-images//EcoBuddy_logo.jpeg';
 
   return (
     <ScrollView style={styles.container}>

@@ -147,7 +147,7 @@ const ReferralsScreen = () => {
         </View>
         <Text style={styles.rewardsTitle}>Referral Rewards</Text>
         <Text style={styles.rewardsDescription}>
-          Earn 100 points for each friend who signs up using your code. They'll get 300 points too!
+          Earn 300 points for each friend who signs up using your code. They'll get 300 points too!
         </Text>
       </View>
 
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
-    paddingTop: 60,
+    paddingTop: 20,
   },
   title: {
     fontSize: 32,

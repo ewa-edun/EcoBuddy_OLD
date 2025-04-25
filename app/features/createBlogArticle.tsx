@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, Text, TextInput, TouchableOpacity, Alert, Image, Modal } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
@@ -30,6 +30,27 @@ export default function CreateBlogArticle() {
     category: 'Sustainability',
     excerpt: '', // Initialize the excerpt field
   });
+
+interface UserInfo {
+    id: string;
+    name: string;
+    avatar: string;
+    badge: string;
+  }
+
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        setUserInfo({
+          id: currentUser.uid,
+          name: currentUser.displayName || "EcoBuddy User",
+          avatar: currentUser.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
+          badge: "Member"
+        });
+      }
+    }, []);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -173,6 +194,17 @@ export default function CreateBlogArticle() {
       <View>
         <Text style={styles.title}>Create a Blog Article</Text>
         
+{/* Show user info when logged in */}
+      {userInfo && (
+        <View style={styles.userInfoContainer}>
+          <Image 
+            source={{ uri: userInfo.avatar }} 
+            style={styles.userAvatar} 
+          />
+          <Text style={styles.userName}>Posting as: {userInfo.name}</Text>
+        </View>
+      )}
+
         <TextInput
           style={styles.titleInput}
           placeholder="Article Title"
@@ -211,7 +243,7 @@ export default function CreateBlogArticle() {
         
         <TouchableOpacity style={styles.pickImage} onPress={pickImage}>
           <Text style={styles.pickImageText}>Pick an Image</Text>
-          {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />}
+          {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100, marginTop:10 }} />}
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -284,6 +316,25 @@ const styles = StyleSheet.create({
     color: Colors.primary.green,
     marginBottom: 16,
   },
+   userInfoContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      padding: 12,
+      backgroundColor: Colors.primary.cream,
+      borderRadius: 12,
+    },
+    userAvatar: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      marginRight: 10,
+    },
+    userName: {
+      fontSize: 14,
+      fontFamily: 'PlusJakartaSans-Medium',
+      color: Colors.accent.darkGray,
+    },
   titleInput: {
     height: 50,
     borderColor: Colors.accent.lightGray,
@@ -385,6 +436,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 60,
   },
   modalOverlay: {
     flex: 1,

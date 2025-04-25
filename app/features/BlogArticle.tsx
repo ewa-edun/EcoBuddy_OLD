@@ -90,19 +90,19 @@ const BlogArticle = () => {
             {
               id: 'related1',
               title: 'Global Recycling Trends in 2024',
-              image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b',
+              image: 'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png',
               author: 'Sarah Bunmi'
             },
             {
               id: 'related2',
               title: 'How To Start Composting At Home',
-              image: 'https://images.unsplash.com/photo-1595163788995-a027797fd8b2',
+              image: 'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png',
               author: 'Mike Chukuwunonye'
             },
             {
               id: 'related3',
               title: 'Plastic-Free Kitchen Swaps',
-              image: 'https://images.unsplash.com/photo-1590136019848-8d650328b645',
+              image: 'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png',
               author: 'Bello Susan'
             }
           ]);
@@ -234,7 +234,7 @@ const BlogArticle = () => {
         <Image 
           source={{ 
             uri: article.imageUrl || 
-                 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b' 
+                 'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/blog-images//EcoBuddy_logo.jpeg' 
           }} 
           style={styles.heroImage} 
         />

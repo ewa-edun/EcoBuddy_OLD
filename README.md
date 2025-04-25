@@ -183,6 +183,7 @@ WEEKLY DATA TYPE
 - Past chats of AI Chatbot
 - SMS Notifications.
 - Community active chalenges: Challenges are created by the admin of the app and elite users(like level 100, premium users, etc) with large followings.
+- Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
 - Add more profile levels and achievements.
 - Subscription packages.
 - NEW GAME: Memory Match Eco Edition
@@ -222,12 +223,13 @@ WEEKLY DATA TYPE
 
 - Firestore.
    - Integerate in Leaderboard for game and waste recycled, 
-   - points gotten, 
-   - rewards claimed and method of claiming, 
-   - profile levels (eco warrior and the likes), 
+   - All the 3 cards on the home (data earned, waste recycled, current tier), ecorewards (available points, data earned, current tier), education (article reads, discussions, knowledge), community page (members, challenges, current tier).
+   - available rewardss, points gotten, rewards claimed and method of claiming, 
+   - profile levels and achievements (eco warrior and the likes), 
    - waste history, 
    - phone number/bank account on claim rewards page.
-   - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
+   - Recent Activity on home page.
+   
 
 - Need API's 
    - to handle claim rewards for both data and cash.
