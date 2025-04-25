@@ -1,44 +1,89 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Award, Recycle } from 'lucide-react-native';
-
-// Mock data for leaderboards
-const pointsLeaderboardData = [
-  { id: '1', name: 'Adebayo James', points: 5240, avatar: require('../../assets/user icon.png') },
-  { id: '2', name: 'Chioma Obi', points: 4830, avatar: require('../../assets/user icon.png') },
-  { id: '3', name: 'Tunde Bakare', points: 4510, avatar: require('../../assets/user icon.png') },
-  { id: '4', name: 'Amaka Zuma', points: 3950, avatar: require('../../assets/user icon.png') },
-  { id: '5', name: 'Olufemi Johnson', points: 3720, avatar: require('../../assets/user icon.png') },
-  { id: '6', name: 'Ngozi Adichie', points: 3450, avatar: require('../../assets/user icon.png') },
-  { id: '7', name: 'David Adeleke', points: 3200, avatar: require('../../assets/user icon.png') },
-  { id: '8', name: 'Sarah Ibrahim', points: 2980, avatar: require('../../assets/user icon.png') },
-  { id: '9', name: 'Michael Ojo', points: 2760, avatar: require('../../assets/user icon.png') },
-  { id: '10', name: 'Fatima Hassan', points: 2540, avatar: require('../../assets/user icon.png') },
-];
-
-const wasteLeaderboardData = [
-  { id: '1', name: 'Chioma Obi', recycled: 78, avatar: require('../../assets/user icon.png') },
-  { id: '2', name: 'Adebayo James', recycled: 65, avatar: require('../../assets/user icon.png') },
-  { id: '3', name: 'Olufemi Johnson', recycled: 59, avatar: require('../../assets/user icon.png') },
-  { id: '4', name: 'Tunde Bakare', recycled: 52, avatar: require('../../assets/user icon.png') },
-  { id: '5', name: 'Ngozi Adichie', recycled: 48, avatar: require('../../assets/user icon.png') },
-  { id: '6', name: 'Amaka Zuma', recycled: 45, avatar: require('../../assets/user icon.png') },
-  { id: '7', name: 'Fatima Hassan', recycled: 42, avatar: require('../../assets/user icon.png') },
-  { id: '8', name: 'David Adeleke', recycled: 38, avatar: require('../../assets/user icon.png') },
-  { id: '9', name: 'Sarah Ibrahim', recycled: 36, avatar: require('../../assets/user icon.png') },
-  { id: '10', name: 'Michael Ojo', recycled: 33, avatar: require('../../assets/user icon.png') },
-];
+import { collection, query, orderBy, limit, getDocs, onSnapshot, where } from 'firebase/firestore';
+import { db } from '@lib/firebase/firebaseConfig';
+import { supabase } from '@lib/supabase/client';
 
 const LeaderboardScreen = () => {
   const [activeTab, setActiveTab] = useState<'points' | 'waste'>('points');
+  interface Leader {
+    id: string;
+    name?: string;
+    points?: number;
+    recycled?: number;
+    avatarUrl?: string;
+  }
 
-  const renderPointsItem = ({ item, index }: { item: typeof pointsLeaderboardData[0], index: number }) => (
+  const [pointsLeaders, setPointsLeaders] = useState<Leader[]>([]);
+  const [wasteLeaders, setWasteLeaders] = useState<Leader[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Define fetchLeaders outside of useEffect
+  const fetchLeaders = async () => {
+    try {
+      // 1. Points Leaderboard Query
+      const pointsQuery = query(
+        collection(db, 'users'),
+        orderBy('points', 'desc'),
+        limit(10),
+        where('points', '>', 0) // Only active participants
+      );
+      const pointsSnapshot = await getDocs(pointsQuery);
+      const pointsData = pointsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // 2. Waste Leaderboard Query
+      const wasteQuery = query(
+        collection(db, 'users'),
+        orderBy('recycled', 'desc'),
+        limit(10),
+        where('recycled', '>', 0) // Only users with recycling activity
+      );
+      const wasteSnapshot = await getDocs(wasteQuery);
+      const wasteData = wasteSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setPointsLeaders(pointsData);
+      setWasteLeaders(wasteData);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      Alert.alert("Error", "Could not load leaderboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // First useEffect for initial data fetch
+  useEffect(() => {
+    fetchLeaders();
+  }, []);
+
+  // Second useEffect for real-time updates
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'users'), () => {
+      fetchLeaders();
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const renderPointsItem = ({ item, index }: { item: Leader; index: number }) => (
     <View style={styles.listItem}>
       <View style={styles.rankContainer}>
         <Text style={styles.rank}>{index + 1}</Text>
       </View>
-      <Image source={item.avatar} style={styles.avatar} />
+      <Image 
+        source={item.avatarUrl ? 
+          { uri: item.avatarUrl } : 
+          require('../../assets/user icon.png')
+        } 
+        style={styles.avatar}
+      />
       <View style={styles.userInfo}>
         <Text style={styles.userName}>{item.name}</Text>
         <View style={styles.pointsContainer}>
@@ -49,12 +94,18 @@ const LeaderboardScreen = () => {
     </View>
   );
 
-  const renderWasteItem = ({ item, index }: { item: typeof wasteLeaderboardData[0], index: number }) => (
+  const renderWasteItem = ({ item, index }: { item: Leader; index: number }) => (
     <View style={styles.listItem}>
       <View style={styles.rankContainer}>
         <Text style={styles.rank}>{index + 1}</Text>
       </View>
-      <Image source={item.avatar} style={styles.avatar} />
+      <Image 
+        source={item.avatarUrl ? 
+          { uri: item.avatarUrl } : 
+          require('../../assets/user icon.png')
+        } 
+        style={styles.avatar}
+      />
       <View style={styles.userInfo}>
         <Text style={styles.userName}>{item.name}</Text>
         <View style={styles.pointsContainer}>
@@ -85,21 +136,19 @@ const LeaderboardScreen = () => {
       </View>
 
       {activeTab === 'points' ? (
-        <FlatList
-          data={pointsLeaderboardData}
-          renderItem={renderPointsItem}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-          style={styles.list}
-        />
-      ) : (
-        <FlatList
-          data={wasteLeaderboardData}
-          renderItem={renderWasteItem}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-          style={styles.list}
-        />
+      <FlatList
+        data={pointsLeaders}
+        renderItem={renderPointsItem}
+        keyExtractor={item => item.id}
+        ListEmptyComponent={<Text style={styles.noDataText}>No data available</Text>}
+      />
+    ) : (
+      <FlatList
+        data={wasteLeaders}
+        renderItem={renderWasteItem}
+        keyExtractor={item => item.id}
+        ListEmptyComponent={<Text style={styles.noDataText}>No data available</Text>}
+      />
       )}
     </View>
   );
@@ -196,6 +245,12 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14,
     color: Colors.primary.green,
+    marginLeft: 4,
+  },
+  noDataText: {
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 24,
+    color: Colors.secondary.white,
     marginLeft: 4,
   },
 });

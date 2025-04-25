@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Share, TextInput } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus, Send } from 'lucide-react-native';
+import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus, Send, AlertCircle } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { db, auth } from '@lib/firebase/firebaseConfig';
@@ -393,6 +393,15 @@ setPosts(updatedPosts);
           </View>
         ) : (
           <View style={styles.challengesContainer}>
+         {/* Disclaimer Section */}
+          <View style={styles.disclaimerContainer}>
+            <AlertCircle size={24} color={Colors.primary.red} style={styles.disclaimerIcon} />
+            <Text style={styles.disclaimerText}>
+              This feature will be fully functional in the next update. What you see below is a sneak peek of how it will look😉!
+            </Text>
+          </View>
+
+          {/* Challenges */}
             <TouchableOpacity style={styles.challengeCard}>
               <View style={styles.challengeBadge}>
                 <Trophy size={24} color={Colors.secondary.yellow} />
@@ -670,6 +679,29 @@ const styles = StyleSheet.create({
   challengesContainer: {
     padding: 16,
     gap: 16,
+  },
+  disclaimerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary.red + '56',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    shadowColor: '#fff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  disclaimerIcon: {
+    marginRight: 8,
+  },
+  disclaimerText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.secondary.white + '90',
+    flex: 1,
+    lineHeight: 20,
   },
   challengeCard: {
     backgroundColor: Colors.primary.cream,

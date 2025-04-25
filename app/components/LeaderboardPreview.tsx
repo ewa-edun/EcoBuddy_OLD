@@ -1,25 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Award, Recycle, Trophy, ChevronRight } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { db } from '@lib/firebase/firebaseConfig';
+import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 
-// Mock data for top 3 leaders
-const topPointsLeaders = [
-  { id: '1', name: 'Adebayo J.', points: 5240, avatar: require('../../assets/user icon.png') },
-  { id: '2', name: 'Chioma O.', points: 4830, avatar: require('../../assets/user icon.png') },
-  { id: '3', name: 'Tunde B.', points: 4510, avatar: require('../../assets/user icon.png') },
-];
-
-const topWasteLeaders = [
-  { id: '1', name: 'Chioma O.', recycled: 78, avatar: require('../../assets/user icon.png') },
-  { id: '2', name: 'Adebayo J.', recycled: 65, avatar: require('../../assets/user icon.png') },
-  { id: '3', name: 'Olufemi J.', recycled: 59, avatar: require('../../assets/user icon.png') },
-];
 
 const LeaderboardPreview = () => {
   const [activeTab, setActiveTab] = useState('points');
-  const currentData = activeTab === 'points' ? topPointsLeaders : topWasteLeaders;
+  interface Leader {
+    id: string;
+    name?: string;
+    avatarUrl?: string;
+    points?: number;
+    recycled?: number;
+  }
+
+  const [topLeaders, setTopLeaders] = useState<Leader[]>([]);
+
+  useEffect(() => {
+    const fetchTopLeaders = async () => {
+      try {
+        const field = activeTab === 'points' ? 'points' : 'recycled';
+        
+        const leadersQuery = query(
+          collection(db, 'users'),
+          orderBy(field, 'desc'),
+          limit(3),
+          where(field, '>', 0) // Filter out zeros
+        );
+        
+        const snapshot = await getDocs(leadersQuery);
+        setTopLeaders(snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })));
+      } catch (error) {
+        console.error("Error fetching top leaders:", error);
+      }
+    };
+  
+    fetchTopLeaders();
+  }, [activeTab]); // Re-run when tab changes
 
   return (
     <View style={styles.container}>
@@ -51,12 +74,16 @@ const LeaderboardPreview = () => {
         </TouchableOpacity>
       </View>
 
-      {currentData.map((item, index) => (
-        <View key={item.id} style={styles.leaderItem}>
-          <View style={[styles.rankBadge, index === 0 ? styles.firstPlace : (index === 1 ? styles.secondPlace : styles.thirdPlace)]}>
-            <Text style={styles.rankText}>{index + 1}</Text>
-          </View>
-          <Image source={item.avatar} style={styles.avatar} />
+      {topLeaders.map((item, index) => (
+      <View key={item.id} style={styles.leaderItem}>
+        {/* ... */}
+        <Image 
+          source={item.avatarUrl ? 
+            { uri: item.avatarUrl } : 
+            require('../../assets/user icon.png')
+          } 
+          style={styles.avatar}
+        />
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{item.name}</Text>
             <View style={styles.statsContainer}>

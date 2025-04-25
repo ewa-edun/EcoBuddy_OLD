@@ -218,18 +218,26 @@ WEEKLY DATA TYPE
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 ## Pages/Fixes to do
-- Poster still showing annonymous even though im logged in.
-- Find a solution to why profile images are saying network error from supabase.
-
-- Firestore.
-   - Integerate in Leaderboard for game and waste recycled, 
-   - All the 3 cards on the home (data earned, waste recycled, current tier), ecorewards (available points, data earned, current tier), education (article reads, discussions, knowledge), community page (members, challenges, current tier).
-   - available rewardss, points gotten, rewards claimed and method of claiming, 
+EDUCATION PAGE
+   - All the 3 cards on the education (article reads, discussions, knowledge),
+COMMUNITY PAGE
+   - All the 3 cards on the  community page (members, challenges, current tier).
+ECO REWARDS PAGE
+   - available rewardss, points gotten,  
+   - All the 3 cards on the ecorewards (available points, data earned, current tier),
+PROFILE PAGE
    - profile levels and achievements (eco warrior and the likes), 
-   - waste history, 
-   - phone number/bank account on claim rewards page.
+   - Find a solution to why profile images are saying network error from supabase.
+HOME PAGE
+   - All the 3 cards on the home (data earned, waste recycled, current tier),
    - Recent Activity on home page.
-   
+WASTE HISTORY PAGE
+   - waste history, 
+CLAIM REWARDS PAGE
+   - rewards claimed and method of claiming,
+   - phone number/bank account on claim rewards page.
+WASTE SCHEDULE PAGE
+   - Amount of kg waste converted to points.
 
 - Need API's 
    - to handle claim rewards for both data and cash.
@@ -239,6 +247,7 @@ WEEKLY DATA TYPE
 - The model should have better predictions.
 - Mobile Kiosk page
 - Charity page
+- Poster still showing annonymous even though im logged in.
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)
