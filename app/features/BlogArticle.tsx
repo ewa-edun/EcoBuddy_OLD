@@ -169,6 +169,30 @@ const BlogArticle = () => {
     }
   };
 
+// Add a function to format the date
+const formatDate = (timestamp: Timestamp | string | null) => {
+  if (!timestamp) return 'Unknown date';
+  
+  // Check if it's a Firestore Timestamp
+  if (timestamp instanceof Timestamp) {
+    // Convert to JavaScript Date
+    const date = timestamp.toDate();
+    // Format the date (you can adjust the format as needed)
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  
+  // If it's already a string, just return it
+  if (typeof timestamp === 'string') {
+    return timestamp;
+  }
+  
+  return 'Unknown date';
+};
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -203,7 +227,7 @@ const BlogArticle = () => {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton} 
-          onPress={() => router.back()}
+          onPress={() => router.push('/(tabs)/education')}
         >
           <ArrowLeft size={24} color={Colors.text.darker} />
         </TouchableOpacity>
@@ -246,8 +270,8 @@ const BlogArticle = () => {
             <Text style={styles.metaText}>{article.author?.name || 'EcoBuddy Team'}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Calendar size={16} color={Colors.text.secondary} />
-            <Text style={styles.metaText}>{article.date || 'May 10, 2024'}</Text>
+             <Calendar size={16} color={Colors.text.secondary} />
+             <Text style={styles.metaText}>{formatDate(article.date)}</Text>
           </View>
           <View style={styles.metaItem}>
             <Clock size={16} color={Colors.text.secondary} />

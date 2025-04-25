@@ -3,9 +3,11 @@ import { StyleSheet, ScrollView, View, Text, TextInput, TouchableOpacity, Alert,
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { auth, db, storage } from '@lib/firebase/firebaseConfig';
+import { auth, db } from '@lib/firebase/firebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
+import { supabase } from '@lib/supabase/client';
 
 type ArticleFormData = {
   title: string;
@@ -15,8 +17,8 @@ type ArticleFormData = {
 };
 
 export default function CreateBlogArticle() {
-const [loading, setLoading] = useState(false);
-const [imageUri, setImageUri] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const [formData, setFormData] = useState<ArticleFormData>({
     title: '',
     content: '',
@@ -29,7 +31,7 @@ const [imageUri, setImageUri] = useState<string | null>(null);
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
@@ -37,56 +39,110 @@ const [imageUri, setImageUri] = useState<string | null>(null);
     }
   };
 
-  const uploadImage = async (uri: string) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const storageRef = ref(storage, `blogImages/${Date.now()}`);
-    await uploadBytes(storageRef, blob);
-    return await getDownloadURL(storageRef);
+  const uploadImageToSupabase = async (uri: string) => {
+    try {
+      // Generate a unique file name
+      const fileName = `blog-image-${Date.now()}.jpg`;
+      
+      // Read the image file as base64
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      // Convert base64 to array buffer
+      const arrayBuffer = decode(base64);
+      
+      // Upload to Supabase storage
+      const { data, error } = await supabase
+        .storage
+        .from('blog-images') // Your bucket name
+        .upload(fileName, arrayBuffer, {
+          contentType: 'image/jpeg',
+        });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // For private buckets, create a signed URL
+      const { data: signedUrlData, error: signedUrlError } = await supabase
+        .storage
+        .from('blog-images')
+        .createSignedUrl(fileName, 60 * 60 * 24 * 30); // URL valid for 30 days
+        
+      if (signedUrlError) {
+        throw new Error(signedUrlError.message);
+      }
+      
+      return {
+        url: signedUrlData.signedUrl,
+        path: fileName // Store the path for future reference
+      };
+    } catch (error) {
+      console.error('Error uploading image to Supabase:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-  try {
-    if (!auth.currentUser) {
-      Alert.alert('Error', 'You must be logged in to create articles');
-      return;
-    }
+    try {
+      if (!auth.currentUser) {
+        Alert.alert('Error', 'You must be logged in to create articles');
+        return;
+      }
 
-    let imageUrl = '';
-    if (imageUri) {
-      imageUrl = await uploadImage(imageUri);
-    }
+      if (!formData.title.trim()) {
+        Alert.alert('Error', 'Please enter a title for your article');
+        setLoading(false);
+        return;
+      }
 
-    const docRef = await addDoc(collection(db, 'blogArticles'), {
-      title: formData.title,
-      content: formData.content,
-      image: imageUrl,
-      category: formData.category,
-      author: {
-        name: auth.currentUser.displayName || 'Anonymous',
-        id: auth.currentUser.uid,
-        avatar: auth.currentUser.photoURL || null
-      },
-      date: serverTimestamp(),
-      views: 0,
-      readingTime: calculateReadingTime(formData.content),
-      lastUpdated: serverTimestamp()
-    });
-    
-    Alert.alert('Success', 'Article published successfully!');
-    router.replace(`/features/BlogArticle?id=${docRef.id}`);
-  } catch (error) {
-    console.error('Error publishing article:', error);
-    if ((error as { code: string }).code === 'permission-denied') {
-      Alert.alert('Error', 'You do not have permission to create articles');
-    } else {
-      Alert.alert('Error', 'Failed to publish article');
+      if (!formData.content.trim()) {
+        Alert.alert('Error', 'Please enter content for your article');
+        setLoading(false);
+        return;
+      }
+
+      let imageData = null;
+      if (imageUri) {
+        imageData = await uploadImageToSupabase(imageUri);
+      }
+
+      const docRef = await addDoc(collection(db, 'blogArticles'), {
+        title: formData.title,
+        content: formData.content,
+        // Only add these fields if imageData exists
+  ...(imageData?.url && { imageUrl: imageData.url }),
+  ...(imageData?.path && { imagePath: imageData.path }),
+  
+        imageUrl: imageData?.url,
+        imagePath: imageData?.path, // Store path for future reference
+        category: formData.category,
+        author: {
+          name: auth.currentUser.displayName || 'Anonymous',
+          id: auth.currentUser.uid,
+          avatar: auth.currentUser.photoURL || null
+        },
+        date: serverTimestamp(),
+        views: 0,
+        readingTime: calculateReadingTime(formData.content),
+        lastUpdated: serverTimestamp()
+      });
+      
+      Alert.alert('Success', 'Article published successfully!');
+      router.replace(`/features/BlogArticle?id=${docRef.id}`);
+    } catch (error) {
+      console.error('Error publishing article:', error);
+      if ((error as { code: string }).code === 'permission-denied') {
+        Alert.alert('Error', 'You do not have permission to create articles');
+      } else {
+        Alert.alert('Error', 'Failed to publish article');
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
- };
+  };
 
   const calculateReadingTime = (content: string) => {
     const words = content.split(/\s+/).length;
@@ -94,7 +150,6 @@ const [imageUri, setImageUri] = useState<string | null>(null);
     return `${minutes} min read`;
   };
   
-
   const handleBack = () => {
     router.replace('/(tabs)/education');
   };
@@ -102,32 +157,40 @@ const [imageUri, setImageUri] = useState<string | null>(null);
   return (
     <ScrollView style={styles.container}>
       <View>
-      <Text style={styles.title}>Create a Blog Article</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Article Title"
-        value={formData.title}
-        onChangeText={(text) => setFormData({...formData, title: text})}
-   />
-   <TextInput
-       style={styles.input}
-       placeholder="Article Content"
-       value={formData.content}
-       onChangeText={(text) => setFormData({...formData, content: text})}
-       multiline
-    />
-  <TouchableOpacity style={styles.pickImage} onPress={pickImage}>
-    <Text style={styles.pickImageText}>Pick an Image</Text>
-    {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />}
-  </TouchableOpacity>
-      
-      <TouchableOpacity style={styles.postButton} onPress={handleSubmit}>
-        <Text style={styles.postButtonText}>Post Article</Text>
-      </TouchableOpacity>
+        <Text style={styles.title}>Create a Blog Article</Text>
+        <TextInput
+          style={styles.titleInput}
+          placeholder="Article Title"
+          value={formData.title}
+          onChangeText={(text) => setFormData({...formData, title: text})}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Article Content"
+          value={formData.content}
+          onChangeText={(text) => setFormData({...formData, content: text})}
+          multiline
+        />
+        <TouchableOpacity style={styles.pickImage} onPress={pickImage}>
+          <Text style={styles.pickImageText}>Pick an Image</Text>
+          {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />}
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.postButton, loading && styles.disabledButton]} 
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.postButtonText}>{loading ? 'Posting...' : 'Post Article'}</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-        <Text style={styles.postButtonText}>Back</Text>
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={handleBack}
+          disabled={loading}
+        >
+          <Text style={styles.postButtonText}>Back</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -150,6 +213,17 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: 'PlusJakartaSans-Bold',
     color: Colors.primary.green,
+    marginBottom: 16,
+  },
+  titleInput: {
+    height: 50,
+    borderColor: Colors.accent.lightGray,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
     marginBottom: 16,
   },
   input: {
@@ -175,22 +249,25 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   pickImage: {
-      backgroundColor: Colors.background.modal,
-      padding: 12,
-      borderRadius: 30,
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    pickImageText: {
-      color: Colors.text.darker,
-      fontSize: 16,
-      fontFamily: 'PlusJakartaSans-SemiBold',
-    },
+    backgroundColor: Colors.background.modal,
+    padding: 12,
+    borderRadius: 30,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  pickImageText: {
+    color: Colors.text.darker,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+  },
   postButton: {
     backgroundColor: Colors.primary.green,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: Colors.primary.green + '80', // Add opacity to show disabled state
   },
   postButtonText: {
     color: Colors.secondary.white,
@@ -204,4 +281,4 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-}); 
+});

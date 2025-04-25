@@ -98,6 +98,13 @@ export default function FeaturesLayout() {
         headerShown: true,
       }}
     />
+    <Stack.Screen
+      name="BlogArticle"
+      options={{
+        title: 'Blog Article',
+        headerShown: false,
+      }}
+    />
     </Stack>
   );
 } 

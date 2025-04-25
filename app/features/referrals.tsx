@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 50,
-    backgroundColor: Colors.background.card,
+    backgroundColor: Colors.background.modal,
     borderRadius: 8,
     paddingHorizontal: 16,
     color: Colors.text.primary,

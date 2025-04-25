@@ -27,6 +27,7 @@
     "@tensorflow/tfjs-react-native": "^1.0.0",
     "@types/firebase": "^2.4.32",
     "axios": "^1.8.4",
+    "base64-arraybuffer": "^1.0.2",
     "ecobuddy": "file:",
     "expo": "~52.0.46",
     "expo-auth-session": "~6.0.3",

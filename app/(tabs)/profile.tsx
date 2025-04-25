@@ -217,7 +217,7 @@ const handleImagePicker = async () => {
               await deleteUser(user);
               
               Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
-              router.replace('/(auth)/login');
+              router.replace('/(auth)/register'); // Redirect to register page after deletion
             } catch (error: any) {
               console.error('Delete account error:', error);
               
@@ -245,9 +245,16 @@ const handleImagePicker = async () => {
       'How would you like to share your review?',
       [
         {
-          text: 'App Store',
+          text: 'Apple Store',
           onPress: () => {
-            // Opens app store for review - update the URL to your actual app store URL
+  //Opens app store for review . update the URL to actual app store URL once deployed
+            Linking.openURL('https://play.google.com/store/apps/details?id=com.ecobuddy.app');
+          }
+        },
+        {
+          text: 'Google Play Store',
+          onPress: () => {
+  //Opens play store for review. update the URL to actual play store URL once deployed
             Linking.openURL('https://play.google.com/store/apps/details?id=com.ecobuddy.app');
           }
         },

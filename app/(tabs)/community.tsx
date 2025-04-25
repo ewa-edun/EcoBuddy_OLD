@@ -1,11 +1,10 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Share } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Share, TextInput } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus } from 'lucide-react-native';
+import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus, Send } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { db } from '@lib/firebase/firebaseConfig';
-import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
-//import UserIcon from '@assets/user icon.png'; // Adjust path as needed
+import { db, auth } from '@lib/firebase/firebaseConfig';
+import { collection, onSnapshot, updateDoc, doc, addDoc, query, where, orderBy, getDocs } from 'firebase/firestore';
 
 type Post = {
   id: string;
@@ -13,11 +12,26 @@ type Post = {
     name: string;
     avatar: string;
     badge: string;
+    id: string;
   };
   content: string;
   image?: string;
   likes: string[]; // Array of user IDs who liked the post
   comments: number;
+  timestamp: string;
+  commentsData?: Comment[];
+};
+
+type Comment = {
+  id: string;
+  postId: string;
+  user: {
+    id: string;
+    name: string;
+    avatar: string;
+    badge: string;
+  };
+  content: string;
   timestamp: string;
 };
 
@@ -25,8 +39,25 @@ export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState<'feed' | 'challenges'>('feed');
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedCommentPosts, setExpandedCommentPosts] = useState<string[]>([]);
+  const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
+  const [loadingComments, setLoadingComments] = useState<{ [key: string]: boolean }>({});
+  const [hasMoreComments, setHasMoreComments] = useState<{ [key: string]: boolean }>({});
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
+    // Get current user
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setCurrentUser({
+          id: user.uid,
+          name: user.displayName || "EcoBuddy User",
+          avatar: user.photoURL || "https://placehold.co/100x100",
+          badge: "Member" // You can fetch this from a user profile collection if needed
+        });
+      }
+    });
+
     // Fetch posts from Firestore
     const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
       const fetchedPosts = snapshot.docs.map((doc) => {
@@ -36,7 +67,8 @@ export default function CommunityScreen() {
           user: data.author || { // Fallback to anonymous if author data missing
             name: "EcoBuddy User",
             avatar: "https://placehold.co/100x100",
-            badge: "Member"
+            badge: "Member",
+            id: data.authorId || "unknown"
           },
           content: data.content,
           image: data.imageUrl || undefined,
@@ -49,10 +81,16 @@ export default function CommunityScreen() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      unsubscribeAuth();
+    };
   }, []);
 
-  const handleLike = async (postId: string, userId: string) => {
+  const handleLike = async (postId: string) => {
+    if (!currentUser) return;
+    
+    const userId = currentUser.id;
     const postRef = doc(db, 'posts', postId);
     const post = posts.find((p) => p.id === postId);
     if (!post) return;
@@ -64,7 +102,7 @@ export default function CommunityScreen() {
     await updateDoc(postRef, { likes: updatedLikes });
   };
 
-const handleShare = async () => {
+  const handleShare = async () => {
     try {
       await Share.share({
         message: `Check Out my post on EcoBuddy and start your eco-friendly journey!`,
@@ -76,6 +114,109 @@ const handleShare = async () => {
 
   const handlePost = () => {
     router.replace('/features/createPost');
+  };
+
+  const toggleComments = async (postId: string) => {
+    if (expandedCommentPosts.includes(postId)) {
+      setExpandedCommentPosts(expandedCommentPosts.filter(id => id !== postId));
+      return;
+    }
+    
+    setExpandedCommentPosts([...expandedCommentPosts, postId]);
+    await loadComments(postId);
+  };
+
+  const loadComments = async (postId: string) => {
+    if (loadingComments[postId]) return;
+    
+    setLoadingComments({...loadingComments, [postId]: true});
+    
+    try {
+      const commentsQuery = query(
+        collection(db, 'comments'),
+        where('postId', '==', postId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const commentSnapshot = await getDocs(commentsQuery);
+      const comments = commentSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          postId: data.postId,
+          user: data.user || {
+            id: data.userId,
+            name: "EcoBuddy User",
+            avatar: "https://placehold.co/100x100",
+            badge: "Member"
+          },
+          content: data.content,
+          timestamp: data.createdAt?.toDate().toLocaleString() || "Just now",
+        };
+      });
+      
+      // Update the post with comments
+      setPosts(posts.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            commentsData: comments
+          };
+        }
+        return post;
+      }));
+      
+      // Set if there are more comments than what's loaded
+      setHasMoreComments({
+        ...hasMoreComments,
+        [postId]: comments.length < (posts.find(p => p.id === postId)?.comments || 0)
+      });
+      
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    } finally {
+      setLoadingComments({...loadingComments, [postId]: false});
+    }
+  };
+
+  const handleCommentSubmit = async (postId: string) => {
+    if (!commentText[postId]?.trim() || !currentUser) return;
+    
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    
+    try {
+      // Create comment in Firestore
+      const newComment = {
+        postId,
+        userId: currentUser.id,
+        user: {
+          id: currentUser.id,
+          name: currentUser.name,
+          avatar: currentUser.avatar,
+          badge: currentUser.badge
+        },
+        content: commentText[postId],
+        createdAt: new Date()
+      };
+      
+      await addDoc(collection(db, 'comments'), newComment);
+      
+      // Update post's comment count
+      const postRef = doc(db, 'posts', postId);
+      await updateDoc(postRef, {
+        comments: (post.comments || 0) + 1
+      });
+      
+      // Clear input
+      setCommentText({...commentText, [postId]: ''});
+      
+      // Reload comments to show the new one
+      await loadComments(postId);
+      
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
   };
 
   return (
@@ -163,25 +304,80 @@ const handleShare = async () => {
                 <View style={styles.postActions}>
                 <TouchableOpacity
                       style={styles.actionButton}
-                      onPress={() => handleLike(post.id, 'currentUserId')}>
+                      onPress={() => handleLike(post.id)}>
                       <Heart
                         size={20}
                         color={
-                          post.likes.includes('currentUserId')
+                          currentUser && post.likes.includes(currentUser.id)
                             ? Colors.primary.green
                             : Colors.accent.darkGray
                         }
                       />
                       <Text style={styles.actionText}>{post.likes.length}</Text>
                     </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                    <MessageCircle size={20} color={Colors.accent.darkGray} />
+              <TouchableOpacity style={styles.actionButton} onPress={() => toggleComments(post.id)}>
+                    <MessageCircle size={20} color={expandedCommentPosts.includes(post.id) ? Colors.primary.green : Colors.accent.darkGray} />
                     <Text style={styles.actionText}>{post.comments}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
                     <Share2 size={20} color={Colors.accent.darkGray} />
                   </TouchableOpacity>
                 </View>
+                
+                {/* Comment Section */}
+                {expandedCommentPosts.includes(post.id) && (
+                  <View style={styles.commentSection}>
+                    {/* Comment Input */}
+                    <View style={styles.commentInputContainer}>
+                      <TextInput
+                        style={styles.commentInput}
+                        placeholder="Write a comment..."
+                        value={commentText[post.id] || ''}
+                        onChangeText={(text) => setCommentText({...commentText, [post.id]: text})}
+                        multiline
+                      />
+                      <TouchableOpacity 
+                        style={styles.sendButton}
+                        onPress={() => handleCommentSubmit(post.id)}
+                        disabled={!commentText[post.id]?.trim()}
+                      >
+                        <Send size={20} color={commentText[post.id]?.trim() ? Colors.primary.green : Colors.accent.lightGray} />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {/* Comment List */}
+                    <View style={styles.commentsList}>
+                      {loadingComments[post.id] ? (
+                        <Text style={styles.commentStatusText}>Loading comments...</Text>
+                      ) : post.commentsData?.length ? (
+                        <>
+                          {post.commentsData.map((comment) => (
+                            <View key={comment.id} style={styles.commentItem}>
+                              <Image source={{ uri: comment.user.avatar }} style={styles.commentAvatar} />
+                              <View style={styles.commentContent}>
+                                <View style={styles.commentHeader}>
+                                  <Text style={styles.commentUserName}>{comment.user.name}</Text>
+                                  <Text style={styles.commentTime}>{comment.timestamp}</Text>
+                                </View>
+                                <Text style={styles.commentText}>{comment.content}</Text>
+                              </View>
+                            </View>
+                          ))}
+                          
+                          {hasMoreComments[post.id] && (
+                            <TouchableOpacity onPress={() => loadComments(post.id)}>
+                              <Text style={styles.loadMoreText}>
+                                Click to load more comments
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </>
+                      ) : (
+                        <Text style={styles.commentStatusText}>No comments yet. Be the first to comment!</Text>
+                      )}
+                    </View>
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -379,6 +575,87 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.accent.darkGray,
+  },
+  commentSection: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.accent.lightGray,
+    paddingTop: 16,
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', 
+    marginBottom: 16,
+  },
+  commentInput: {
+    flex: 1,
+    backgroundColor: Colors.background.main,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
+    maxHeight: 100,
+  },
+  sendButton: {
+    marginLeft: 12,
+    padding: 8,
+  },
+  commentsList: {
+    gap: 12,
+  },
+  commentStatusText: {
+    textAlign: 'center',
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.accent.darkGray,
+    marginVertical: 8,
+  },
+  commentItem: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  commentAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  commentContent: {
+    flex: 1,
+    backgroundColor: Colors.background.main,
+    borderRadius: 12,
+    padding: 12,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  commentUserName: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.secondary.white,
+  },
+  commentTime: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.accent.darkGray,
+    paddingLeft: 2,
+  },
+  commentText: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
+  },
+  loadMoreText: {
+    textAlign: 'center',
+    color: Colors.primary.green,
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    marginTop: 8,
+    padding: 8,
   },
   challengesContainer: {
     padding: 16,

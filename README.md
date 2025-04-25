@@ -222,8 +222,7 @@ WEEKLY DATA TYPE
    - Community posts images.
    - Blog articles post images.
 
-- handle comments of community page.
-
+ On the leaderboard and leaderboard preview files, link them to firebase firestore so that the scores points and the waste recycled
 - Firestore.
    - Integerate in Leaderboard for game and waste recycled, 
    - points gotten, 
