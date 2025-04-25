@@ -182,9 +182,12 @@ export default function CommunityScreen() {
   const handleCommentSubmit = async (postId: string) => {
     if (!commentText[postId]?.trim() || !currentUser) return;
     
-    const post = posts.find(p => p.id === postId);
-    if (!post) return;
+    //const post = posts.find(p => p.id === postId);
+    //if (!post) return;
     
+    const postIndex = posts.findIndex((p) => p.id === postId);
+    if (postIndex === -1) return;
+
     try {
       // Create comment in Firestore
       const newComment = {
@@ -202,18 +205,25 @@ export default function CommunityScreen() {
       
       await addDoc(collection(db, 'comments'), newComment);
       
+// Optimistically update the comment count locally
+const updatedPosts = [...posts];
+updatedPosts[postIndex] = {
+  ...updatedPosts[postIndex],
+  comments: (updatedPosts[postIndex].comments || 0) + 1,
+};
+setPosts(updatedPosts);
+
       // Update post's comment count
       const postRef = doc(db, 'posts', postId);
-      await updateDoc(postRef, {
-        comments: (post.comments || 0) + 1
-      });
+    await updateDoc(postRef, {
+      comments: updatedPosts[postIndex].comments,
+    });
       
       // Clear input
       setCommentText({...commentText, [postId]: ''});
       
       // Reload comments to show the new one
       await loadComments(postId);
-      
     } catch (error) {
       console.error('Error submitting comment:', error);
     }

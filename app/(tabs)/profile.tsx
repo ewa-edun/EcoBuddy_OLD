@@ -133,28 +133,97 @@ const handleImagePicker = async () => {
     try {
       setLoading(true);
 
-      //Upload image to Supabase
-      const publicUrl = await uploadAvatar(auth.currentUser.uid, result.assets[0].uri);
+ // Validate the image exists and has a valid URI
+ if (!result.assets || !result.assets[0] || !result.assets[0].uri) {
+  throw new Error("Selected image is invalid or missing URI");
+}
+
+const imageUri = result.assets[0].uri;
+console.log("Selected image URI:", imageUri);
+
+// Check file size (optional - large files might cause upload issues)
+const fileInfo = await fetch(imageUri).then(response => ({
+  size: parseInt(response.headers.get('Content-Length') || '0'),
+  type: response.headers.get('Content-Type')
+})).catch(err => {
+  console.log("Error checking file info:", err);
+  return { size: 0, type: null };
+});
+
+console.log("File size:", fileInfo.size, "bytes, type:", fileInfo.type);
+
+if (fileInfo.size > 5000000) { // 5MB limit example
+  Alert.alert('File too large', 'Please select an image smaller than 5MB');
+  setLoading(false);
+  return;
+}
+
+      // Upload image to Supabase with detailed error handling
+      console.log("Starting upload to Supabase for user:", auth.currentUser.uid);
+      const publicUrl = await uploadAvatar(auth.currentUser.uid, imageUri)
+        .catch(error => {
+          console.error("Supabase upload error details:", error);
+          Alert.alert(
+            'Upload Error', 
+            `Failed to upload image: ${error.message || 'Unknown error'}`
+          );
+          throw error; // Re-throw to stop the process
+        });
       
-      // Update Firebase auth profile
-      await updateProfile(auth.currentUser, { photoURL: publicUrl });
+      console.log("Image uploaded successfully, public URL:", publicUrl);
+      
+       // Update Firebase auth profile
+       await updateProfile(auth.currentUser, { photoURL: publicUrl })
+       .catch(error => {
+         console.error("Firebase profile update error:", error);
+         Alert.alert(
+           'Profile Update Error',
+           `Failed to update profile: ${error.message || 'Unknown error'}`
+         );
+         throw error;
+       });
+     
+     console.log("Auth profile updated successfully");
       
       // Update Firestore
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         photoURL: publicUrl,
         avatarLastUpdated: new Date().toISOString()
+      }).catch(error => {
+        console.error("Firestore update error:", error);
+        Alert.alert(
+          'Database Update Error',
+          `Failed to update user data: ${error.message || 'Unknown error'}`
+        );
+        throw error;
       });
+      
+      console.log("Firestore updated successfully");
 
       setAvatar(publicUrl);
       Alert.alert('Success', 'Avatar updated successfully!');
     } catch (error) {
       console.error('Error updating avatar:', error);
-      Alert.alert('Error', 'Failed to update avatar');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      Alert.alert(
+        'Avatar Update Failed', 
+        `Error: ${errorMessage}\n\nPlease try again or contact support if the issue persists.`
+      );
     } finally {
       setLoading(false);
     }
   }
 };
+
+const renderAvatar = () => {
+  if (loading) {
+    return (
+      <View style={[styles.avatar, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.primary.green} />
+      </View>
+    );
+  }
+}
 
 {loading && (
   <View style={[styles.avatar, styles.loadingOverlay]}>
@@ -318,13 +387,17 @@ const handleImagePicker = async () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
-        <Image source={{ 
-    uri: avatar || 
-    'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//default-avatar.png' 
-  }} 
-  style={styles.avatar}
-  onError={() => setAvatar('https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//default-avatar.png')}
-  />
+        <Image 
+      source={{ 
+        uri: avatar || 
+        'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars/default-avatar.png' 
+      }} 
+      style={styles.avatar}
+      onError={(e) => {
+        console.error("Image loading error:", e.nativeEvent.error);
+        setAvatar('https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars/default-avatar.png');
+      }}
+    />
           <View style={styles.profileInfo}>
             <Text style={styles.name}>{userData.name}</Text>
             <Text style={styles.role}>{userData.role}</Text>
@@ -511,6 +584,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.accent.darkGray,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.accent.lightGray,
   },
   section: {
     padding: 24,

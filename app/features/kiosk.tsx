@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, TextInput, Alert, FlatList } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { MapPin, Recycle, User, Phone, Calendar, ArrowRight, AlertCircle, FileText, Scale, TrendingUp, Handshake, Search } from 'lucide-react-native';
+import { MapPin, Recycle, User, Phone, Calendar, ArrowRight, AlertCircle, FileText, Scale, TrendingUp, Smile, Search } from 'lucide-react-native';
 
 // Mock data for kiosk locations
 const kioskLocations = [
@@ -197,7 +197,7 @@ const KioskScreen = () => {
           style={[styles.tab, selectedTab === 'becomeAgent' && styles.activeTab]} 
           onPress={() => setSelectedTab('becomeAgent')}
         >
-          <Handshake size={18} color={selectedTab === 'becomeAgent' ? Colors.secondary.white : Colors.text.darker} />
+          <Smile size={18} color={selectedTab === 'becomeAgent' ? Colors.secondary.white : Colors.text.darker} />
           <Text style={[styles.tabText, selectedTab === 'becomeAgent' && styles.activeTabText]}>Become Agent</Text>
         </TouchableOpacity>
       </View>

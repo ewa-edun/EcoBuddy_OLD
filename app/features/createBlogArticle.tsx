@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
+import { StyleSheet, ScrollView, View, Text, TextInput, TouchableOpacity, Alert, Image, Modal } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
@@ -14,16 +14,21 @@ type ArticleFormData = {
   content: string;
   image: string;
   category: string;
+  excerpt: string; // Added excerpt field
 };
+
+const CATEGORIES = ['Sustainability', 'Recycling', 'Community', 'Technology'];
 
 export default function CreateBlogArticle() {
   const [loading, setLoading] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [formData, setFormData] = useState<ArticleFormData>({
     title: '',
     content: '',
     image: '',
-    category: 'Sustainability'
+    category: 'Sustainability',
+    excerpt: '', // Initialize the excerpt field
   });
 
   const pickImage = async () => {
@@ -104,6 +109,12 @@ export default function CreateBlogArticle() {
         return;
       }
 
+      if (!formData.excerpt.trim()) {
+        Alert.alert('Error', 'Please enter a headline/excerpt for your article');
+        setLoading(false);
+        return;
+      }
+
       let imageData = null;
       if (imageUri) {
         imageData = await uploadImageToSupabase(imageUri);
@@ -112,13 +123,11 @@ export default function CreateBlogArticle() {
       const docRef = await addDoc(collection(db, 'blogArticles'), {
         title: formData.title,
         content: formData.content,
+        excerpt: formData.excerpt, // Save the excerpt to Firestore
         // Only add these fields if imageData exists
-  ...(imageData?.url && { imageUrl: imageData.url }),
-  ...(imageData?.path && { imagePath: imageData.path }),
-  
-        imageUrl: imageData?.url,
-        imagePath: imageData?.path, // Store path for future reference
-        category: formData.category,
+        ...(imageData?.url && { imageUrl: imageData.url }),
+        ...(imageData?.path && { imagePath: imageData.path }),
+        category: formData.category, // Save the selected category
         author: {
           name: auth.currentUser.displayName || 'Anonymous',
           id: auth.currentUser.uid,
@@ -154,16 +163,44 @@ export default function CreateBlogArticle() {
     router.replace('/(tabs)/education');
   };
 
+  const selectCategory = (category: string) => {
+    setFormData({...formData, category});
+    setShowCategoryModal(false);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View>
         <Text style={styles.title}>Create a Blog Article</Text>
+        
         <TextInput
           style={styles.titleInput}
           placeholder="Article Title"
           value={formData.title}
           onChangeText={(text) => setFormData({...formData, title: text})}
         />
+        
+        {/* Excerpt/Headline Input */}
+        <TextInput
+          style={styles.excerptInput}
+          placeholder="Article Headline/Excerpt (brief summary)"
+          value={formData.excerpt}
+          onChangeText={(text) => setFormData({...formData, excerpt: text})}
+          multiline
+          numberOfLines={2}
+        />
+        
+        {/* Category Selector */}
+        <TouchableOpacity 
+          style={styles.categorySelector}
+          onPress={() => setShowCategoryModal(true)}
+        >
+          <Text style={styles.categoryLabel}>Category:</Text>
+          <View style={styles.selectedCategoryContainer}>
+            <Text style={styles.selectedCategory}>{formData.category}</Text>
+          </View>
+        </TouchableOpacity>
+        
         <TextInput
           style={styles.input}
           placeholder="Article Content"
@@ -171,6 +208,7 @@ export default function CreateBlogArticle() {
           onChangeText={(text) => setFormData({...formData, content: text})}
           multiline
         />
+        
         <TouchableOpacity style={styles.pickImage} onPress={pickImage}>
           <Text style={styles.pickImageText}>Pick an Image</Text>
           {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />}
@@ -192,6 +230,37 @@ export default function CreateBlogArticle() {
           <Text style={styles.postButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Category Selection Modal */}
+      <Modal
+        visible={showCategoryModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCategoryModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Category</Text>
+            
+            {CATEGORIES.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={styles.categoryOption}
+                onPress={() => selectCategory(category)}
+              >
+                <Text style={styles.categoryOptionText}>{category}</Text>
+              </TouchableOpacity>
+            ))}
+            
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowCategoryModal(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -226,6 +295,41 @@ const styles = StyleSheet.create({
     color: Colors.text.darker,
     marginBottom: 16,
   },
+  excerptInput: {
+    height: 80,
+    borderColor: Colors.accent.lightGray,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
+    marginBottom: 16,
+    textAlignVertical: 'top',
+  },
+  categorySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  categoryLabel: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.text.darker,
+    marginRight: 10,
+  },
+  selectedCategoryContainer: {
+    backgroundColor: Colors.primary.green + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    flex: 1,
+  },
+  selectedCategory: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.primary.green,
+  },
   input: {
     height: 180,
     borderColor: Colors.accent.lightGray,
@@ -236,6 +340,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.darker,
     marginBottom: 16,
+    textAlignVertical: 'top',
   },
   numberinput: {
     height: 70,
@@ -280,5 +385,47 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: Colors.background.main,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: Colors.primary.green,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  categoryOption: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.accent.lightGray,
+  },
+  categoryOptionText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.text.darker,
+  },
+  cancelButton: {
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: Colors.accent.lightGray,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.text.darker,
   },
 });

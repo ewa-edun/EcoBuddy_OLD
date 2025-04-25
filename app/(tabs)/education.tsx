@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import {useState, useEffect} from 'react';
 import { Colors } from '../constants/Colors';
-import { Link,  router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { BookOpen, MessageSquare, TrendingUp, Plus } from 'lucide-react-native';
 import { query, collection, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '@lib/firebase/firebaseConfig';
@@ -11,9 +11,9 @@ type Article = {
   id: string;
   title: string;
   excerpt: string;
-  image: string;
+  imageUrl?: string; // Changed from image to imageUrl to match CreateBlogArticle
   type: 'ai' | 'human';
-  readTime: string;
+  readingTime: string;
   category: 'Sustainability' | 'Recycling' | 'Community' | 'Technology';
 };
 
@@ -33,9 +33,9 @@ export default function EducationScreen() {
         id: doc.id,
         title: doc.data().title,
         excerpt: doc.data().excerpt,
-        image: doc.data().image,
+        imageUrl: doc.data().imageUrl, // Changed from image to imageUrl
         type: doc.data().type || 'human',
-        readTime: doc.data().readingTime,
+        readingTime: doc.data().readingTime,
         category: doc.data().category || 'Sustainability'
       }));
       setArticles(fetchedArticles);
@@ -58,6 +58,9 @@ export default function EducationScreen() {
   const handlePost = () => {
     router.replace('/features/createBlogArticle');
   };
+
+  // Default image in case article doesn't have one
+  const defaultImage = 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b';
 
   return (
     <ScrollView style={styles.container}>
@@ -98,7 +101,10 @@ export default function EducationScreen() {
             style={styles.articleCard}
             onPress={() => router.push(`/features/BlogArticle?id=${article.id}`)}
           >
-            <Image source={{ uri: article.image }} style={styles.articleImage} />
+            <Image 
+              source={{ uri: article.imageUrl || defaultImage }} 
+              style={styles.articleImage} 
+            />
             <View style={styles.articleContent}>
               <View style={styles.articleMeta}>
                 <View style={[
@@ -107,7 +113,7 @@ export default function EducationScreen() {
                ]}>
                   <Text style={styles.categoryText}>{article.category}</Text>
                 </View>
-                <Text style={styles.readTime}>{article.readTime}</Text>
+                <Text style={styles.readTime}>{article.readingTime}</Text>
               </View>
               <Text style={styles.articleTitle}>{article.title}</Text>
               <Text style={styles.articleExcerpt}>{article.excerpt}</Text>

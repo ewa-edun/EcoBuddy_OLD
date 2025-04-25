@@ -7,21 +7,22 @@ import { getDoc, doc, updateDoc, increment, Timestamp } from 'firebase/firestore
 import { getAuth } from 'firebase/auth';
 import { db } from '@lib/firebase/firebaseConfig';
 import LoadingSpinner from '../components/LoadingSpinner';
-//import { LinearGradient } from 'expo-linear-gradient';
-//import Markdown from 'react-native-markdown-display';
 
 interface Article {
   id: string;
   title: string;
   content: string;
-  image: string;
-  category: string | any[]; // Can be string or array of sections
-  author: string;
-  authorId: string;
+  excerpt: string;
+  imageUrl?: string;
+  category: string;
+  author: {
+    name: string;
+    id: string;
+    avatar: string | null;
+  };
   date: Timestamp;
   views: number;
   readingTime: string;
-  lastUpdated?: Timestamp;
 }
 
 type BlogArticleParams = {
@@ -48,19 +49,22 @@ const BlogArticle = () => {
         
         if (!articleDoc.exists()) {
           console.error('Article not found');
-          router.back();
+          router.push('/(tabs)/education');
+          setLoading(false);
           return;
         }
         
         const articleData = articleDoc.data();
+        
+        // Set the article with all its data
         setArticle({
           id: articleDoc.id,
           ...articleData,
           // Ensure author data exists
-        author: articleData.author || {
-          name: 'EcoBuddy Team',
-          avatar: null
-        }
+          author: articleData.author || {
+            name: 'EcoBuddy Team',
+            avatar: null
+          }
         });
         
         // Increment view count
@@ -78,31 +82,10 @@ const BlogArticle = () => {
           }
         }
         
-        // Fetch related articles
-        // In a real app, you'd implement a more sophisticated recommendation system
-        // For now, we'll just get 3 random articles from the same category
+        // Fetch related articles with the same category
         if (articleData.category) {
-          // This is a simplified approach - in production you'd use a more efficient query
-          // const relatedDocs = await getDocs(
-          //   query(
-          //     collection(db, 'blogArticles'),
-          //     where('category', '==', articleData.category),
-          //     where('id', '!=', params.id),
-          //     limit(3)
-          //   )
-          // );
-          
-          // const relatedData: any[] = [];
-          // relatedDocs.forEach((doc) => {
-          //   relatedData.push({
-          //     id: doc.id,
-          //     ...doc.data()
-          //   });
-          // });
-          
-          // setRelatedArticles(relatedData);
-          
           // For now, use hardcoded related articles
+ // In a production app, you would query Firestore for articles with the same category
           setRelatedArticles([
             {
               id: 'related1',
@@ -169,29 +152,25 @@ const BlogArticle = () => {
     }
   };
 
-// Add a function to format the date
-const formatDate = (timestamp: Timestamp | string | null) => {
-  if (!timestamp) return 'Unknown date';
-  
-  // Check if it's a Firestore Timestamp
-  if (timestamp instanceof Timestamp) {
-    // Convert to JavaScript Date
-    const date = timestamp.toDate();
-    // Format the date (you can adjust the format as needed)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
-  
-  // If it's already a string, just return it
-  if (typeof timestamp === 'string') {
-    return timestamp;
-  }
-  
-  return 'Unknown date';
-};
+  // Format the date
+  const formatDate = (timestamp: Timestamp | string | null) => {
+    if (!timestamp) return 'Unknown date';
+    
+    if (timestamp instanceof Timestamp) {
+      const date = timestamp.toDate();
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    
+    if (typeof timestamp === 'string') {
+      return timestamp;
+    }
+    
+    return 'Unknown date';
+  };
 
   const handleShare = async () => {
     try {
@@ -253,7 +232,10 @@ const formatDate = (timestamp: Timestamp | string | null) => {
 
       <View style={styles.heroSection}>
         <Image 
-          source={{ uri: article.image || 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b' }} 
+          source={{ 
+            uri: article.imageUrl || 
+                 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b' 
+          }} 
           style={styles.heroImage} 
         />
         <View style={styles.categoryPill}>
@@ -281,57 +263,8 @@ const formatDate = (timestamp: Timestamp | string | null) => {
 
         {/* Main article content */}
         <View style={styles.articleContent}>
-  {article.content && Array.isArray(article.content) ? (
-    // If we have structured content, render it properly
-    article.content.map((section: any, index: number) => (
-      <View key={index} style={styles.section}>
-        {section.title && (
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-        )}
-        {section.paragraphs && section.paragraphs.map((paragraph: string, pIndex: number) => (
-          <Text key={pIndex} style={styles.paragraph}>{paragraph}</Text>
-        ))}
-        {section.image && (
-          <Image source={{ uri: (require('../../assets/user icon.png')) }} style={styles.contentImage} />
-        )}
-        {section.caption && (
-          <Text style={styles.imageCaption}>{section.caption}</Text>
-        )}
-      </View>
-            ))
-          ) : (
-            // Fallback to a default article structure
-            <>
-              <Text style={styles.paragraph}>
-                Climate change is one of the most pressing issues of our time. The Earth's climate has always changed naturally over thousands or millions of years, but what we're experiencing now is happening much faster, and humans are causing it.
-              </Text>
-              <Text style={styles.paragraph}>
-                The primary driver of today's warming is the release of carbon dioxide and other greenhouse gases through human activities like burning fossil fuels, deforestation, and industrial processes. These gases trap heat in the atmosphere, leading to global warming and climate change.
-              </Text>
-              <Text style={styles.sectionTitle}>The Impact on Our Environment</Text>
-              <Text style={styles.paragraph}>
-                The effects of climate change are far-reaching and increasingly severe. Rising temperatures lead to melting ice caps and glaciers, resulting in sea level rise that threatens coastal communities. Extreme weather events like hurricanes, droughts, and floods are becoming more frequent and intense.
-              </Text>
-              <Text style={styles.paragraph}>
-                Ecosystems and wildlife are also being disrupted. Many species are struggling to adapt to rapidly changing conditions, leading to biodiversity loss. Some areas are experiencing changes in growing seasons, impacting agriculture and food security.
-              </Text>
-              <Image 
-                source={{ uri: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce' }} 
-                style={styles.contentImage} 
-              />
-              <Text style={styles.imageCaption}>Melting glaciers are one visible effect of climate change</Text>
-              <Text style={styles.sectionTitle}>What Can We Do?</Text>
-              <Text style={styles.paragraph}>
-                While the challenge is immense, there are steps we can all take to help combat climate change. Transitioning to renewable energy sources like solar and wind power is crucial for reducing greenhouse gas emissions. Energy efficiency measures in homes and buildings can also make a significant difference.
-              </Text>
-              <Text style={styles.paragraph}>
-                On an individual level, we can reduce our carbon footprint by choosing sustainable transportation options, consuming less meat, reducing waste, and supporting businesses and policies that prioritize environmental sustainability.
-              </Text>
-              <Text style={styles.paragraph}>
-                By working together at all levels of society—from individual choices to corporate decisions to government policies—we can address climate change and create a more sustainable future for our planet.
-              </Text>
-            </>
-          )}
+          {/* Display the actual content */}
+          <Text style={styles.paragraph}>{article.content}</Text>
         </View>
 
         {/* Related articles section */}
@@ -529,4 +462,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BlogArticle; 
+export default BlogArticle;

@@ -217,12 +217,9 @@ WEEKLY DATA TYPE
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 ## Pages/Fixes to do
-- Supabase to store images used in the app.
-   - Let the profile image be displayed on leaderboard, community.
-   - Community posts images.
-   - Blog articles post images.
+- Poster still showing annonymous even though im logged in.
+- Find a solution to why profile images are saying network error from supabase.
 
- On the leaderboard and leaderboard preview files, link them to firebase firestore so that the scores points and the waste recycled
 - Firestore.
    - Integerate in Leaderboard for game and waste recycled, 
    - points gotten, 
@@ -238,6 +235,8 @@ WEEKLY DATA TYPE
    - location and dynamic maps. Also more centers for pick-up.
 
 - The model should have better predictions.
+- Mobile Kiosk page
+- Charity page
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)
