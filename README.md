@@ -223,6 +223,7 @@ Forgot Password page
 
 PROFILE PAGE
    - Find a solution to why profile images are saying network error from supabase.
+   - Achievements 
 
 - Need API's to handle
    - Waste submission of proper waste allowed.

@@ -4,7 +4,7 @@ import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus, Send } from '
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { db, auth } from '@lib/firebase/firebaseConfig';
-import { collection, onSnapshot, updateDoc, doc, addDoc, getDoc, query, where, orderBy, getDocs, getCountFromServer, increment, serverTimestamp, runTransaction } from 'firebase/firestore';
+import { collection, onSnapshot, updateDoc, doc, addDoc, getDoc, query, where, orderBy, getDocs, getCountFromServer, increment, serverTimestamp, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
 import NewChallengeForm from '../features/newChallengeForm';
 
 type Post = {
@@ -188,9 +188,37 @@ export default function CommunityScreen() {
     const userId = currentUser.id;
     const postRef = doc(db, 'posts', postId);
     
-    await updateDoc(postRef, {
-      likes: increment(userId)
-    });
+    // Find the post in local state to check if user already liked it
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    
+    const userLiked = post.likes.includes(userId);
+    
+    if (userLiked) {
+      // Remove like
+      await updateDoc(postRef, {
+        likes: arrayRemove(userId)
+      });
+      
+      // Update local state
+      setPosts(posts.map(p => 
+        p.id === postId 
+          ? { ...p, likes: p.likes.filter(id => id !== userId) } 
+          : p
+      ));
+    } else {
+      // Add like
+      await updateDoc(postRef, {
+        likes: arrayUnion(userId)
+      });
+      
+      // Update local state
+      setPosts(posts.map(p => 
+        p.id === postId 
+          ? { ...p, likes: [...p.likes, userId] } 
+          : p
+      ));
+    }
   };
 
   const handleShare = async () => {
@@ -269,6 +297,34 @@ export default function CommunityScreen() {
         createdAt: serverTimestamp()
       };
       
+
+    // Update local state immediately for better UX
+    const newCommentWithClientTimestamp = {
+      ...newComment,
+      id: `temp-${Date.now()}`, // Temporary ID until Firestore assigns one
+      timestamp: new Date().toLocaleString() // Local timestamp for immediate display
+    };
+    
+    // Update posts state with the new comment count and add comment to commentsData
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        const updatedComments = (post.comments || 0) + 1;
+        const updatedCommentsData = [
+          newCommentWithClientTimestamp,
+          ...(post.commentsData || [])
+        ];
+        return {
+          ...post,
+          comments: updatedComments,
+          commentsData: updatedCommentsData
+        };
+      }
+      return post;
+    }));
+    
+    // Clear the comment input field
+    setCommentText({...commentText, [postId]: ''});
+
       // Add comment
       await addDoc(collection(db, 'comments'), newComment);
       
@@ -524,7 +580,7 @@ export default function CommunityScreen() {
                           ))}
                         </View>
                       ) : (
-                        <Text style={styles.commentStatusText}>No comments yet</Text>
+                        <Text style={styles.commentStatusText}>No comments yet. Be the first to comment!</Text>
                       )}
                     </View>
                   )}
