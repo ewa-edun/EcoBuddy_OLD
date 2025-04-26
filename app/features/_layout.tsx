@@ -105,6 +105,20 @@ export default function FeaturesLayout() {
         headerShown: false,
       }}
     />
+    <Stack.Screen
+      name="newChallengeForm"
+      options={{
+        title: 'Challenge Form',
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="challengeDetails"
+      options={{
+        title: 'Challenge Details',
+        headerShown: false,
+      }}
+    />
     </Stack>
   );
 } 

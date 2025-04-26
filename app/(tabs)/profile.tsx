@@ -5,36 +5,66 @@ import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
 import { getAuth, deleteUser, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
-import { doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc, updateDoc, collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '@lib/firebase/firebaseConfig';
 import { supabase } from '@lib/supabase/client';
 import { uploadAvatar } from '@lib/supabase/storage';
 
 const auth = getAuth();
 
-const achievements = [
+// Default achievements data (will be replaced with Firestore data)
+const defaultAchievements = [
   {
     id: '1',
     title: 'Eco Warrior',
     description: 'Recycled over 100kg of waste',
-    progress: 85,
+    progress: 0,
     icon: Recycle,
+    target: 100,
+    current: 0,
+    type: 'recycled',
+    unlocked: false, 
   },
   {
     id: '2',
     title: 'Community Leader',
     description: 'Inspired 50 people to start recycling',
-    progress: 60,
+    progress: 0,
     icon: Award,
+    target: 50,
+    current: 0,
+    type: 'referrals',
+    unlocked: false, 
   },
   {
     id: '3',
     title: 'Plastic Hero',
     description: 'Collected 1000 plastic bottles',
-    progress: 40,
+    progress: 0,
     icon: Gift,
+    target: 1000,
+    current: 0,
+    type: 'items',
+    unlocked: false, 
   },
 ];
+
+// Update the userData state interface to include more fields
+interface UserData {
+  name: string;
+  email: string;
+  phone: string;
+  points: number;
+  recycled: number;
+  rewards: number;
+  photoURL: string;
+  role: string;
+  level: number;
+  xp: number;
+  nextLevelXp: number;
+  achievementsUnlocked: string[]; // Array of achievement IDs
+  badges: string[]; // Array of badge names
+}
 
 const menuItems = [
   {
@@ -79,40 +109,172 @@ export default function ProfileScreen() {
     rewards: 0,
     photoURL: '',
     role: 'myself',
+    level: 1,
+    xp: 0,
+    nextLevelXp: 100,
+    achievementsUnlocked: [],
+    badges: [],
   });
+  
+  // Add level thresholds configuration
+const levelThresholds = [
+  { level: 1, xpRequired: 0, title: 'Eco Beginner' },
+  { level: 2, xpRequired: 100, title: 'Eco Explorer' },
+  { level: 3, xpRequired: 300, title: 'Eco Enthusiast' },
+  { level: 4, xpRequired: 600, title: 'Eco Champion' },
+  { level: 5, xpRequired: 1000, title: 'Eco Master' },
+];
 
+// Enhanced calculateLevel function
+const calculateLevel = (xp: number): number => {
+  for (let i = levelThresholds.length - 1; i >= 0; i--) {
+    if (xp >= levelThresholds[i].xpRequired) {
+      return levelThresholds[i].level;
+    }
+  }
+  return 1;
+};
+
+// Enhanced calculateNextLevelXp function
+const calculateNextLevelXp = (currentLevel: number): number => {
+  const nextLevel = levelThresholds.find(threshold => threshold.level === currentLevel + 1);
+  return nextLevel ? nextLevel.xpRequired : levelThresholds[levelThresholds.length - 1].xpRequired;
+};
+
+// Get level title
+const getLevelTitle = (level: number): string => {
+  const levelData = levelThresholds.find(threshold => threshold.level === level);
+  return levelData ? levelData.title : 'Eco Beginner';
+};
+
+  const [achievements, setAchievements] = useState(defaultAchievements);
   const [avatar, setAvatar] = useState(Image.resolveAssetSource(require('../../assets/user icon.png')).uri);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (auth.currentUser) {
-        const docRef = doc(db, "users", auth.currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setUserData({
-            name: data.fullName || auth.currentUser?.displayName || 'EcoBuddy User',
-            email: auth.currentUser?.email || 'No email',
-            phone: data.phone || 'No phone number',
-            points: data.points || 0,
-            recycled: data.recycled || 0,
-            rewards: data.rewards || 0,
-            photoURL: auth.currentUser?.photoURL || '',
-            role: data.role || 'myself',
-          });
+        try {
+          const userDocRef = doc(db, "users", auth.currentUser.uid);
           
-          if (auth.currentUser?.photoURL) {
-            setAvatar(auth.currentUser.photoURL);
-          }
+          // Set up real-time listener for user data
+          const unsubscribe = onSnapshot(userDocRef, async (doc) => {
+            if (doc.exists()) {
+              const data = doc.data();
+              const xp = data.xp || 0;
+              const level = calculateLevel(xp);
+              const nextLevelXp = calculateNextLevelXp(level);
+              
+              setUserData({
+                name: data.fullName || auth.currentUser?.displayName || 'EcoBuddy User',
+                email: auth.currentUser?.email || 'No email',
+                phone: data.phone || 'No phone number',
+                points: data.points || 0,
+                recycled: data.recycled || 0,
+                rewards: data.rewards || 0,
+                photoURL: auth.currentUser?.photoURL || '',
+                role: data.role || 'myself',
+                level,
+                xp,
+                nextLevelXp,
+                achievementsUnlocked: data.achievementsUnlocked || [],
+                badges: data.badges || [],
+              });
+    
+              if (auth.currentUser?.photoURL) {
+                setAvatar(auth.currentUser.photoURL);
+              }
+    
+              // Refresh achievements when user data changes
+              await fetchAchievements(data);
+            }
+          });
+    
+          // Cleanup function for the useEffect
+          return () => unsubscribe();
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          Alert.alert("Error", "Could not load profile data");
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
-    }
-  };
+      }
+    };
 
-  fetchUserData();
-}, []);
+    fetchUserData();
+  }, []);
+
+  // Enhanced fetchAchievements function
+// Define a proper type for achievements
+interface Achievement {
+  id: string;
+  type: string;
+  target: number;
+  unlocked: boolean; // Add the unlocked property
+  [key: string]: any; // Allow additional properties
+}
+
+const fetchAchievements = async (userData: any) => {
+  try {
+    const achievementsRef = collection(db, "achievements");
+    const q = query(achievementsRef, where("isActive", "==", true));
+    const achievementsSnapshot = await getDocs(q);
+    
+    const loadedAchievements: Achievement[] = achievementsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        type: data.type || '', // Ensure type is provided
+        target: data.target || 0, // Ensure target is provided
+        unlocked: false, // Default value for unlocked
+        ...data
+      };
+    });
+
+    const updatedAchievements = loadedAchievements.map((achievement: Achievement) => {
+      const currentValue = userData[achievement.type] || 0;
+      const targetValue = achievement.target || 0;
+      const progress = targetValue > 0 ? Math.min(Math.floor((currentValue / targetValue) * 100), 100) : 0;
+      const isUnlocked = userData.achievementsUnlocked?.includes(achievement.id) || false;
+
+      return {
+        id: achievement.id,
+        title: achievement.title || 'Untitled Achievement', // Default title if missing
+        description: achievement.description || 'No description available', // Default description if missing
+        progress,
+        current: currentValue,
+        target: targetValue,
+        unlocked: isUnlocked,
+        icon: getAchievementIcon(achievement.id), // Helper function to get the right icon
+        type: achievement.type,
+      };
+    });
+
+    // Sort achievements: unlocked first, then by progress
+    updatedAchievements.sort((a, b) => {
+      if (a.unlocked && !b.unlocked) return -1;
+      if (!a.unlocked && b.unlocked) return 1;
+      return b.progress - a.progress;
+    });
+
+    setAchievements(updatedAchievements);
+  } catch (error) {
+    console.error("Error fetching achievements:", error);
+    setAchievements(defaultAchievements);
+  }
+};
+
+// Helper function to get achievement icon
+const getAchievementIcon = (achievementId: string) => {
+  switch(achievementId) {
+    case 'eco-warrior': return Recycle;
+    case 'community-leader': return Award;
+    case 'plastic-hero': return Gift;
+    case 'waste-reducer': return Trash2;
+    case 'green-ambassador': return Share2;
+    default: return Stars;
+  }
+};          
 
 const handleImagePicker = async () => {
   const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -401,9 +563,34 @@ const renderAvatar = () => {
           <View style={styles.profileInfo}>
             <Text style={styles.name}>{userData.name}</Text>
             <Text style={styles.role}>{userData.role}</Text>
+
             <View style={styles.badgeContainer}>
-              <Award size={16} color={Colors.secondary.yellow} />
-              <Text style={styles.badge}>Gold Member</Text>
+            <Award size={16} color={Colors.secondary.yellow} />
+            <Text style={styles.badge}>{getLevelTitle(userData.level)}</Text>
+             {userData.badges?.length > 0 && (
+            <View style={styles.badgesList}>
+             {userData.badges.map((badge, index) => (
+            <View key={index} style={styles.badgeItem}>
+            <Text style={styles.badgeText}>{badge}</Text>
+           </View>
+          ))}
+        </View>
+        )}
+      </View>
+
+            <View style={styles.xpContainer}>
+              <Text style={styles.xpText}>XP: {userData.xp}/{userData.nextLevelXp}</Text>
+              <View style={styles.xpBar}>
+                <View 
+                  style={[
+                    styles.xpProgress, 
+                    { 
+                      width: `${(userData.xp % 100)}%`,
+                      backgroundColor: Colors.primary.green 
+                    }
+                  ]} 
+                />
+              </View>
             </View>
           </View>
         </View>
@@ -411,8 +598,8 @@ const renderAvatar = () => {
         <View>
           <View style={styles.editSection}>
             <TouchableOpacity style={styles.editButton} onPress={handleImagePicker}>
-            <Text style={styles.editButtonText}>Edit image</Text>
-          </TouchableOpacity>
+              <Text style={styles.editButtonText}>Edit image</Text>
+            </TouchableOpacity>
             <View style={styles.contactInfo}>
               <Text style={styles.contactText}>{userData.email}</Text>
               <Text style={styles.contactText}>{userData.phone}</Text>
@@ -441,27 +628,51 @@ const renderAvatar = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Achievements</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.achievementsScroll}>
-          {achievements.map((achievement) => (
-            <View key={achievement.id} style={styles.achievementCard}>
+
+         
+         {achievements.map((achievement) => (
+          <View key={achievement.id} style={[
+           styles.achievementCard,
+           achievement.unlocked && styles.unlockedAchievement
+        ]}>
+    <View style={[
+      styles.achievementIcon,
+      { 
+        backgroundColor: achievement.unlocked 
+          ? Colors.secondary.yellow + '20' 
+          : Colors.primary.green + '20'
+        },
+        ]}>
+         <achievement.icon size={24} color={achievement.unlocked ? Colors.secondary.yellow : Colors.primary.green} />
+         {achievement.unlocked && (
+        <View style={styles.achievementBadge}>
+          <Award size={12} color={Colors.text.secondary} />
+        </View>
+           )}
+         </View>
+          <Text style={styles.achievementTitle}>{achievement.title}</Text>
+          <Text style={styles.achievementDesc}>{achievement.description}</Text>
+          {!achievement.unlocked && (
+         <>
+           <Text style={styles.achievementProgress}>{achievement.current}/{achievement.target}</Text>
+            <View style={styles.progressBar}>
               <View
-                style={[
-                  styles.achievementIcon,
-                  { backgroundColor: Colors.primary.green + '20' },
-                ]}>
-                <achievement.icon size={24} color={Colors.primary.green} />
+             style={[styles.progress, { width: `${achievement.progress}%` }]}
+            />
+          </View>
+          <Text style={styles.progressText}>{achievement.progress}%</Text>
+           </>
+          )}
+           {achievement.unlocked && (
+              <View style={styles.unlockedContainer}>
+              <Text style={styles.unlockedText}>Unlocked!</Text>
               </View>
-              <Text style={styles.achievementTitle}>{achievement.title}</Text>
-              <Text style={styles.achievementDesc}>{achievement.description}</Text>
-              <View style={styles.progressBar}>
-                <View
-                  style={[styles.progress, { width: `${achievement.progress}%` }]}
-                />
-              </View>
-              <Text style={styles.progressText}>{achievement.progress}%</Text>
-            </View>
+             )}
+           </View>
           ))}
         </ScrollView>
       </View>
+
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Menu</Text>
@@ -519,6 +730,12 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginRight: 16,
   },
+  achievementProgress: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.primary.green,
+    marginBottom: 4,
+  },
   profileInfo: {
     flex: 1,
   },
@@ -543,6 +760,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.secondary.yellow,
+  },
+  badgesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginLeft: 8,
+  },
+  badgeItem: {
+    backgroundColor: Colors.primary.green + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.primary.green,
   },
   editButton: {
     paddingHorizontal: 14,
@@ -602,12 +837,15 @@ const styles = StyleSheet.create({
   achievementsScroll: {
     marginHorizontal: -24,
     paddingHorizontal: 24,
+    paddingEnd: 55,
+  
   },
   achievementCard: {
     width: 200,
     backgroundColor: Colors.primary.cream,
     borderRadius: 16,
     padding: 16,
+    paddingEnd: 24,
     marginRight: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -732,5 +970,52 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.darker,
+  },
+  xpContainer: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  xpText: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: Colors.primary.green,
+  },
+  xpBar: {
+    height: 8,
+    backgroundColor: Colors.accent.lightGray,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  xpProgress: {
+    width: '100%',
+    height: 10,
+    backgroundColor: 'blue',
+  },
+  unlockedAchievement: {
+    borderWidth: 2,
+    borderColor: Colors.secondary.yellow,
+  },
+  achievementBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: Colors.secondary.yellow,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  unlockedContainer: {
+    marginTop: 8,
+    padding: 4,
+    backgroundColor: Colors.secondary.yellow + '20',
+    borderRadius: 4,
+  },
+  unlockedText: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.secondary.yellow,
+    textAlign: 'center',
   },
 });

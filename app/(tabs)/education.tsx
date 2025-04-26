@@ -3,8 +3,8 @@ import {useState, useEffect} from 'react';
 import { Colors } from '../constants/Colors';
 import { Link, router } from 'expo-router';
 import { BookOpen, MessageSquare, TrendingUp, Plus } from 'lucide-react-native';
-import { query, collection, getDocs, orderBy, limit } from 'firebase/firestore';
-import { db } from '@lib/firebase/firebaseConfig';
+import { query, collection, getDocs, orderBy, limit, doc, getDoc, serverTimestamp, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { db, auth } from '@lib/firebase/firebaseConfig';
 import React from 'react';
 
 type Article = {
@@ -20,6 +20,34 @@ type Article = {
 export default function EducationScreen() {
   const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [userStats, setUserStats] = useState({
+    articlesRead: 0,
+    discussions: 0,
+    knowledgeLevel: 1
+  });
+
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      if (!auth.currentUser?.uid) return;
+      
+      try {
+        const userRef = doc(db, 'userStats', auth.currentUser.uid);
+        const docSnap = await getDoc(userRef);
+        
+        if (docSnap.exists()) {
+          setUserStats({
+            articlesRead: docSnap.data().articlesRead || 0,
+            discussions: docSnap.data().discussions || 0,
+            knowledgeLevel: docSnap.data().knowledgeLevel || 1
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+      }
+    };
+  
+    fetchUserStats();
+  }, []);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -62,6 +90,42 @@ export default function EducationScreen() {
   // Default image in case article doesn't have one
   const defaultImage = 'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/blog-images//EcoBuddy_logo.jpeg';
 
+  const handleArticlePress = async (articleId: string) => {
+    // Navigate to article
+    router.push(`/features/BlogArticle?id=${articleId}`);
+    
+    // Track read if not already read
+    if (!auth.currentUser?.uid) return;
+    
+    try {
+      const userRef = doc(db, 'userStats', auth.currentUser.uid);
+      const readRef = doc(db, 'users', auth.currentUser.uid, 'readArticles', articleId);
+      
+      const readSnap = await getDoc(readRef);
+      if (!readSnap.exists()) {
+        // Mark as read
+        await setDoc(readRef, { readAt: serverTimestamp() });
+        
+        // Update stats
+        await updateDoc(userRef, {
+          articlesRead: increment(1),
+          knowledgePoints: increment(10),
+          knowledgeLevel: Math.floor((userStats.knowledgeLevel * 10 + 10) / 10)
+        });
+      }
+    } catch (error) {
+      console.error("Error tracking article read:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -74,22 +138,22 @@ export default function EducationScreen() {
       </View>
 
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <BookOpen size={24} color={Colors.primary.green} />
-          <Text style={styles.statValue}>12</Text>
-          <Text style={styles.statLabel}>Articles Read</Text>
-        </View>
-        <View style={styles.statCard}>
-          <MessageSquare size={24} color={Colors.primary.blue} />
-          <Text style={styles.statValue}>5</Text>
-          <Text style={styles.statLabel}>Discussions</Text>
-        </View>
-        <View style={styles.statCard}>
-          <TrendingUp size={24} color={Colors.secondary.yellow} />
-          <Text style={styles.statValue}>Level 3</Text>
-          <Text style={styles.statLabel}>Knowledge</Text>
-        </View>
-      </View>
+  <View style={styles.statCard}>
+    <BookOpen size={24} color={Colors.primary.green} />
+    <Text style={styles.statValue}>{userStats.articlesRead}</Text>
+    <Text style={styles.statLabel}>Articles Read</Text>
+  </View>
+  <View style={styles.statCard}>
+    <MessageSquare size={24} color={Colors.primary.blue} />
+    <Text style={styles.statValue}>{userStats.discussions}</Text>
+    <Text style={styles.statLabel}>Discussions</Text>
+  </View>
+  <View style={styles.statCard}>
+    <TrendingUp size={24} color={Colors.secondary.yellow} />
+    <Text style={styles.statValue}>Level {userStats.knowledgeLevel}</Text>
+    <Text style={styles.statLabel}>Knowledge</Text>
+  </View>
+</View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Featured Articles</Text>
@@ -97,10 +161,10 @@ export default function EducationScreen() {
         {articles?.length > 0 ? (
           articles.map((article) => (
             <TouchableOpacity 
-            key={article.id} 
-            style={styles.articleCard}
-            onPress={() => router.push(`/features/BlogArticle?id=${article.id}`)}
-          >
+               key={article.id} 
+               style={styles.articleCard}
+               onPress={() => handleArticlePress(article.id)}
+            >
             <Image 
               source={{ uri: article.imageUrl || defaultImage }} 
               style={styles.articleImage} 

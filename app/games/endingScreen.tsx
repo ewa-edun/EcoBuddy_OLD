@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Animated, Easing } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { useNavigation, useLocalSearchParams, useRouter } from 'expo-router';
+import { doc, updateDoc, increment, getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { db } from '@lib/firebase/firebaseConfig';
 
 const ConfettiPiece = ({ delay }: { delay: number }) => {
   const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
@@ -89,6 +92,32 @@ const EndingScreen = () => {
   const router = useRouter();
   const scoreNum = typeof score === 'string' ? parseInt(score) : 0;
   const showConfetti = scoreNum > 50;
+  const [pointsAdded, setPointsAdded] = useState(false);
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  useEffect(() => {
+    const addGamePoints = async () => {
+      if (!user || pointsAdded || scoreNum <= 0) return;
+
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        
+        await updateDoc(userRef, {
+          points: increment(scoreNum),
+          lastGamePlayed: new Date().toISOString(),
+          gamesPlayed: increment(1),
+        });
+
+        setPointsAdded(true);
+        console.log('Points added successfully');
+      } catch (error) {
+        console.error('Error adding points:', error);
+      }
+    };
+
+    addGamePoints();
+  }, [user, scoreNum, pointsAdded]);
 
   return (
     <View style={styles.container}>
@@ -105,6 +134,11 @@ const EndingScreen = () => {
       <Text style={[styles.scoreText, showConfetti && styles.celebrationScore]}>
         Your Score: {score}
       </Text>
+      {pointsAdded && (
+        <Text style={styles.pointsAddedText}>
+          {scoreNum} points added to your account!
+        </Text>
+      )}
       <TouchableOpacity
         style={[styles.button, showConfetti && styles.celebrationButton]}
         onPress={() => router.replace('/features/leaderboard')}
@@ -175,5 +209,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.secondary.white,
     fontWeight: 'bold',
+  },
+  pointsAddedText: {
+    fontSize: 16,
+    color: Colors.primary.green,
+    marginBottom: 20,
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
 });

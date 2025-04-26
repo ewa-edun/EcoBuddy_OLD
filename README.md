@@ -218,29 +218,13 @@ WEEKLY DATA TYPE
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 ## Pages/Fixes to do
-EDUCATION PAGE
-   - All the 3 cards on the education (article reads, discussions, knowledge),
-COMMUNITY PAGE
-   - All the 3 cards on the  community page (members, challenges, current tier).
-ECO REWARDS PAGE
-   - available rewardss, points gotten,  
-   - All the 3 cards on the ecorewards (available points, data earned, current tier),
-PROFILE PAGE
-   - profile levels and achievements (eco warrior and the likes), 
-   - Find a solution to why profile images are saying network error from supabase.
-HOME PAGE
-   - All the 3 cards on the home (data earned, waste recycled, current tier),
-   - Recent Activity on home page.
-WASTE HISTORY PAGE
-   - waste history, 
-CLAIM REWARDS PAGE
-   - rewards claimed and method of claiming,
-   - phone number/bank account on claim rewards page.
-WASTE SCHEDULE PAGE
-   - Amount of kg waste converted to points.
+BUGS
+Community page not displaying
+Forgot Password page
 
-- Need API's 
-   - to handle claim rewards for both data and cash.
+PROFILE PAGE
+   - Find a solution to why profile images are saying network error from supabase.
+- Need API's to handle
    - Waste submission of proper waste allowed.
    - location and dynamic maps. Also more centers for pick-up.
 

@@ -1,10 +1,11 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Share, TextInput } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Share, TextInput, Modal, ActivityIndicator, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus, Send, AlertCircle } from 'lucide-react-native';
+import { Heart, MessageCircle, Share2, Award, Users, Trophy, Plus, Send } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { db, auth } from '@lib/firebase/firebaseConfig';
-import { collection, onSnapshot, updateDoc, doc, addDoc, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, updateDoc, doc, addDoc, getDoc, query, where, orderBy, getDocs, getCountFromServer, increment, serverTimestamp, runTransaction } from 'firebase/firestore';
+import NewChallengeForm from '../features/newChallengeForm';
 
 type Post = {
   id: string;
@@ -16,7 +17,7 @@ type Post = {
   };
   content: string;
   image?: string;
-  likes: string[]; // Array of user IDs who liked the post
+  likes: string[];
   comments: number;
   timestamp: string;
   commentsData?: Comment[];
@@ -35,85 +36,171 @@ type Comment = {
   timestamp: string;
 };
 
+type Challenge = {
+  id: string;
+  title: string;
+  description: string;
+  targetParticipants: number;
+  rewardPoints: number;
+  startDate: Date | import('firebase/firestore').Timestamp;
+  endDate: Date | import('firebase/firestore').Timestamp;
+  participants: string[];
+  daysLeft: number;
+  createdBy: string;
+  status: 'active' | 'completed' | 'upcoming';
+};
+
 export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState<'feed' | 'challenges'>('feed');
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showNewChallengeForm, setShowNewChallengeForm] = useState(false);
   const [expandedCommentPosts, setExpandedCommentPosts] = useState<string[]>([]);
   const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
   const [loadingComments, setLoadingComments] = useState<{ [key: string]: boolean }>({});
-  const [hasMoreComments, setHasMoreComments] = useState<{ [key: string]: boolean }>({});
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [communityStats, setCommunityStats] = useState({
+    memberCount: 0,
+    activeChallenges: 0,
+    userTier: 'Bronze'
+  });
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [challengesLoading, setChallengesLoading] = useState(false);
 
+  // Fetch current user and community stats
   useEffect(() => {
-    // Get current user
-    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+    const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setCurrentUser({
           id: user.uid,
           name: user.displayName || "EcoBuddy User",
           avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
-          badge: "Member" // You can fetch this from a user profile collection if needed
+          badge: "Member"
         });
+
+        // Fetch user tier
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          setCommunityStats(prev => ({
+            ...prev,
+            userTier: userDoc.data().tier || 'Bronze'
+          }));
+        }
       }
     });
 
-    // Fetch posts from Firestore
-    const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
-      const fetchedPosts = snapshot.docs.map((doc) => {
+    // Fetch member count
+    const fetchMemberCount = async () => {
+      const snapshot = await getCountFromServer(collection(db, 'users'));
+      setCommunityStats(prev => ({
+        ...prev,
+        memberCount: snapshot.data().count
+      }));
+    };
+
+    fetchMemberCount();
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Fetch posts
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'posts'), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const fetchedPosts = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            user: data.author || {
+              name: "EcoBuddy User",
+              avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
+              badge: "Member",
+              id: data.authorId || "unknown"
+            },
+            content: data.content,
+            image: data.imageUrl || undefined,
+            likes: data.likes || [],
+            comments: data.comments || 0,
+            timestamp: data.createdAt?.toDate().toLocaleString() || "Just now",
+          };
+        });
+        setPosts(fetchedPosts);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch challenges when tab is active
+  useEffect(() => {
+    if (activeTab !== 'challenges') return;
+
+    const fetchChallenges = async () => {
+      setChallengesLoading(true);
+      try {
+        const q = query(
+          collection(db, 'challenges'),
+          where('endDate', '>=', new Date()),
+          orderBy('endDate', 'asc')
+        );
+        
+        const querySnapshot = await getDocs(q);
+      const challengesData = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
-          user: data.author || { // Fallback to anonymous if author data missing
-            name: "EcoBuddy User",
-            avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
-            badge: "Member",
-            id: data.authorId || "unknown"
-          },
-          content: data.content,
-          image: data.imageUrl || undefined,
-          likes: data.likes || [],
-          comments: data.comments || 0,
-          timestamp: data.createdAt?.toDate().toLocaleString() || "Just now",
+          title: data.title || "Untitled Challenge",
+          description: data.description || "No description provided",
+          targetParticipants: data.targetParticipants || 0,
+          rewardPoints: data.rewardPoints || 0,
+          startDate: data.startDate || new Date(),
+          endDate: data.endDate || new Date(),
+          participants: data.participants || [],
+          daysLeft: data.endDate 
+            ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
+                data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+            : 0,
+          createdBy: data.createdBy || "Unknown",
+          status: data.status || "upcoming"
         };
-      }) as Post[];
-      setPosts(fetchedPosts);
-      setLoading(false);
-    });
+      });
 
-    return () => {
-      unsubscribe();
-      unsubscribeAuth();
+      setChallenges(challengesData);
+        setCommunityStats(prev => ({
+          ...prev,
+          activeChallenges: challengesData.length
+        }));
+      } catch (error) {
+        console.error("Error fetching challenges:", error);
+      } finally {
+        setChallengesLoading(false);
+      }
     };
-  }, []);
+
+    fetchChallenges();
+  }, [activeTab]);
 
   const handleLike = async (postId: string) => {
     if (!currentUser) return;
     
     const userId = currentUser.id;
     const postRef = doc(db, 'posts', postId);
-    const post = posts.find((p) => p.id === postId);
-    if (!post) return;
-
-    const updatedLikes = post.likes.includes(userId)
-      ? post.likes.filter((id) => id !== userId)
-      : [...post.likes, userId];
-
-    await updateDoc(postRef, { likes: updatedLikes });
+    
+    await updateDoc(postRef, {
+      likes: increment(userId)
+    });
   };
 
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check Out my post on EcoBuddy and start your eco-friendly journey!`,
+        message: `Check out my post on EcoBuddy and start your eco-friendly journey!`,
       });
     } catch (error) {
       console.error('Failed to share:', error);
     }
-  };
-
-  const handlePost = () => {
-    router.replace('/features/createPost');
   };
 
   const toggleComments = async (postId: string) => {
@@ -155,23 +242,9 @@ export default function CommunityScreen() {
         };
       });
       
-      // Update the post with comments
-      setPosts(posts.map(post => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            commentsData: comments
-          };
-        }
-        return post;
-      }));
-      
-      // Set if there are more comments than what's loaded
-      setHasMoreComments({
-        ...hasMoreComments,
-        [postId]: comments.length < (posts.find(p => p.id === postId)?.comments || 0)
-      });
-      
+      setPosts(posts.map(post => 
+        post.id === postId ? {...post, commentsData: comments} : post
+      ));
     } catch (error) {
       console.error('Error loading comments:', error);
     } finally {
@@ -182,14 +255,7 @@ export default function CommunityScreen() {
   const handleCommentSubmit = async (postId: string) => {
     if (!commentText[postId]?.trim() || !currentUser) return;
     
-    //const post = posts.find(p => p.id === postId);
-    //if (!post) return;
-    
-    const postIndex = posts.findIndex((p) => p.id === postId);
-    if (postIndex === -1) return;
-
     try {
-      // Create comment in Firestore
       const newComment = {
         postId,
         userId: currentUser.id,
@@ -200,32 +266,89 @@ export default function CommunityScreen() {
           badge: currentUser.badge
         },
         content: commentText[postId],
-        createdAt: new Date()
+        createdAt: serverTimestamp()
       };
       
+      // Add comment
       await addDoc(collection(db, 'comments'), newComment);
       
-// Optimistically update the comment count locally
-const updatedPosts = [...posts];
-updatedPosts[postIndex] = {
-  ...updatedPosts[postIndex],
-  comments: (updatedPosts[postIndex].comments || 0) + 1,
-};
-setPosts(updatedPosts);
-
-      // Update post's comment count
-      const postRef = doc(db, 'posts', postId);
-    await updateDoc(postRef, {
-      comments: updatedPosts[postIndex].comments,
-    });
+      // Update comment count
+      await updateDoc(doc(db, 'posts', postId), {
+        comments: increment(1)
+      });
       
-      // Clear input
+      // Update local state
+      setPosts(posts.map(post => 
+        post.id === postId 
+          ? {...post, comments: (post.comments || 0) + 1} 
+          : post
+      ));
+      
       setCommentText({...commentText, [postId]: ''});
-      
-      // Reload comments to show the new one
       await loadComments(postId);
     } catch (error) {
       console.error('Error submitting comment:', error);
+    }
+  };
+
+  const handleJoinChallenge = async (challengeId: string) => {
+    if (!currentUser?.id) return;
+    
+    try {
+      const challengeRef = doc(db, 'challenges', challengeId);
+      const userRef = doc(db, 'users', currentUser.id);
+      
+      await runTransaction(db, async (transaction) => {
+        const challengeDoc = await transaction.get(challengeRef);
+        const userDoc = await transaction.get(userRef);
+        
+        if (!challengeDoc.exists() || !userDoc.exists()) {
+          throw new Error("Challenge or user not found");
+        }
+        
+        const participants = challengeDoc.data().participants || [];
+        if (participants.includes(currentUser.id)) {
+          throw new Error("You already joined this challenge");
+        }
+        
+        transaction.update(challengeRef, {
+          participants: [...participants, currentUser.id]
+        });
+        
+        transaction.update(userRef, {
+          joinedChallenges: [...(userDoc.data().joinedChallenges || []), challengeId]
+        });
+      });
+      
+      // Refresh challenges
+      const q = query(
+        collection(db, 'challenges'),
+        where('endDate', '>=', new Date()),
+        orderBy('endDate', 'asc')
+      );
+      const snapshot = await getDocs(q);
+      setChallenges(snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+              id: doc.id,
+              title: data.title || "Untitled Challenge",
+              description: data.description || "No description provided",
+              targetParticipants: data.targetParticipants || 0,
+              rewardPoints: data.rewardPoints || 0,
+              startDate: data.startDate || new Date(),
+              endDate: data.endDate || new Date(),
+              participants: data.participants || [],
+              daysLeft: data.endDate 
+                ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
+                           data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                : 0,
+              createdBy: data.createdBy || "Unknown",
+              status: data.status || "upcoming"
+          };
+      }));
+    } catch (error) {
+      console.error("Error joining challenge:", error);
+      Alert.alert("Error", error instanceof Error ? error.message : "An unknown error occurred");
     }
   };
 
@@ -234,50 +357,61 @@ setPosts(updatedPosts);
       <View style={styles.header}>
         <Text style={styles.title}>Community</Text>
         <Text style={styles.subtitle}>Connect with eco-warriors</Text>
-        <TouchableOpacity style={styles.postButton} onPress={handlePost}>
-          <Plus size={20} color={Colors.text.primary} />
-          <Text style={styles.postButtonText}>Post</Text>
-        </TouchableOpacity>
+        
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.postButton} onPress={() => router.replace('/features/createPost')}>
+            <Plus size={20} color={Colors.text.primary} />
+            <Text style={styles.postButtonText}>Post</Text>
+          </TouchableOpacity>
+          
+          {activeTab === 'challenges' && (
+            <TouchableOpacity 
+              style={styles.postButton} 
+              onPress={() => setShowNewChallengeForm(true)}
+            >
+              <Plus size={20} color={Colors.text.primary} />
+              <Text style={styles.postButtonText}>New Challenge</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Users size={24} color={Colors.primary.green} />
-          <Text style={styles.statValue}>2.4K</Text>
+          <Text style={styles.statValue}>
+            {communityStats.memberCount > 1000 
+              ? `${(communityStats.memberCount / 1000).toFixed(1)}K` 
+              : communityStats.memberCount}
+          </Text>
           <Text style={styles.statLabel}>Members</Text>
         </View>
         <View style={styles.statCard}>
           <Trophy size={24} color={Colors.primary.blue} />
-          <Text style={styles.statValue}>156</Text>
+          <Text style={styles.statValue}>{communityStats.activeChallenges}</Text>
           <Text style={styles.statLabel}>Challenges</Text>
         </View>
         <View style={styles.statCard}>
           <Award size={24} color={Colors.secondary.yellow} />
-          <Text style={styles.statValue}>#12</Text>
-          <Text style={styles.statLabel}>Your Rank</Text>
+          <Text style={styles.statValue}>{communityStats.userTier}</Text>
+          <Text style={styles.statLabel}>Current Tier</Text>
         </View>
       </View>
 
       <View style={styles.tabs}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'feed' && styles.activeTab]}
-          onPress={() => setActiveTab('feed')}>
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'feed' && styles.activeTabText,
-            ]}>
+          onPress={() => setActiveTab('feed')}
+        >
+          <Text style={[styles.tabText, activeTab === 'feed' && styles.activeTabText]}>
             Community Feed
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'challenges' && styles.activeTab]}
-          onPress={() => setActiveTab('challenges')}>
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'challenges' && styles.activeTabText,
-            ]}>
+          onPress={() => setActiveTab('challenges')}
+        >
+          <Text style={[styles.tabText, activeTab === 'challenges' && styles.activeTabText]}>
             Active Challenges
           </Text>
         </TouchableOpacity>
@@ -287,80 +421,95 @@ setPosts(updatedPosts);
         {activeTab === 'feed' ? (
           <View style={styles.feed}>
             {loading ? (
-              <Text style={{ color:Colors.primary.green, textAlign: 'center', marginTop: 20 }}>Loading...</Text>
+              <ActivityIndicator size="large" color={Colors.primary.green} />
             ) : posts.length === 0 ? (
-              <Text style={{ textAlign: 'center', marginTop: 20 }}>No posts available</Text>
-            ) : null}
-            {posts.map((post) => (
-              <View key={post.id} style={styles.post}>
-                <View style={styles.postHeader}>
-                <Image 
-               source={{ uri: post.user?.avatar || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png" }} 
-               style={styles.avatar} 
-                />
-                  <View style={styles.postHeaderText}>
-                <Text style={styles.userName}>{post.user?.name || "EcoBuddy User"}</Text>
-                  <View style={styles.badgeContainer}>
-                     <Text style={styles.badge}>{post.user?.badge ?? "Member"}</Text>
+              <Text style={styles.noContentText}>No posts available yet</Text>
+            ) : (
+              posts.map((post) => (
+                <View key={post.id} style={styles.post}>
+                  {/* Post header */}
+                  <View style={styles.postHeader}>
+                    <Image 
+                      source={{ uri: post.user?.avatar }} 
+                      style={styles.avatar} 
+                    />
+                    <View style={styles.postHeaderText}>
+                      <Text style={styles.userName}>{post.user?.name}</Text>
+                      <View style={styles.badgeContainer}>
+                        <Text style={styles.badge}>{post.user?.badge}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.timeAgo}>{post.timestamp}</Text>
                   </View>
-                </View>
-                  <Text style={styles.timeAgo}>{post.timestamp}</Text>
-              </View>
-                
-                <Text style={styles.postContent}>{post.content}</Text>
-                {post.image && (
-                  <Image source={{ uri: post.image }} style={styles.postImage} />
-                )}
-                <View style={styles.postActions}>
-                <TouchableOpacity
+                  
+                  {/* Post content */}
+                  <Text style={styles.postContent}>{post.content}</Text>
+                  {post.image && (
+                    <Image source={{ uri: post.image }} style={styles.postImage} />
+                  )}
+                  
+                  {/* Post actions */}
+                  <View style={styles.postActions}>
+                    <TouchableOpacity
                       style={styles.actionButton}
-                      onPress={() => handleLike(post.id)}>
+                      onPress={() => handleLike(post.id)}
+                    >
                       <Heart
                         size={20}
-                        color={
-                          currentUser && post.likes.includes(currentUser.id)
-                            ? Colors.primary.green
-                            : Colors.accent.darkGray
-                        }
+                        color={post.likes.includes(currentUser?.id) 
+                          ? Colors.primary.green 
+                          : Colors.accent.darkGray}
                       />
                       <Text style={styles.actionText}>{post.likes.length}</Text>
                     </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={() => toggleComments(post.id)}>
-                    <MessageCircle size={20} color={expandedCommentPosts.includes(post.id) ? Colors.primary.green : Colors.accent.darkGray} />
-                    <Text style={styles.actionText}>{post.comments}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-                    <Share2 size={20} color={Colors.accent.darkGray} />
-                  </TouchableOpacity>
-                </View>
-                
-                {/* Comment Section */}
-                {expandedCommentPosts.includes(post.id) && (
-                  <View style={styles.commentSection}>
-                    {/* Comment Input */}
-                    <View style={styles.commentInputContainer}>
-                      <TextInput
-                        style={styles.commentInput}
-                        placeholder="Write a comment..."
-                        value={commentText[post.id] || ''}
-                        onChangeText={(text) => setCommentText({...commentText, [post.id]: text})}
-                        multiline
-                      />
-                      <TouchableOpacity 
-                        style={styles.sendButton}
-                        onPress={() => handleCommentSubmit(post.id)}
-                        disabled={!commentText[post.id]?.trim()}
-                      >
-                        <Send size={20} color={commentText[post.id]?.trim() ? Colors.primary.green : Colors.accent.lightGray} />
-                      </TouchableOpacity>
-                    </View>
                     
-                    {/* Comment List */}
-                    <View style={styles.commentsList}>
+                    <TouchableOpacity 
+                      style={styles.actionButton} 
+                      onPress={() => toggleComments(post.id)}
+                    >
+                      <MessageCircle 
+                        size={20} 
+                        color={expandedCommentPosts.includes(post.id) 
+                          ? Colors.primary.green 
+                          : Colors.accent.darkGray} 
+                      />
+                      <Text style={styles.actionText}>{post.comments}</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
+                      <Share2 size={20} color={Colors.accent.darkGray} />
+                    </TouchableOpacity>
+                  </View>
+                  
+                  {/* Comments section */}
+                  {expandedCommentPosts.includes(post.id) && (
+                    <View style={styles.commentSection}>
+                      <View style={styles.commentInputContainer}>
+                        <TextInput
+                          style={styles.commentInput}
+                          placeholder="Write a comment..."
+                          value={commentText[post.id] || ''}
+                          onChangeText={(text) => setCommentText({...commentText, [post.id]: text})}
+                          multiline
+                        />
+                        <TouchableOpacity 
+                          style={styles.sendButton}
+                          onPress={() => handleCommentSubmit(post.id)}
+                          disabled={!commentText[post.id]?.trim()}
+                        >
+                          <Send 
+                            size={20} 
+                            color={commentText[post.id]?.trim() 
+                              ? Colors.primary.green 
+                              : Colors.accent.lightGray} 
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      
                       {loadingComments[post.id] ? (
-                        <Text style={styles.commentStatusText}>Loading comments...</Text>
+                        <ActivityIndicator size="small" color={Colors.primary.green} />
                       ) : post.commentsData?.length ? (
-                        <>
+                        <View style={styles.commentsList}>
                           {post.commentsData.map((comment) => (
                             <View key={comment.id} style={styles.commentItem}>
                               <Image source={{ uri: comment.user.avatar }} style={styles.commentAvatar} />
@@ -373,74 +522,107 @@ setPosts(updatedPosts);
                               </View>
                             </View>
                           ))}
-                          
-                          {hasMoreComments[post.id] && (
-                            <TouchableOpacity onPress={() => loadComments(post.id)}>
-                              <Text style={styles.loadMoreText}>
-                                Click to load more comments
-                              </Text>
-                            </TouchableOpacity>
-                          )}
-                        </>
+                        </View>
                       ) : (
-                        <Text style={styles.commentStatusText}>No comments yet. Be the first to comment!</Text>
+                        <Text style={styles.commentStatusText}>No comments yet</Text>
                       )}
                     </View>
-                  </View>
-                )}
-              </View>
-            ))}
+                  )}
+                </View>
+              ))
+            )}
           </View>
         ) : (
           <View style={styles.challengesContainer}>
-         {/* Disclaimer Section */}
-          <View style={styles.disclaimerContainer}>
-            <AlertCircle size={24} color={Colors.primary.red} style={styles.disclaimerIcon} />
-            <Text style={styles.disclaimerText}>
-              This feature will be fully functional in the next update. What you see below is a sneak peek of how it will look😉!
-            </Text>
-          </View>
-
-          {/* Challenges */}
-            <TouchableOpacity style={styles.challengeCard}>
-              <View style={styles.challengeBadge}>
-                <Trophy size={24} color={Colors.secondary.yellow} />
-              </View>
-              <Text style={styles.challengeTitle}>30-Day Recycling Sprint</Text>
-              <Text style={styles.challengeDesc}>
-                Recycle 100kg of waste in 30 days to earn special badges and 2000 bonus points!
-              </Text>
-              <View style={styles.challengeMeta}>
-                <Text style={styles.challengeParticipants}>1.2K participants</Text>
-                <Text style={styles.challengeTimeLeft}>20 days left</Text>
-              </View>
-              <View style={styles.progressBar}>
-                <View style={[styles.progress, { width: '60%' }]} />
-              </View>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.challengeCard}>
-              <View style={[styles.challengeBadge, { backgroundColor: Colors.primary.blue + '20' }]}>
-                <Users size={24} color={Colors.primary.blue} />
-              </View>
-              <Text style={styles.challengeTitle}>Community Clean-up</Text>
-              <Text style={styles.challengeDesc}>
-                Join forces with your community to clean up local areas and earn rewards together!
-              </Text>
-              <View style={styles.challengeMeta}>
-                <Text style={styles.challengeParticipants}>856 participants</Text>
-                <Text style={styles.challengeTimeLeft}>5 days left</Text>
-              </View>
-              <View style={styles.progressBar}>
-                <View style={[styles.progress, { width: '80%', backgroundColor: Colors.primary.blue }]} />
-              </View>
-            </TouchableOpacity>
+            {challengesLoading ? (
+              <ActivityIndicator size="large" color={Colors.primary.green} />
+            ) : challenges.length === 0 ? (
+              <Text style={styles.noContentText}>No active challenges at the moment</Text>
+            ) : (
+              challenges.map((challenge) => (
+                <TouchableOpacity 
+                  key={challenge.id} 
+                  style={styles.challengeCard}
+                  onPress={() => router.push(`/features/challengeDetails?id=${challenge.id}`)}
+                >
+                  <View style={styles.challengeBadge}>
+                    <Trophy size={24} color={Colors.secondary.yellow} />
+                  </View>
+                  <Text style={styles.challengeTitle}>{challenge.title}</Text>
+                  <Text style={styles.challengeDesc}>{challenge.description}</Text>
+                  
+                  <View style={styles.challengeMeta}>
+                    <Text style={styles.challengeParticipants}>
+                      {challenge.participants} participants
+                    </Text>
+                    <Text style={styles.challengeTimeLeft}>
+                      {challenge.daysLeft} days left
+                    </Text>
+                  </View>
+                  
+                  <View style={styles.progressBar}>
+                    <View style={[
+                      styles.progress, 
+                      { 
+                        width: `${Math.min(100, (challenge.participants.length / challenge.targetParticipants) * 100)}%`,
+                        backgroundColor: challenge.participants.length >= challenge.targetParticipants 
+                          ? Colors.primary.green 
+                          : Colors.primary.blue
+                      }
+                    ]} />
+                  </View>
+                  
+                  <TouchableOpacity 
+                    style={[
+                      styles.joinButton,
+                      challenge.participants.includes(currentUser?.id) && styles.joinedButton
+                    ]}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleJoinChallenge(challenge.id);
+                    }}
+                  >
+                    <Text style={styles.joinButtonText}>
+                      {challenge.participants.includes(currentUser?.id) 
+                        ? 'Joined' 
+                        : 'Join Challenge'}
+                    </Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         )}
       </View>
+
+      {/* New Challenge Modal */}
+      <Modal
+        visible={showNewChallengeForm}
+        animationType="slide"
+        onRequestClose={() => setShowNewChallengeForm(false)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity 
+            style={styles.closeButton}
+            onPress={() => setShowNewChallengeForm(false)}
+          >
+            <Text style={styles.closeButtonText}>×</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.modalTitle}>Create New Challenge</Text>
+          
+          <NewChallengeForm 
+            onSuccess={() => {
+              setShowNewChallengeForm(false);
+              setActiveTab('challenges');
+            }} 
+          />
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -461,6 +643,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.darker,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -520,6 +707,13 @@ const styles = StyleSheet.create({
   feed: {
     padding: 16,
     gap: 16,
+  },
+  noContentText: {
+    textAlign: 'center',
+    color: Colors.text.darker,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    marginTop: 20,
   },
   post: {
     backgroundColor: Colors.primary.cream,
@@ -661,47 +855,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.accent.darkGray,
-    paddingLeft: 2,
   },
   commentText: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.darker,
   },
-  loadMoreText: {
-    textAlign: 'center',
-    color: Colors.primary.green,
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-Medium',
-    marginTop: 8,
-    padding: 8,
-  },
   challengesContainer: {
     padding: 16,
     gap: 16,
-  },
-  disclaimerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primary.red + '56',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    shadowColor: '#fff',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  disclaimerIcon: {
-    marginRight: 8,
-  },
-  disclaimerText: {
-    fontSize: 14,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.secondary.white + '90',
-    flex: 1,
-    lineHeight: 20,
   },
   challengeCard: {
     backgroundColor: Colors.primary.cream,
@@ -754,11 +916,24 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: Colors.accent.lightGray,
     borderRadius: 2,
+    marginBottom: 12,
   },
   progress: {
     height: '100%',
-    backgroundColor: Colors.primary.green,
     borderRadius: 2,
+  },
+  joinButton: {
+    backgroundColor: Colors.primary.green,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  joinedButton: {
+    backgroundColor: Colors.accent.darkGray,
+  },
+  joinButtonText: {
+    color: Colors.text.primary,
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   postButton: {
     flexDirection: 'row',
@@ -766,12 +941,39 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.modal,
     padding: 10,
     borderRadius: 5,
-    marginTop: 10,
   },
   postButtonText: {
     marginLeft: 5,
     color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-Regular',
+  },
+  modalContainer: {
+    flex: 1,
+    padding: 20,
+    paddingTop: 60,
+    backgroundColor: Colors.background.main,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: Colors.primary.green,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.background.modal,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: Colors.text.primary,
   },
 });

@@ -3,28 +3,75 @@ import { Colors } from '../constants/Colors';
 import { Gift, TrendingUp, Award, Camera, Recycle, HelpCircle, ChevronRight, Gamepad2, MessageSquare, Calendar, HelpingHand, Store } from 'lucide-react-native';
 import { router, Link } from 'expo-router';
 import { getAuth } from 'firebase/auth'; 
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '@lib/firebase/firebaseConfig'; 
 import { useEffect, useState } from 'react';
 import LeaderboardPreview from '../components/LeaderboardPreview';
 
+type ActivityItem = {
+  id: string;
+  type: string;
+  points: number;
+  date: Date;
+  description: string;
+};
+
 export default function HomeScreen() {
   const auth = getAuth();
-  const [userData, setUserData] = useState<{fullName?: string, points?: number} | null>(null);
+  const [userData, setUserData] = useState<{
+    fullName?: string;
+    points?: number;
+    dataEarnedMB?: number;
+    wasteRecycledKg?: number;
+    tier?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (auth.currentUser) {
         try {
-          const docRef = doc(db, "users", auth.currentUser.uid);
-          const docSnap = await getDoc(docRef);
+          // Fetch user data
+          const userRef = doc(db, "users", auth.currentUser.uid);
+          const userSnap = await getDoc(userRef);
           
-          if (docSnap.exists()) {
-            setUserData(docSnap.data());
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            setUserData({
+              fullName: data.fullName,
+              points: data.points || 0,
+              dataEarnedMB: data.dataEarnedMB || 0,
+              wasteRecycledKg: data.wasteRecycledKg || 0,
+              tier: data.tier || 'Bronze'
+            });
           }
+
+          // Fetch recent activities
+          const activitiesQuery = query(
+            collection(db, "activities"),
+            where("userId", "==", auth.currentUser.uid),
+            orderBy("date", "desc"),
+            limit(3)
+          );
+
+          const unsubscribe = onSnapshot(activitiesQuery, (snapshot) => {
+            const activities = snapshot.docs.map(doc => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                type: data.type,
+                points: data.points,
+                date: data.date.toDate(),
+                description: data.description
+              };
+            });
+            setRecentActivities(activities);
+          });
+
+          return () => unsubscribe();
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("Error fetching data:", error);
         } finally {
           setLoading(false);
         }
@@ -33,6 +80,20 @@ export default function HomeScreen() {
 
     fetchUserData();
   }, []);
+
+  const formatData = (mb: number = 0) => {
+    if (mb >= 1000) return `${(mb / 1000).toFixed(1)}GB`;
+    return `${mb}MB`;
+  };
+
+  const formatDate = (date: Date) => {
+    const now = new Date();
+    const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffHours < 1) return 'Less than an hour ago';
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    return `${Math.floor(diffHours / 24)} days ago`;
+  };
 
   const handleQuickAction = (action: 'scan' | 'redeem') => {
     switch (action) {
@@ -87,38 +148,46 @@ export default function HomeScreen() {
         />
       </View>
 
+      {/* Stats Cards */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Gift size={24} color={Colors.primary.green} />
-          <Text style={styles.statValue}>1.2GB</Text>
+          <Text style={styles.statValue}>{formatData(userData?.dataEarnedMB)}</Text>
           <Text style={styles.statLabel}>Data Earned</Text>
         </View>
         <View style={styles.statCard}>
           <TrendingUp size={24} color={Colors.primary.blue} />
-          <Text style={styles.statValue}>45kg</Text>
+          <Text style={styles.statValue}>{userData?.wasteRecycledKg || '0'}kg</Text>
           <Text style={styles.statLabel}>Waste Recycled</Text>
         </View>
         <View style={styles.statCard}>
           <Award size={24} color={Colors.secondary.yellow} />
-          <Text style={styles.statValue}>Silver</Text>
+          <Text style={styles.statValue}>{userData?.tier || 'Bronze'}</Text>
           <Text style={styles.statLabel}>Current Tier</Text>
         </View>
       </View>
 
+      {/* Recent Activity Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recent Activity</Text>
         <View style={styles.activityList}>
-          {[1, 2].map((item) => (
-            <View key={item} style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Recycle size={24} color={Colors.primary.green} />
+          {recentActivities.length > 0 ? (
+            recentActivities.map((activity) => (
+              <View key={activity.id} style={styles.activityItem}>
+                <View style={styles.activityIcon}>
+                  <Recycle size={24} color={Colors.primary.green} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityTitle}>{activity.description}</Text>
+                  <Text style={styles.activityMeta}>
+                    +{activity.points} points • {formatDate(activity.date)}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Plastic Bottles Recycled</Text>
-                <Text style={styles.activityMeta}>+150 points • 2 hours ago</Text>
-              </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <Text style={styles.noActivitiesText}>No recent activities</Text>
+          )}
         </View>
       </View>
 
@@ -288,6 +357,13 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.accent.darkGray,
     marginTop: 4,
+  },
+  noActivitiesText: {
+    textAlign: 'center',
+    color: Colors.text.darker,
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Regular',
+    marginTop: 10,
   },
   section: {
     padding: 24,

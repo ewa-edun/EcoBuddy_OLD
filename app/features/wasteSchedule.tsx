@@ -4,6 +4,9 @@ import { MapPin, Info, Scale } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import MapView, { Marker } from 'react-native-maps';
+import { db } from '@lib/firebase/firebaseConfig';
+import { getAuth } from 'firebase/auth';
+import { addDoc, collection, doc, increment, updateDoc } from 'firebase/firestore';
 
 const wasteCategories = {
   '1': {
@@ -139,18 +142,57 @@ export default function WasteScheduleScreen() {
   const { wasteType } = useLocalSearchParams();
   const [weight, setWeight] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(dropOffLocations[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   const wasteInfo = wasteCategories[wasteType as keyof typeof wasteCategories];
 
-  const handleSubmit = () => {
+ const handleSubmit = async () => {
     if (!weight || isNaN(Number(weight)) || Number(weight) <= 0) {
       Alert.alert('Invalid Weight', 'Please enter a valid weight in kilograms');
       return;
     }
 
- // Here you would make an API call to submit the waste, For now, we'll just navigate to the history page
-    router.push('/features/wasteHistory');
+    if (!user) {
+      Alert.alert('Not logged in', 'Please log in to submit waste');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Calculate points
+      const pointsEarned = wasteInfo.points * Number(weight);
+      
+      // Add to waste history
+      const wasteRef = await addDoc(collection(db, 'wasteHistory'), {
+        userId: user.uid,
+        wasteType: wasteInfo.name,
+        weight: Number(weight),
+        points: pointsEarned,
+        location: selectedLocation.name,
+        status: 'pending',
+        date: new Date().toISOString(),
+      });
+
+      // Update user's total points
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        totalPoints: increment(pointsEarned),
+        lastRecycled: new Date().toISOString(),
+      });
+
+      Alert.alert('Success', 'Your waste submission has been recorded!');
+      router.push('/features/wasteHistory');
+    } catch (error) {
+      console.error('Error submitting waste:', error);
+      Alert.alert('Error', 'There was a problem submitting your waste. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -228,9 +270,15 @@ export default function WasteScheduleScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Submit Waste</Text>
-      </TouchableOpacity>
+      <TouchableOpacity 
+    style={styles.submitButton} 
+    onPress={handleSubmit}
+    disabled={isSubmitting}
+  >
+    <Text style={styles.submitButtonText}>
+      {isSubmitting ? 'Submitting...' : 'Submit Waste'}
+    </Text>
+  </TouchableOpacity>
     </ScrollView>
   );
 }

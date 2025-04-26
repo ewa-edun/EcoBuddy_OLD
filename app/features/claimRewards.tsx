@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
+import { db, auth } from '@lib/firebase/firebaseConfig';
+import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 
 // Define waste category type
 type WasteCategory = {
@@ -63,12 +65,153 @@ const ClaimRewards = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [mobileNetwork, setMobileNetwork] = useState('');
     const [saveAsDefault, setSaveAsDefault] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = () => {
-        // Logic to handle submission
-        Alert.alert('Success', 'Your claim has been submitted!');
-        router.push('/(tabs)/ecoRewards'); 
+     // Load saved default info on component mount
+     useEffect(() => {
+        const loadDefaultInfo = async () => {
+            try {
+                const userRef = doc(db, 'users', auth.currentUser?.uid || '');
+                const docSnap = await getDoc(userRef);
+                
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    if (userData.defaultClaimInfo) {
+                        setGiftType(userData.defaultClaimInfo.giftType);
+                        setBankAccount(userData.defaultClaimInfo.bankAccount || '');
+                        setBankName(userData.defaultClaimInfo.bankName || '');
+                        setPhoneNumber(userData.defaultClaimInfo.phoneNumber || '');
+                        setMobileNetwork(userData.defaultClaimInfo.mobileNetwork || '');
+                        setSaveAsDefault(true);
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading default info:", error);
+            }
+        };
+        loadDefaultInfo();
+    }, []);
+
+    const handleSubmit = async () => {
+        if (!points || isNaN(Number(points))) {
+            Alert.alert('Error', 'Please enter a valid points amount');
+            return;
+        }
+
+        if (giftType === 'money' && (!bankAccount || !bankName)) {
+            Alert.alert('Error', 'Please enter bank details');
+            return;
+        }
+
+        if (giftType === 'data' && (!phoneNumber || !mobileNetwork)) {
+            Alert.alert('Error', 'Please enter phone details');
+            return;
+        }
+
+        setIsLoading(true);
+        setIsSubmitting(true);
+
+        try {
+            const userId = auth.currentUser?.uid;
+            if (!userId) throw new Error('User not authenticated');
+
+            // 1. Save the claim request
+            const claimsRef = collection(db, 'claimRequests');
+            const newClaimRef = doc(claimsRef);
+            
+            await setDoc(newClaimRef, {
+                userId,
+                points: Number(points),
+                giftType,
+                ...(giftType === 'money' ? {
+                    bankAccount,
+                    bankName
+                } : {
+                    phoneNumber,
+                    mobileNetwork
+                }),
+                status: 'pending',
+                createdAt: serverTimestamp()
+            });
+
+            // 2. Update user points (deduct claimed points)
+            await runTransaction(db, async (transaction) => {
+                const userRef = doc(db, 'users', userId);
+                const userDoc = await transaction.get(userRef);
+                
+                if (!userDoc.exists()) throw new Error("User document doesn't exist");
+                
+                const currentPoints = userDoc.data().points || 0;
+                if (currentPoints < Number(points)) {
+                    throw new Error("Insufficient points");
+                }
+                
+                transaction.update(userRef, {
+                    points: currentPoints - Number(points)
+                });
+            });
+
+            // 3. Save as default if requested
+            if (saveAsDefault) {
+                const userRef = doc(db, 'users', userId);
+                await setDoc(userRef, {
+                    defaultClaimInfo: {
+                        giftType,
+                        bankAccount,
+                        bankName,
+                        phoneNumber,
+                        mobileNetwork
+                    }
+                }, { merge: true });
+            }
+
+            Alert.alert('Success', 'Your claim has been submitted!');
+            router.push('/(tabs)/ecoRewards');
+        } catch (error) {
+            console.error("Claim error:", error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to submit claim';
+            Alert.alert('Error', errorMessage);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+// API for processing claims (Cloud Function)
+    // Add this to your Firebase Cloud Functions
+    /*
+    exports.processClaim = functions.firestore
+        .document('claimRequests/{claimId}')
+        .onCreate(async (snap, context) => {
+            const claim = snap.data();
+            
+            if (claim.giftType === 'data') {
+                // Integrate with your data vendor API
+                await dataVendorAPI.redeem(
+                    claim.phoneNumber,
+                    claim.mobileNetwork,
+                    claim.points
+                );
+                
+                await snap.ref.update({ 
+                    status: 'completed',
+                    completedAt: admin.firestore.FieldValue.serverTimestamp() 
+                });
+            } else {
+                // Process bank transfer
+                await bankAPI.transfer(
+                    claim.bankAccount,
+                    claim.bankName,
+                    calculateCashAmount(claim.points)
+                );
+                
+                await snap.ref.update({ 
+                    status: 'completed',
+                    completedAt: admin.firestore.FieldValue.serverTimestamp() 
+                });
+            }
+        });
+    */
 
     return (
         <ScrollView style={styles.container}>
@@ -159,8 +302,14 @@ const ClaimRewards = () => {
                 </TouchableOpacity>
                 <Text style={styles.checkboxLabel}>Save this info as default account</Text>
             </View>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Submit</Text>
+            <TouchableOpacity 
+                style={[styles.submitButton, isSubmitting && styles.disabledButton]} 
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+            >
+                <Text style={styles.submitButtonText}>
+                    {isSubmitting ? 'Processing...' : 'Submit'}
+                </Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -295,6 +444,10 @@ const styles = StyleSheet.create({
         color: Colors.text.primary,
         fontSize: 18,
         fontFamily: 'PlusJakartaSans-SemiBold',
+    },
+    disabledButton: {
+        backgroundColor: Colors.primary.green + '50',
+        opacity: 0.7
     },
 });
 
