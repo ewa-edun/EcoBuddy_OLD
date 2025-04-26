@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   userName: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    color: Colors.accent.darkGray,
+    color: Colors.primary.cream,
   },
   statsContainer: {
     flexDirection: 'row',

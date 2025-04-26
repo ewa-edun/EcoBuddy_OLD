@@ -490,7 +490,7 @@ export default function CommunityScreen() {
                       style={styles.avatar} 
                     />
                     <View style={styles.postHeaderText}>
-                      <Text style={styles.userfullName}>{post.user?.fullName}</Text>
+                      <Text style={styles.userfullName}>EcoBuddy User</Text>
                       <View style={styles.badgeContainer}>
                         <Text style={styles.badge}>{post.user?.badge}</Text>
                       </View>

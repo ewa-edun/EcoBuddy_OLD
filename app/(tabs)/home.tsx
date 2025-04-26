@@ -21,8 +21,8 @@ export default function HomeScreen() {
   const [userData, setUserData] = useState<{
     fullName?: string;
     points?: number;
-    dataEarnedMB?: number;
-    wasteRecycledKg?: number;
+    rewards?: number;
+    recycled?: number;
     tier?: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,8 +41,8 @@ export default function HomeScreen() {
             setUserData({
               fullName: data.fullName,
               points: data.points || 0,
-              dataEarnedMB: data.dataEarnedMB || 0,
-              wasteRecycledKg: data.wasteRecycledKg || 0,
+              rewards: data.rewards || 0,
+              recycled: data.recycled || 0,
               tier: data.tier || 'Bronze'
             });
           }
@@ -152,12 +152,12 @@ export default function HomeScreen() {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Gift size={24} color={Colors.primary.green} />
-          <Text style={styles.statValue}>{formatData(userData?.dataEarnedMB)}</Text>
+          <Text style={styles.statValue}>{formatData(userData?.rewards)}</Text>
           <Text style={styles.statLabel}>Data Earned</Text>
         </View>
         <View style={styles.statCard}>
           <TrendingUp size={24} color={Colors.primary.blue} />
-          <Text style={styles.statValue}>{userData?.wasteRecycledKg || '0'}kg</Text>
+          <Text style={styles.statValue}>{userData?.recycled || '0'}kg</Text>
           <Text style={styles.statLabel}>Waste Recycled</Text>
         </View>
         <View style={styles.statCard}>

@@ -231,7 +231,10 @@ PROFILE PAGE
 
 - The model should have better predictions.
 
-- Posts. articles, leaderboards still showing annonymous even though im logged in.
+- Posts and articles still showing annonymous even though im logged in. the error is that im saving the name as fullName in firebase but here im btinging in fields that dont exist there.
+
+- Mobile kiosk
+- Charity donations should become functional and linked to firebase.
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)

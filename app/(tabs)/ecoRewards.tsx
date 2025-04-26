@@ -35,7 +35,7 @@ export default function EcoRewardsScreen() {
       if (doc.exists()) {
         const userData = doc.data();
         setUserPoints(userData.points || 0);
-        setDataEarned(userData.dataEarnedMB || 0);
+        setDataEarned(userData.rewards || 0);
         setUserTier(userData.tier || 'Bronze');
       }
     });
