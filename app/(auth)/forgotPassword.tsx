@@ -7,8 +7,9 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const auth = getAuth(); 
 
-//export const ForgotPassword = () => {
-function ForgotPassword() {
+export const ForgotPassword = () => {
+//function ForgotPassword() {
+
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false); 
 
