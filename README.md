@@ -219,19 +219,18 @@ WEEKLY DATA TYPE
 
 ## Pages/Fixes to do
 BUGS
-Community page not displaying
 Forgot Password page
 
 PROFILE PAGE
    - Find a solution to why profile images are saying network error from supabase.
+
 - Need API's to handle
    - Waste submission of proper waste allowed.
    - location and dynamic maps. Also more centers for pick-up.
 
 - The model should have better predictions.
-- Mobile Kiosk page
-- Charity page
-- Poster still showing annonymous even though im logged in.
+
+- Posts. articles, leaderboards still showing annonymous even though im logged in.
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)
@@ -316,6 +315,9 @@ npm --v
    npm install expo-camera
    npm install expo-image-picker
    npm install @react-native-async-storage/async-storage
+   npm install @react-native-community/datetimepicker
+   npm install @react-native-picker/picker
+   npm install react-native-svg
    npm install jest
    npm install @testing-library/react-native
    npm install -g expo-cli

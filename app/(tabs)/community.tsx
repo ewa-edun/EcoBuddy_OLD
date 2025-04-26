@@ -147,27 +147,27 @@ export default function CommunityScreen() {
         );
         
         const querySnapshot = await getDocs(q);
-      const challengesData = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          title: data.title || "Untitled Challenge",
-          description: data.description || "No description provided",
-          targetParticipants: data.targetParticipants || 0,
-          rewardPoints: data.rewardPoints || 0,
-          startDate: data.startDate || new Date(),
-          endDate: data.endDate || new Date(),
-          participants: data.participants || [],
-          daysLeft: data.endDate 
-            ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
-                data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-            : 0,
-          createdBy: data.createdBy || "Unknown",
-          status: data.status || "upcoming"
-        };
-      });
+        const challengesData = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || "Untitled Challenge",
+            description: data.description || "No description provided",
+            targetParticipants: data.targetParticipants || 0,
+            rewardPoints: data.rewardPoints || 0,
+            startDate: data.startDate || new Date(),
+            endDate: data.endDate || new Date(),
+            participants: data.participants || [],
+            daysLeft: data.endDate 
+              ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
+                  data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+              : 0,
+            createdBy: data.createdBy || "Unknown",
+            status: data.status || "upcoming"
+          };
+        });
 
-      setChallenges(challengesData);
+        setChallenges(challengesData);
         setCommunityStats(prev => ({
           ...prev,
           activeChallenges: challengesData.length
@@ -553,7 +553,7 @@ export default function CommunityScreen() {
                   
                   <View style={styles.challengeMeta}>
                     <Text style={styles.challengeParticipants}>
-                      {challenge.participants} participants
+                      {challenge.participants.length} participants
                     </Text>
                     <Text style={styles.challengeTimeLeft}>
                       {challenge.daysLeft} days left
@@ -622,7 +622,6 @@ export default function CommunityScreen() {
     </ScrollView>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

@@ -8,7 +8,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const auth = getAuth(); 
 
 //export const ForgotPassword = () => {
-    export default function ForgotPassword() {
+function ForgotPassword() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false); 
 
@@ -57,6 +57,8 @@ const auth = getAuth();
         </View>
     );
 };
+
+export default ForgotPassword;
 
 const styles = StyleSheet.create({
     container: {

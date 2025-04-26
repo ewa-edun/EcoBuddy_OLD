@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { db, auth } from '@lib/firebase/firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { router } from 'expo-router';
 
-export const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
+const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [targetParticipants, setTargetParticipants] = useState('100');
@@ -59,7 +60,7 @@ export const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.label}>Challenge Title*</Text>
       <TextInput
         style={styles.input}
@@ -79,7 +80,7 @@ export const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
       <View style={styles.row}>
         <View style={styles.halfInput}>
-          <Text style={styles.label}>Target Participants</Text>
+          <Text style={styles.label}>Participants num</Text>
           <Picker
             selectedValue={targetParticipants}
             onValueChange={setTargetParticipants}
@@ -159,12 +160,20 @@ export const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
           {isSubmitting ? 'Creating...' : 'Create Challenge'}
         </Text>
       </TouchableOpacity>
-    </View>
+
+      <TouchableOpacity 
+        style={styles.backButton} 
+        onPress={() => router.push('/(tabs)/community')}
+      >
+        <Text style={styles.backButtonText}>
+          Back to community
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
 export default NewChallengeForm;
-
 
 const styles = StyleSheet.create({
   container: {
@@ -210,6 +219,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 24,
+    marginBottom: 5,
   },
   submitButtonText: {
     color: Colors.text.primary,
@@ -219,5 +229,18 @@ const styles = StyleSheet.create({
   disabledButton: {
           backgroundColor: Colors.primary.green + '50',
           opacity: 0.7
+    },
+    backButton: {
+    backgroundColor: Colors.primary.red,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 5,
+    marginBottom: 50,
+    },
+    backButtonText: {
+      color: Colors.text.primary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans-SemiBold',
     },
 });

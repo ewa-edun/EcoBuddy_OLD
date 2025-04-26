@@ -10,7 +10,7 @@ const LeaderboardScreen = () => {
   const [activeTab, setActiveTab] = useState<'points' | 'waste'>('points');
   interface Leader {
     id: string;
-    name?: string;
+    fullName?: string;
     points?: number;
     recycled?: number;
     avatarUrl?: string;
@@ -85,7 +85,7 @@ const LeaderboardScreen = () => {
         style={styles.avatar}
       />
       <View style={styles.userInfo}>
-        <Text style={styles.userName}>{item.name}</Text>
+        <Text style={styles.userName}>{item.fullName}</Text>
         <View style={styles.pointsContainer}>
           <Award size={14} color={Colors.secondary.yellow} />
           <Text style={styles.pointsText}>{item.points} points</Text>
@@ -107,7 +107,7 @@ const LeaderboardScreen = () => {
         style={styles.avatar}
       />
       <View style={styles.userInfo}>
-        <Text style={styles.userName}>{item.name}</Text>
+        <Text style={styles.userName}>{item.fullName}</Text>
         <View style={styles.pointsContainer}>
           <Recycle size={14} color={Colors.primary.green} />
           <Text style={styles.wasteText}>{item.recycled} kg recycled</Text>

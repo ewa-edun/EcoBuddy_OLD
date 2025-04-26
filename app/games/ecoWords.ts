@@ -89,3 +89,6 @@ export const ecoWords = [
     { word: 'windy', description: 'Relating to wind energy generation.' },
     { word: 'worms', description: 'Creatures that help break down compost.' }
   ];
+
+
+  export default ecoWords;

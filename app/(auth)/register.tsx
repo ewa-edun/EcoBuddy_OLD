@@ -22,7 +22,7 @@ export default function RegisterScreen() {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   const handleRegister = async () => {
-    if (!formData.email || !formData.password || !formData.fullName) {
+    if (!formData.email || !formData.password || !formData.fullName || !formData.role || !formData.phone) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }

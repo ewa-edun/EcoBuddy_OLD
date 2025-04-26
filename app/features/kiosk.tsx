@@ -117,7 +117,7 @@ const KioskScreen = () => {
         <Text style={styles.materialsTitle}>Materials Accepted:</Text>
         <View style={styles.materialTags}>
           {item.materialsAccepted.map((material, index) => (
-            <View key={index} style={styles.materialTag}>
+            <View key={`${item.id}-${material}`}  style={styles.materialTag}>
               <Text style={styles.materialTagText}>{material}</Text>
             </View>
           ))}
@@ -267,10 +267,18 @@ const KioskScreen = () => {
 
           {/* Kiosk Locations */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Kiosk Locations</Text>
-            {filteredKiosks.length > 0 ? (
-              filteredKiosks.map((kiosk) => renderKioskItem({ item: kiosk }))
-            ) : (
+         <Text style={styles.sectionTitle}>Kiosk Locations</Text>
+         {filteredKiosks.length > 0 ? (
+     filteredKiosks.map((kiosk) => (
+     <TouchableOpacity 
+        key={kiosk.id} // Add this key prop
+        style={styles.kioskCard}
+        onPress={() => handleViewKiosk(kiosk)}
+      >
+        {renderKioskItem({ item: kiosk })}
+      </TouchableOpacity>
+      ))
+        ) : (
               <View style={styles.noResultsContainer}>
                 <AlertCircle size={60} color={Colors.primary.green} />
                 <Text style={styles.noResultsText}>No kiosks found</Text>
@@ -527,24 +535,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   hoursText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.accent.darkGray,
-    marginLeft: 6,
+    marginRight: 3,
+    marginLeft: 2,
   },
   scheduleButton: {
     flexDirection: 'row',
     backgroundColor: Colors.primary.green,
-    paddingHorizontal: 12,
+    paddingHorizontal: 7,
     paddingVertical: 6,
     borderRadius: 8,
     alignItems: 'center',
   },
   scheduleButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.secondary.white,
-    marginRight: 6,
   },
   dropoffCard: {
     flexDirection: 'row',
