@@ -10,7 +10,7 @@ import NewChallengeForm from '../features/newChallengeForm';
 type Post = {
   id: string;
   user?: {
-    name: string;
+    fullName: string;
     avatar: string;
     badge: string;
     id: string;
@@ -28,7 +28,7 @@ type Comment = {
   postId: string;
   user: {
     id: string;
-    name: string;
+    fullName: string;
     avatar: string;
     badge: string;
   };
@@ -73,7 +73,7 @@ export default function CommunityScreen() {
       if (user) {
         setCurrentUser({
           id: user.uid,
-          name: user.displayName || "EcoBuddy User",
+          fullName: user.displayName || "EcoBuddy User",
           avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member"
         });
@@ -113,7 +113,7 @@ export default function CommunityScreen() {
           return {
             id: doc.id,
             user: data.author || {
-              name: "EcoBuddy User",
+              fullName: "EcoBuddy User",
               avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
               badge: "Member",
               id: data.authorId || "unknown"
@@ -261,7 +261,7 @@ export default function CommunityScreen() {
           postId: data.postId,
           user: data.user || {
             id: data.userId,
-            name: "EcoBuddy User",
+            fullName: "EcoBuddy User",
             avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
             badge: "Member"
           },
@@ -289,7 +289,7 @@ export default function CommunityScreen() {
         userId: currentUser.id,
         user: {
           id: currentUser.id,
-          name: currentUser.name,
+          fullName: currentUser.fullName,
           avatar: currentUser.avatar,
           badge: currentUser.badge
         },
@@ -490,7 +490,7 @@ export default function CommunityScreen() {
                       style={styles.avatar} 
                     />
                     <View style={styles.postHeaderText}>
-                      <Text style={styles.userName}>{post.user?.name}</Text>
+                      <Text style={styles.userfullName}>{post.user?.fullName}</Text>
                       <View style={styles.badgeContainer}>
                         <Text style={styles.badge}>{post.user?.badge}</Text>
                       </View>
@@ -571,7 +571,7 @@ export default function CommunityScreen() {
                               <Image source={{ uri: comment.user.avatar }} style={styles.commentAvatar} />
                               <View style={styles.commentContent}>
                                 <View style={styles.commentHeader}>
-                                  <Text style={styles.commentUserName}>{comment.user.name}</Text>
+                                  <Text style={styles.commentUserfullName}>{comment.user.fullName}</Text>
                                   <Text style={styles.commentTime}>{comment.timestamp}</Text>
                                 </View>
                                 <Text style={styles.commentText}>{comment.content}</Text>
@@ -794,7 +794,7 @@ const styles = StyleSheet.create({
   postHeaderText: {
     flex: 1,
   },
-  userName: {
+  userfullName: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans-SemiBold',
     color: Colors.accent.darkGray,
@@ -901,7 +901,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 4,
   },
-  commentUserName: {
+  commentUserfullName: {
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-SemiBold',
     color: Colors.secondary.white,

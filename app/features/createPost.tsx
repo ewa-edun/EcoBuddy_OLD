@@ -15,7 +15,7 @@ export default function CreatePost() {
   const [isLoading, setIsLoading] = useState(false);
   interface UserInfo {
     id: string;
-    name: string;
+    fullName: string;
     avatar: string;
     badge: string;
   }
@@ -28,7 +28,7 @@ export default function CreatePost() {
     if (currentUser) {
       setUserInfo({
         id: currentUser.uid,
-        name: currentUser.displayName || "EcoBuddy User",
+        fullName: currentUser.displayName || "EcoBuddy User",
         avatar: currentUser.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
         badge: "Member"
       });
@@ -135,7 +135,7 @@ export default function CreatePost() {
         authorId: user.uid, // Add this so rules can match it
         author: userInfo || {
           id: user.uid,
-          name: user.displayName || "EcoBuddy User",
+          fullName: user.displayName || "EcoBuddy User",
           avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member"
         },
@@ -183,7 +183,7 @@ export default function CreatePost() {
             source={{ uri: userInfo.avatar }} 
             style={styles.userAvatar} 
           />
-          <Text style={styles.userName}>Posting as: {userInfo.name}</Text>
+          <Text style={styles.userName}>Posting as: {userInfo.fullName}</Text>
         </View>
       )}
       

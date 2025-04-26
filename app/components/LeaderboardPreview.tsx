@@ -11,7 +11,7 @@ const LeaderboardPreview = () => {
   const [activeTab, setActiveTab] = useState('points');
   interface Leader {
     id: string;
-    name?: string;
+    fullName?: string;
     avatarUrl?: string;
     points?: number;
     recycled?: number;
@@ -85,7 +85,7 @@ const LeaderboardPreview = () => {
           style={styles.avatar}
         />
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{item.name}</Text>
+            <Text style={styles.userName}>{item.fullName}</Text>
             <View style={styles.statsContainer}>
               {activeTab === 'points' ? (
                 <>

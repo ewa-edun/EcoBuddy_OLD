@@ -16,7 +16,7 @@ interface Article {
   imageUrl?: string;
   category: string;
   author: {
-    name: string;
+    fullName: string;
     id: string;
     avatar: string | null;
   };
@@ -62,7 +62,7 @@ const BlogArticle = () => {
           ...articleData,
           // Ensure author data exists
           author: articleData.author || {
-            name: 'EcoBuddy Team',
+            fullName: 'EcoBuddy Team',
             avatar: null
           }
         });
@@ -249,7 +249,7 @@ const BlogArticle = () => {
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <User size={16} color={Colors.text.secondary} />
-            <Text style={styles.metaText}>{article.author?.name || 'EcoBuddy Team'}</Text>
+            <Text style={styles.metaText}>{article.author?.fullName || 'EcoBuddy Team'}</Text>
           </View>
           <View style={styles.metaItem}>
              <Calendar size={16} color={Colors.text.secondary} />

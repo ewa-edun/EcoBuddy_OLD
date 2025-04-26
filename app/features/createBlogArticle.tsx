@@ -33,7 +33,7 @@ export default function CreateBlogArticle() {
 
 interface UserInfo {
     id: string;
-    name: string;
+    fullName: string;
     avatar: string;
     badge: string;
   }
@@ -45,7 +45,7 @@ interface UserInfo {
       if (currentUser) {
         setUserInfo({
           id: currentUser.uid,
-          name: currentUser.displayName || "EcoBuddy User",
+          fullName: currentUser.displayName || "EcoBuddy User",
           avatar: currentUser.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member"
         });
@@ -150,7 +150,7 @@ interface UserInfo {
         ...(imageData?.path && { imagePath: imageData.path }),
         category: formData.category, // Save the selected category
         author: {
-          name: auth.currentUser.displayName || 'Anonymous',
+          fullName: auth.currentUser.displayName || 'Anonymous',
           id: auth.currentUser.uid,
           avatar: auth.currentUser.photoURL || null
         },
@@ -201,7 +201,7 @@ interface UserInfo {
             source={{ uri: userInfo.avatar }} 
             style={styles.userAvatar} 
           />
-          <Text style={styles.userName}>Posting as: {userInfo.name}</Text>
+          <Text style={styles.userName}>Posting as: {userInfo.fullName}</Text>
         </View>
       )}
 
