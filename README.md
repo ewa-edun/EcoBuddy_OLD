@@ -218,20 +218,20 @@ WEEKLY DATA TYPE
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 ## Pages/Fixes to do
-BUGS
-Forgot Password page
+BUGS: Forgot Password page
 
 PROFILE PAGE
    - Find a solution to why profile images are saying network error from supabase.
-   - Achievements 
-
+   
 - Need API's to handle
    - Waste submission of proper waste allowed.
    - location and dynamic maps. Also more centers for pick-up.
 
 - The model should have better predictions.
 
-- Posts and articles still showing annonymous even though im logged in. the error is that im saving the name as fullName in firebase but here im btinging in fields that dont exist there.
+- Posts and articles still showing annonymous even though im logged in. the error is that im saving the name as fullName in firebase but here im bringing in fields that dont exist there.
+
+- Recent activity on home page should be linked to waste history and claim rewards.
 
 - Mobile kiosk
 - Charity donations should become functional and linked to firebase.

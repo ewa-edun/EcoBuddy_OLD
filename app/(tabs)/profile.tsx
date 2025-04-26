@@ -627,6 +627,16 @@ const renderAvatar = () => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Achievements</Text>
+
+        {achievements.length === 0 ? (
+    <View style={styles.emptyAchievementsContainer}>
+      <Award size={40} color={Colors.accent.lightGray} />
+      <Text style={styles.emptyAchievementsText}>No achievements unlocked yet</Text>
+      <Text style={styles.emptyAchievementsSubtext}>
+        Complete challenges and recycle more to earn achievements!
+      </Text>
+    </View>
+  ) : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.achievementsScroll}>
 
          
@@ -671,6 +681,7 @@ const renderAvatar = () => {
            </View>
           ))}
         </ScrollView>
+      )}
       </View>
 
 
@@ -1017,5 +1028,28 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-SemiBold',
     color: Colors.secondary.yellow,
     textAlign: 'center',
+  },
+  emptyAchievementsContainer: {
+    backgroundColor: Colors.primary.cream,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 24,
+  },
+  emptyAchievementsText: {
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+    color: Colors.accent.darkGray,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  emptyAchievementsSubtext: {
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: Colors.accent.darkGray,
+    marginTop: 4,
+    textAlign: 'center',
+    opacity: 0.8,
   },
 });
