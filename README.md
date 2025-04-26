@@ -182,9 +182,12 @@ WEEKLY DATA TYPE
 - Dark Mode / Theme Options
 - Past chats of AI Chatbot
 - SMS Notifications.
-- Community active chalenges: Challenges are created by the admin of the app and elite users(like level 100, premium users, etc) with large followings.
+- App notificatins and notifications page.
 - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
+- Mobile kiosk
+- Charity donations should become functional and linked to firebase.
 - Add more profile levels and achievements.
+- Add a recent transactions page to the claim rewards that shows the recent points to data/cash transactions.
 - Subscription packages.
 - NEW GAME: Memory Match Eco Edition
     - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
@@ -218,23 +221,16 @@ WEEKLY DATA TYPE
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
 ## Pages/Fixes to do
-BUGS: Forgot Password page
-
-PROFILE PAGE
-   - Find a solution to why profile images are saying network error from supabase.
-   
+- BUGS: Forgot Password page
+- PROFILE PAGE: Find a solution to why profile images are saying network error from supabase.
 - Need API's to handle
    - Waste submission of proper waste allowed.
    - location and dynamic maps. Also more centers for pick-up.
-
 - The model should have better predictions.
-
 - Posts and articles still showing annonymous even though im logged in. the error is that im saving the name as fullName in firebase but here im bringing in fields that dont exist there.
-
 - Recent activity on home page should be linked to waste history and claim rewards.
+- Add emails from firebase for create account confirmation: Email address verification.
 
-- Mobile kiosk
-- Charity donations should become functional and linked to firebase.
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)

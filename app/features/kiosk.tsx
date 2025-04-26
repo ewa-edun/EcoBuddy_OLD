@@ -71,18 +71,18 @@ const pastTransactions = [
   {
     id: '1',
     location: 'Ikeja Collection Center',
-    date: '15 Jun 2023',
+    date: '15 Feb 2025',
     materials: 'Plastic bottles',
     weight: '3.2 kg',
-    points: 150,
+    points: 112,
   },
   {
     id: '2',
     location: 'Yaba Recycling Hub',
-    date: '2 Jun 2023',
+    date: '2 Feb 2025',
     materials: 'Metal cans, Glass bottles',
-    weight: '5.7 kg',
-    points: 285,
+    weight: '4.7 kg, 2.3 kg',
+    points: 420,
   },
 ];
 
@@ -179,6 +179,14 @@ const KioskScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+ {/* Disclaimer Section */}
+   <View style={styles.disclaimerContainer}>
+      <AlertCircle size={20} color="#D32F2F" style={styles.disclaimerIcon} />
+      <Text style={styles.disclaimerText}>
+        This page will be fully functional in the next main update. What you see below is a sneak peak of how it will look like 😉
+      </Text>
+    </View>
+
       <View style={styles.header}>
         <Text style={styles.title}>Mobile Kiosk</Text>
         <Text style={styles.subtitle}>Find local recycling agents or join as a collector</Text>
@@ -379,7 +387,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
-    paddingTop: 60,
+    paddingTop: 20,
   },
   title: {
     fontSize: 28,
@@ -800,6 +808,24 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.darker,
     lineHeight: 20,
+  },
+  disclaimerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary.red + 40, 
+    padding: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 8,
+  },
+  disclaimerIcon: {
+    marginRight: 8,
+  },
+  disclaimerText: {
+    color: Colors.primary.red, 
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    flex: 1,
   },
 });
 

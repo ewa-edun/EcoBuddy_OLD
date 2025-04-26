@@ -290,16 +290,16 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
-    paddingTop: 60,
+    paddingTop: 25,
   },
   title: {
-    fontSize: 32,
+    fontSize: 27,
     fontFamily: 'PlusJakartaSans-Bold',
     color: Colors.primary.green,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.secondary,
   },

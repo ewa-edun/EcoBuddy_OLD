@@ -58,14 +58,12 @@ const recentDonations = [
     type: 'Electronics',
     date: '2 days ago',
     charity: 'Eco Warriors Nigeria',
-    points: 320,
   },
   {
     id: '2',
     type: 'Clothing',
     date: '1 week ago',
     charity: 'Lagos Food Bank',
-    points: 150,
   },
 ];
 
@@ -120,6 +118,14 @@ const CharityScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Disclaimer Section */}
+    <View style={styles.disclaimerContainer}>
+      <AlertCircle size={20} color="#D32F2F" style={styles.disclaimerIcon} />
+      <Text style={styles.disclaimerText}>
+      This page will be fully functional in the next main update. What you see below is a sneak peak of how it will look like 😉
+      </Text>
+    </View>
+
       <View style={styles.header}>
         <Text style={styles.title}>Donate Items</Text>
         <Text style={styles.subtitle}>Help reduce landfill waste by donating your used items</Text>
@@ -199,10 +205,6 @@ const CharityScreen = () => {
                 <Text style={styles.donationCharity}>{donation.charity}</Text>
                 <Text style={styles.donationDate}>{donation.date}</Text>
               </View>
-              <View style={styles.donationPoints}>
-                <Text style={styles.pointsValue}>+{donation.points}</Text>
-                <Text style={styles.pointsLabel}>points</Text>
-              </View>
             </View>
           ))}
         </View>
@@ -254,7 +256,7 @@ const CharityScreen = () => {
       <View style={styles.factsContainer}>
         <Text style={styles.factsTitle}>Did You Know?</Text>
         <Text style={styles.factsText}>
-          Donating your used items can reduce landfill waste by up to 30%. Last year, EcoBuddy users helped divert over 15 tonnes of items from landfills through donations.
+        Donating even small household items can reduce landfill waste and lower carbon emissions — every little bit truly adds up! EcoBuddy strives to empower communities to turn everyday donations into a powerful force for environmental change, one item at a time.
         </Text>
       </View>
 
@@ -287,7 +289,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
-    paddingTop: 60,
+    paddingTop: 20,
   },
   title: {
     fontSize: 28,
@@ -321,6 +323,7 @@ const styles = StyleSheet.create({
   categoriesContainer: {
     paddingHorizontal: 20,
     marginTop: 20,
+    marginEnd: 23,
   },
   categoryButton: {
     paddingHorizontal: 16,
@@ -433,20 +436,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Regular',
     color: Colors.text.darker,
-  },
-  donationPoints: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pointsValue: {
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans-Bold',
-    color: Colors.secondary.yellow,
-  },
-  pointsLabel: {
-    fontSize: 12,
-    fontFamily: 'PlusJakartaSans-Regular',
-    color: Colors.accent.darkGray,
   },
   charityCard: {
     flexDirection: 'row',
@@ -605,6 +594,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.secondary.white,
+  },
+  disclaimerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary.red + 40, 
+    padding: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 8,
+  },
+  disclaimerIcon: {
+    marginRight: 8,
+  },
+  disclaimerText: {
+    color: Colors.primary.red, 
+    fontSize: 14,
+    fontFamily: 'PlusJakartaSans-Medium',
+    flex: 1,
   },
 });
 

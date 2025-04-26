@@ -571,7 +571,7 @@ export default function CommunityScreen() {
                               <Image source={{ uri: comment.user.avatar }} style={styles.commentAvatar} />
                               <View style={styles.commentContent}>
                                 <View style={styles.commentHeader}>
-                                  <Text style={styles.commentUserfullName}>{comment.user.fullName}</Text>
+                                  <Text style={styles.commentUserfullName}>EcoBuddy User</Text>
                                   <Text style={styles.commentTime}>{comment.timestamp}</Text>
                                 </View>
                                 <Text style={styles.commentText}>{comment.content}</Text>
@@ -897,7 +897,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   commentHeader: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
     marginBottom: 4,
   },
