@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     color: Colors.primary.green,
   },
   transactionList: {
-    padding: 24,
+    padding: 20,
   },
   statusTitle: {
     fontSize: 20,

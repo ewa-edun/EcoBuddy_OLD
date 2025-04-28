@@ -10,7 +10,7 @@ export const Colors = {
       green: '#4CAF50',
       blue: '#2196F3',
       red: '#e30e0e',
-      purple: '#512663',
+      purple: '#5c1978',
       orange: '#FF924D',
     },
     secondary: {

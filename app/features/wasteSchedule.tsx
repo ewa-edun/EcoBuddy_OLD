@@ -129,7 +129,7 @@ const dropOffLocations = [
     coordinates: { latitude: 6.5244, longitude: 3.3792 },
     hours: 'Mon-Sat: 8am-6pm',
     wasteTypes: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    distance: '0.0'
+    distance: '0.3'
   },
   {
     id: '2',
@@ -155,7 +155,7 @@ const dropOffLocations = [
     address: '10 Government Way, Lagos',
     coordinates: { latitude: 6.5044, longitude: 3.3592 },
     hours: 'Mon-Fri: 8am-4pm',
-    wasteTypes: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+    wasteTypes: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
     distance: '3.1'
   },
   {
@@ -720,14 +720,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   retakeButton: {
-    backgroundColor: Colors.primary.red + '50',
-    padding: 8,
+    backgroundColor: Colors.primary.red + '46',
+    padding: 7,
     borderRadius: 8,
   },
   retakeButtonText: {
     color: Colors.primary.red,
     fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 14,
+    fontSize: 15,
   },
   cameraContainer: {
     height: 300,
@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
   },
   selectedLocation: {
     borderColor: Colors.primary.teal,
-    borderWidth: 2,
+    borderWidth: 5,
   },
   locationName: {
     fontSize: 14,
