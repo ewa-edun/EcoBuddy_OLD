@@ -16,7 +16,6 @@ type Challenge = {
   endDate: any;
   participants: string[];
   daysLeft: number;
-  createdBy: string;
   status: 'active' | 'completed' | 'upcoming';
 };
 
@@ -34,7 +33,30 @@ export default function ChallengeDetails() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [userJoined, setUserJoined] = useState(false);
   const [joiningChallenge, setJoiningChallenge] = useState(false);
+  const [userData, setUserData] = useState<{fullName?: string; } | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+
+useEffect(() => {
+    const fetchUserData = async () => {
+      if (auth.currentUser) {
+        try {
+          // Fetch user data
+          const userRef = doc(db, "users", auth.currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            setUserData({
+              fullName: data.fullName,
+            });
+          }
+        } finally {
+       }
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     const fetchChallengeData = async () => {
@@ -46,6 +68,7 @@ export default function ChallengeDetails() {
         if (user) {
           setCurrentUser({
             id: user.uid,
+            name: userData?.fullName || "EcoBuddy User",
             avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png"
           });
         }
@@ -69,8 +92,8 @@ export default function ChallengeDetails() {
               ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
                   data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
               : 0,
-            createdBy: data.createdBy || "Anonymous",
             status: data.status || "active",
+            
           };
           
           setChallenge(challenge);
@@ -331,7 +354,7 @@ export default function ChallengeDetails() {
           </View>
           <View>
             <Text style={styles.detailLabel}>Created By</Text>
-            <Text style={styles.creatorValue}>{challenge.createdBy}</Text>
+            <Text style={styles.creatorValue}>{userData?.fullName}</Text>
           </View>
         </View>
       </View>
