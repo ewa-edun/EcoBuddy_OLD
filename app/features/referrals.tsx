@@ -5,7 +5,7 @@ import { Users, Copy, Share2, Gift } from 'lucide-react-native';
 import { router } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { getAuth } from 'firebase/auth';
-import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { db } from '@lib/firebase/firebaseConfig';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -36,6 +36,9 @@ const ReferralsScreen = () => {
           const userId = auth.currentUser.uid;
           const generatedCode = generateReferralCode(fullName, userId);
           setReferralCode(generatedCode);
+
+           // Save the referral code to the database
+        await saveReferralCodeToDatabase(generatedCode, userId);
         }
       }
       setLoading(false);
@@ -54,6 +57,20 @@ const ReferralsScreen = () => {
     const idPart = userId.substring(userId.length - 5);
     
     return `${namePart}${idPart}`;
+  };
+
+  const saveReferralCodeToDatabase = async (code: string, userId: string) => {
+    try {
+      const referralCodeRef = doc(db, "referralCodes", code);
+      await setDoc(referralCodeRef, {
+        userId: userId,
+        createdAt: new Date(),
+        active: true
+      });
+      console.log("Referral code saved successfully");
+    } catch (error) {
+      console.error("Error saving referral code:", error);
+    }
   };
 
   const handleCopyCode = async () => {
@@ -85,15 +102,20 @@ const ReferralsScreen = () => {
       Alert.alert('Error', 'You cannot use your own referral code');
       return;
     }
+     
+     // Check if the user has already used a referral code
+  if (userData.referredBy) {
+    Alert.alert('Error', 'You have already used a referral code');
+    return;
+  }
 
     setLoading(true);
     try {
-      // Check if this referral code exists by querying users
-      // This is a simplified approach - in production, you'd use a more efficient query
-      const usersSnapshot = await getDoc(doc(db, "referralCodes", enteredCode));
+// Check if this referral code exists by querying users. This is a simplified approach - in production, you'd use a more efficient query
+      const referralCodeRef = await getDoc(doc(db, "referralCodes", enteredCode));
       
-      if (usersSnapshot.exists()) {
-        const referrerUserId = usersSnapshot.data().userId;
+      if (referralCodeRef.exists()) {
+        const referrerUserId = referralCodeRef.data().userId;
         
         // Update the referrer's points (reward them for the referral)
         const referrerUserRef = doc(db, "users", referrerUserId);
@@ -111,15 +133,22 @@ const ReferralsScreen = () => {
           });
         }
         
+         // Increment the uses count for this referral code
+      const referralCodeDocRef = doc(db, "referralCodes", enteredCode);
+      await updateDoc(referralCodeDocRef, {
+        uses: increment(1)
+      });
+
         setReferralSuccess(true);
         Alert.alert(
           'Success!', 
           'Referral code applied successfully! You and your friend have received bonus points.'
         );
-        setEnteredCode('');
-      } else {
-        Alert.alert('Invalid Code', 'This referral code does not exist or has expired');
-      }
+         // Refresh user data
+      fetchUserData();
+    } else {
+      Alert.alert('Invalid Code', 'This referral code does not exist or has expired');
+    }
     } catch (error) {
       console.error('Error applying referral code:', error);
       Alert.alert('Error', 'Failed to apply referral code. Please try again later.');
@@ -127,6 +156,20 @@ const ReferralsScreen = () => {
       setLoading(false);
     }
   };
+
+// Update current user with all required fields
+const updateCurrentUser = async () => {
+  if (auth.currentUser) {
+    const currentUserRef = doc(db, "users", auth.currentUser.uid);
+    await updateDoc(currentUserRef, {
+      referredBy: enteredCode,
+      points: increment(300),
+      defaultClaimInfo: userData.defaultClaimInfo || {}, // Ensure this field exists
+      increment_value: 300, // Add this explicit field for the security rule
+    });
+  }
+};
+updateCurrentUser();
 
   if (loading) {
     return <LoadingSpinner text="Loading referrals..." />;
@@ -215,7 +258,7 @@ const ReferralsScreen = () => {
         <View style={styles.successCard}>
           <Text style={styles.successTitle}>Referral Applied!</Text>
           <Text style={styles.successText}>
-            You've earned 50 points and your friend received 100 points!
+            You and your friend have both earned 300 points. Keep inviting friends to earn more rewards!
           </Text>
         </View>
       )}

@@ -8,7 +8,6 @@ import * as tf from '@tensorflow/tfjs';
 import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-//import { manipulateAsync, SaveFormat } from 'expo-image';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Asset } from 'expo-asset';
 
@@ -1012,7 +1011,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   rulesContainer: {
-    marginTop: 12,
+    marginTop: 8,
     marginBottom: 8,
   },
   rulesTitle: {

@@ -100,6 +100,8 @@ const menuItems = [
 ];
 
 export default function ProfileScreen() {
+const [unsubscribeListeners, setUnsubscribeListeners] = useState<(() => void)[]>([]);
+
   const [userData, setUserData] = useState({
     name: 'Loading...',
     email: 'Loading...',
@@ -194,7 +196,9 @@ const getLevelTitle = (level: number): string => {
                 achievementsUnlocked: data.achievementsUnlocked || [],
                 badges: data.badges || [],
               });
-    
+
+              setUnsubscribeListeners(prev => [...prev, unsubscribe]);
+
               if (auth.currentUser?.photoURL) {
                 setAvatar(auth.currentUser.photoURL);
               }
@@ -203,7 +207,8 @@ const getLevelTitle = (level: number): string => {
             }
           });
     
-          return () => unsubscribe();
+          return () => 
+            unsubscribe();
         } catch (error) {
           console.error("Error fetching user data:", error);
           Alert.alert("Error", "Could not load profile data");
@@ -412,6 +417,12 @@ const handleImagePicker = async () => {
 
   const handleLogout = async () => {
     try {
+// First, unsubscribe from all active Firestore listeners. You'll need to keep references to these listeners when you create them.
+      if (unsubscribeListeners && unsubscribeListeners.length > 0) {
+        unsubscribeListeners.forEach(unsubscribe => unsubscribe());
+      }
+      
+      // Then sign out
       await auth.signOut();
       router.replace('/(auth)/login'); // Redirect to login page after logout
     } catch (error) {
@@ -419,6 +430,8 @@ const handleImagePicker = async () => {
       Alert.alert('Logout Error', 'An error occurred while logging out.');
     }
   };
+  
+  
 
   const handleChangePassword = async () => {
     router.push('/(auth)/changePassword');
