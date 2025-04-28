@@ -29,8 +29,8 @@ const Rules = () => {
     `,
     'Recycle Match': `
       - Match three or more of the same recyclable items in a grid.
-      - Gain +2 points for each successful match.
-      - Lose -4 points for each invalid move.
+      - Gain +4 points for each successful match.
+      - Lose -2 points for each invalid move.
       - You have 1 minute to complete the game.
     `,
     'EcoQuiz': `

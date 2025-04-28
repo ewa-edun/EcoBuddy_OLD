@@ -152,9 +152,9 @@ const dropOffLocations = [
   {
     id: '4',
     name: 'LAWMA Recycling Center',
-    address: '10 Government Way, Lagos',
-    coordinates: { latitude: 6.5044, longitude: 3.3592 },
-    hours: 'Mon-Fri: 8am-4pm',
+    address: '3 IDDO YARD, IJORA OLOPA, Lagos',
+    coordinates: { latitude: 6.48268, longitude: 3.38021 },
+    hours: 'Mon-Fri: 7am-5pm',
     wasteTypes: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
     distance: '3.1'
   },

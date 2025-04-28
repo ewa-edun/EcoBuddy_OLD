@@ -56,10 +56,10 @@ const RecycleMatch = () => {
           revertedGrid[row][col] = temp;
           setGrid(revertedGrid);
         }, 500);
-        setScore(score - 4);
+        setScore(score - 2);
       } else {
         // Match found, add points
-        setScore(score + 2);
+        setScore(score + 4);
       }
     } else {
       setSelected({ row, col });

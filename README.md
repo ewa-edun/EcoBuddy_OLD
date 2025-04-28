@@ -225,19 +225,13 @@ WEEKLY DATA TYPE
 - Add emails from firebase for create account confirmation: Email address verification. and forgot password, change password: Password reset
 
 # BUGS
-1. I created another account to see how it looks like from there.
- 
-  - Error tracking article read: [FirebaseError: Missing or insufficient permissions.]
   - Referrals not working. it says referral code is invalid or has expired.
+  
   - When i log out it gives me some firebase insufficient permissions so check that: [2025-04-27T23:27:24.234Z]  @firebase/firestore: Firestore (11.6.0): Uncaught Error in snapshot listener: FirebaseError: [code=permission-denied]: Missing or insufficient permissions.
 
-  - Now my name is displaying no longer annonymous. When i log in, everything that was posted (community posts, comments on posts, and blog articles) shows my own name (the name of the current account im using) only instead of the other different users (everybody who's posted smt).
-I think the current solution is to be saving the name of the person that post stuff and display the name from there. that way the content doesnt change.
+  - Now my name is displaying no longer annonymous. When i log in, everything that was posted (community posts, comments on posts, and blog articles) shows my own name (the name of the current account im using) only instead of the other different users (everybody who's posted smt). I think the current solution is to be saving the name of the person that post stuff and display the name from there. that way the content doesnt change.
 
 - Forgot Password page (dependency issue)
-- PROFILE PAGE: Find a solution to why profile images are saying network error from supabase.
-
-when
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)

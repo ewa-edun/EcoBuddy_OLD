@@ -4,15 +4,16 @@ import { Award, Gift, Share2 , Trash2, Key, ChevronRight, Recycle, TrendingUp, H
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
-import { getAuth, deleteUser, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
+import { getAuth, deleteUser, updateProfile } from 'firebase/auth';
 import { doc, getDoc, deleteDoc, updateDoc, collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '@lib/firebase/firebaseConfig';
+import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system';
 import { supabase } from '@lib/supabase/client';
 import { uploadAvatar } from '@lib/supabase/storage';
 
 const auth = getAuth();
 
-// Default achievements data (will be replaced with Firestore data)
 const defaultAchievements = [
   {
     id: '1',
@@ -49,7 +50,6 @@ const defaultAchievements = [
   },
 ];
 
-// Update the userData state interface to include more fields
 interface UserData {
   name: string;
   email: string;
@@ -118,11 +118,26 @@ export default function ProfileScreen() {
   
   // Add level thresholds configuration
 const levelThresholds = [
-  { level: 1, xpRequired: 0, title: 'Eco Beginner' },
-  { level: 2, xpRequired: 100, title: 'Eco Explorer' },
-  { level: 3, xpRequired: 300, title: 'Eco Enthusiast' },
-  { level: 4, xpRequired: 600, title: 'Eco Champion' },
-  { level: 5, xpRequired: 1000, title: 'Eco Master' },
+    { level: 1, xpRequired: 0, title: 'Eco Beginner' },
+    { level: 2, xpRequired: 100, title: 'Eco Explorer' },
+    { level: 3, xpRequired: 300, title: 'Eco Enthusiast' },
+    { level: 4, xpRequired: 600, title: 'Eco Champion' },
+    { level: 5, xpRequired: 1000, title: 'Eco Master' },
+    { level: 6, xpRequired: 1500, title: 'Planet Protector' },
+    { level: 7, xpRequired: 2100, title: 'Green Guardian' },
+    { level: 8, xpRequired: 2800, title: 'Recycling Ranger' },
+    { level: 9, xpRequired: 3600, title: 'Sustainability Star' },
+    { level: 10, xpRequired: 4500, title: 'Earth Advocate' },
+    { level: 11, xpRequired: 5500, title: 'Eco Hero' },
+    { level: 12, xpRequired: 6600, title: 'Zero Waste Warrior' },
+    { level: 13, xpRequired: 7800, title: 'Climate Crusader' },
+    { level: 14, xpRequired: 9100, title: 'Nature Defender' },
+    { level: 15, xpRequired: 10600, title: 'Eco Legend' },
+    { level: 16, xpRequired: 12000, title: 'Planet Pioneer' },
+    { level: 17, xpRequired: 13700, title: 'Green Visionary' },
+    { level: 18, xpRequired: 15400, title: 'Eco Sage' },
+    { level: 19, xpRequired: 17300, title: 'Gaia Guardian' },
+    { level: 20, xpRequired: 19000, title: 'Earth’s Champion' }
 ];
 
 // Enhanced calculateLevel function
@@ -156,7 +171,6 @@ const getLevelTitle = (level: number): string => {
       if (auth.currentUser) {
         try {
           const userDocRef = doc(db, "users", auth.currentUser.uid);
-          
           // Set up real-time listener for user data
           const unsubscribe = onSnapshot(userDocRef, async (doc) => {
             if (doc.exists()) {
@@ -184,13 +198,11 @@ const getLevelTitle = (level: number): string => {
               if (auth.currentUser?.photoURL) {
                 setAvatar(auth.currentUser.photoURL);
               }
-    
               // Refresh achievements when user data changes
               await fetchAchievements(data);
             }
           });
     
-          // Cleanup function for the useEffect
           return () => unsubscribe();
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -204,8 +216,7 @@ const getLevelTitle = (level: number): string => {
     fetchUserData();
   }, []);
 
-  // Enhanced fetchAchievements function
-// Define a proper type for achievements
+ // Enhanced fetchAchievements function. Define a proper type for achievements
 interface Achievement {
   id: string;
   type: string;
@@ -295,69 +306,28 @@ const handleImagePicker = async () => {
     try {
       setLoading(true);
 
- // Validate the image exists and has a valid URI
- if (!result.assets || !result.assets[0] || !result.assets[0].uri) {
-  throw new Error("Selected image is invalid or missing URI");
-}
+      // Validate the image exists and has a valid URI
+      if (!result.assets || !result.assets[0] || !result.assets[0].uri) {
+        throw new Error("Selected image is invalid or missing URI");
+      }
 
-const imageUri = result.assets[0].uri;
-console.log("Selected image URI:", imageUri);
-
-// Check file size (optional - large files might cause upload issues)
-const fileInfo = await fetch(imageUri).then(response => ({
-  size: parseInt(response.headers.get('Content-Length') || '0'),
-  type: response.headers.get('Content-Type')
-})).catch(err => {
-  console.log("Error checking file info:", err);
-  return { size: 0, type: null };
-});
-
-console.log("File size:", fileInfo.size, "bytes, type:", fileInfo.type);
-
-if (fileInfo.size > 5000000) { // 5MB limit example
-  Alert.alert('File too large', 'Please select an image smaller than 5MB');
-  setLoading(false);
-  return;
-}
+      const imageUri = result.assets[0].uri;
+      console.log("Selected image URI:", imageUri);
 
       // Upload image to Supabase with detailed error handling
       console.log("Starting upload to Supabase for user:", auth.currentUser.uid);
-      const publicUrl = await uploadAvatar(auth.currentUser.uid, imageUri)
-        .catch(error => {
-          console.error("Supabase upload error details:", error);
-          Alert.alert(
-            'Upload Error', 
-            `Failed to upload image: ${error.message || 'Unknown error'}`
-          );
-          throw error; // Re-throw to stop the process
-        });
+      const publicUrl = await uploadAvatar(auth.currentUser.uid, imageUri);
       
       console.log("Image uploaded successfully, public URL:", publicUrl);
       
-       // Update Firebase auth profile
-       await updateProfile(auth.currentUser, { photoURL: publicUrl })
-       .catch(error => {
-         console.error("Firebase profile update error:", error);
-         Alert.alert(
-           'Profile Update Error',
-           `Failed to update profile: ${error.message || 'Unknown error'}`
-         );
-         throw error;
-       });
-     
-     console.log("Auth profile updated successfully");
+      // Update Firebase auth profile
+      await updateProfile(auth.currentUser, { photoURL: publicUrl });
+      console.log("Auth profile updated successfully");
       
       // Update Firestore
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         photoURL: publicUrl,
         avatarLastUpdated: new Date().toISOString()
-      }).catch(error => {
-        console.error("Firestore update error:", error);
-        Alert.alert(
-          'Database Update Error',
-          `Failed to update user data: ${error.message || 'Unknown error'}`
-        );
-        throw error;
       });
       
       console.log("Firestore updated successfully");
@@ -377,21 +347,48 @@ if (fileInfo.size > 5000000) { // 5MB limit example
   }
 };
 
-const renderAvatar = () => {
-  if (loading) {
-    return (
-      <View style={[styles.avatar, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={Colors.primary.green} />
-      </View>
-    );
+ const uploadAvatar = async (userId: string, uri: string) => {
+  try {
+    // Fetch the image file from the URI
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    
+    // Read the image file as base64
+    const base64 = await FileSystem.readAsStringAsync(String(uri), {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    // Generate unique filename for the avatar
+    const fileName = `avatar_${userId}_${new Date().getTime()}.jpg`;
+    
+    // Convert base64 to array buffer
+    const arrayBuffer = decode(base64);
+    
+    // Upload to the user-avatars bucket
+    const { data, error } = await supabase.storage
+      .from('user-avatars')
+      .upload(fileName, arrayBuffer, {
+        contentType: 'image/jpeg',
+        upsert: true // Allow replacing existing avatar
+      });
+    
+    if (error) throw error;
+    
+    // Get the public URL for the uploaded avatar
+    const publicUrlResponse = supabase.storage
+      .from('user-avatars')
+      .getPublicUrl(fileName);
+    
+    if (!publicUrlResponse.data) {
+      throw new Error('Failed to retrieve public URL');
+    }
+    
+    return publicUrlResponse.data.publicUrl;
+  } catch (error) {
+    console.error('Error uploading avatar:', error);
+    throw error;
   }
-}
-
-{loading && (
-  <View style={[styles.avatar, styles.loadingOverlay]}>
-    <ActivityIndicator color={Colors.primary.green} />
-  </View>
-)}
+};
 
   const handleMenuPress = (route: string) => {
     switch (route) {
@@ -549,17 +546,26 @@ const renderAvatar = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.profileSection}>
-        <Image 
-      source={{ 
-        uri: avatar || 
-        'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars/default-avatar.png' 
-      }} 
-      style={styles.avatar}
-      onError={(e) => {
-        console.error("Image loading error:", e.nativeEvent.error);
-        setAvatar('https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars/default-avatar.png');
-      }}
-    />
+
+        <View style={styles.avatarContainer}>
+  <Image 
+    source={{ 
+      uri: avatar || 
+      'https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars/default-avatar.png' 
+    }} 
+    style={styles.avatar}
+    onError={(e) => {
+      console.error("Image loading error:", e.nativeEvent.error);
+      setAvatar('https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars/default-avatar.png');
+    }}
+  />
+  {loading && (
+    <View style={styles.avatarLoadingOverlay}>
+      <ActivityIndicator size="large" color={Colors.primary.green} />
+    </View>
+  )}
+</View>
+
           <View style={styles.profileInfo}>
             <Text style={styles.name}>{userData.name}</Text>
             <Text style={styles.role}>{userData.role}</Text>
@@ -834,7 +840,11 @@ const styles = StyleSheet.create({
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.accent.lightGray,
+    backgroundColor: Colors.accent.lightGray + '60',
+    borderWidth: 2,
+    borderRadius: 40, // Match the avatar's circular shape
+    width: 80, // Match the avatar size
+    height: 80, // Match the avatar size
   },
   section: {
     padding: 24,
@@ -1052,4 +1062,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.8,
   },
+avatarContainer: {
+  position: 'relative',
+  width: 80,
+  height: 80,
+  borderRadius: 40,
+  marginRight: 16,
+},
+avatarLoadingOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  borderRadius: 40,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 1,
+},
 });
