@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { Info } from 'lucide-react-native';
+import { Info, CameraIcon } from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
 import { router } from 'expo-router';
 import { Camera, CameraType, CameraView } from 'expo-camera';
@@ -822,6 +822,7 @@ export default function WasteSelectorScreen() {
       </View>
 
       <TouchableOpacity style={styles.scanButton} onPress={handleScanPress}>
+      <CameraIcon size={24} color={Colors.secondary.white} />
       <Text style={styles.scanButtonText}>Scan Waste</Text>
       </TouchableOpacity>
 

@@ -11,6 +11,7 @@
       "@lib/*": ["./lib/*"],
       "@app/*": ["./app/*"],
       "@hook/*": ["./hook/*"],
+      "@api/*": ["./api/*"],
       "expo-router": ["./node_modules/expo-router"],
     }
   },

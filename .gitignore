@@ -42,3 +42,7 @@ app-example
 /lib/gemini/config.ts
 /lib/firebase/config.ts
 /lib/supabase/config.ts
+
+# API files
+/api 
+/app/components/wasteCategories.tsx
