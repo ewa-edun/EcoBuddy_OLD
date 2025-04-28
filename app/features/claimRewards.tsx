@@ -167,7 +167,7 @@ const ClaimRewards = () => {
             }
 
             Alert.alert('Success', 'Your claim has been submitted!');
-            router.push('/(tabs)/ecoRewards');
+            router.push('/features/activityHistory');
         } catch (error) {
             console.error("Claim error:", error);
             const errorMessage = error instanceof Error ? error.message : 'Failed to submit claim';

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, Text, TextInput, TouchableOpacity, Alert, Image, Modal } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@lib/firebase/firebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -33,7 +33,6 @@ export default function CreateBlogArticle() {
 
 interface UserInfo {
     id: string;
-    fullName: string;
     avatar: string;
     badge: string;
   }
@@ -45,12 +44,37 @@ interface UserInfo {
       if (currentUser) {
         setUserInfo({
           id: currentUser.uid,
-          fullName: currentUser.displayName || "EcoBuddy User",
           avatar: currentUser.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member"
         });
       }
     }, []);
+
+  const [userData, setUserData] = useState<{
+    fullName?: string; } | null>(null);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+          if (auth.currentUser) {
+            try {
+              // Fetch user data
+              const userRef = doc(db, "users", auth.currentUser.uid);
+              const userSnap = await getDoc(userRef);
+              
+              if (userSnap.exists()) {
+                const data = userSnap.data();
+                setUserData({
+                  fullName: data.fullName,
+                });
+              }
+            } finally {
+              // Handle any errors here if needed
+            }
+          }
+        };
+    
+        fetchUserData();
+      }, []);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -144,13 +168,13 @@ interface UserInfo {
       const docRef = await addDoc(collection(db, 'blogArticles'), {
         title: formData.title,
         content: formData.content,
-        excerpt: formData.excerpt, // Save the excerpt to Firestore
+        excerpt: formData.excerpt, 
         // Only add these fields if imageData exists
         ...(imageData?.url && { imageUrl: imageData.url }),
         ...(imageData?.path && { imagePath: imageData.path }),
         category: formData.category, // Save the selected category
+        name: userData?.fullName || "EcoBuddy User",
         author: {
-          fullName: auth.currentUser.displayName || 'Anonymous',
           id: auth.currentUser.uid,
           avatar: auth.currentUser.photoURL || null
         },
@@ -201,7 +225,7 @@ interface UserInfo {
             source={{ uri: userInfo.avatar }} 
             style={styles.userAvatar} 
           />
-          <Text style={styles.userName}>Posting as: {userInfo.fullName}</Text>
+          <Text style={styles.userName}>Posting as: {userData?.fullName}</Text>
         </View>
       )}
 

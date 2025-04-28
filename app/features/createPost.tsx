@@ -4,7 +4,7 @@ import { Colors } from '../constants/Colors';
 import { router } from 'expo-router';
 import { db, auth } from '@lib/firebase/firebaseConfig'; 
 import * as ImagePicker from 'expo-image-picker';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system';
 import { supabase } from '@lib/supabase/client';
@@ -15,7 +15,6 @@ export default function CreatePost() {
   const [isLoading, setIsLoading] = useState(false);
   interface UserInfo {
     id: string;
-    fullName: string;
     avatar: string;
     badge: string;
   }
@@ -28,12 +27,38 @@ export default function CreatePost() {
     if (currentUser) {
       setUserInfo({
         id: currentUser.uid,
-        fullName: currentUser.displayName || "EcoBuddy User",
         avatar: currentUser.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
         badge: "Member"
       });
     }
+    
   }, []);
+
+  const [userData, setUserData] = useState<{
+    fullName?: string; } | null>(null);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+          if (auth.currentUser) {
+            try {
+              // Fetch user data
+              const userRef = doc(db, "users", auth.currentUser.uid);
+              const userSnap = await getDoc(userRef);
+              
+              if (userSnap.exists()) {
+                const data = userSnap.data();
+                setUserData({
+                  fullName: data.fullName,
+                });
+              }
+            } finally {
+              // Handle any errors here if needed
+            }
+          }
+        };
+    
+        fetchUserData();
+      }, []);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -123,6 +148,7 @@ export default function CreatePost() {
       const postData: {
         userId: string;
         authorId: string;
+        name: string;
         author: UserInfo;
         content: string;
         createdAt: ReturnType<typeof serverTimestamp>;
@@ -133,9 +159,9 @@ export default function CreatePost() {
       } = {
         userId: user.uid,
         authorId: user.uid, // Add this so rules can match it
+        name: userData?.fullName || "EcoBuddy User",
         author: userInfo || {
           id: user.uid,
-          fullName: user.displayName || "EcoBuddy User",
           avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member"
         },
@@ -183,7 +209,7 @@ export default function CreatePost() {
             source={{ uri: userInfo.avatar }} 
             style={styles.userAvatar} 
           />
-          <Text style={styles.userName}>Posting as: {userInfo.fullName}</Text>
+          <Text style={styles.userName}>Posting as: {userData?.fullName}</Text>
         </View>
       )}
       

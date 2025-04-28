@@ -16,6 +16,14 @@ type ActivityItem = {
   description: string;
 };
 
+type ClaimRequest = {
+  id: string;
+  points: number;
+  giftType: string;
+  status: string;
+  createdAt: Date;
+};
+
 export default function HomeScreen() {
   const auth = getAuth();
   const [userData, setUserData] = useState<{
@@ -27,6 +35,7 @@ export default function HomeScreen() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
+  const [recentClaims, setRecentClaims] = useState<ClaimRequest[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -55,7 +64,7 @@ export default function HomeScreen() {
             limit(3)
           );
 
-          const unsubscribe = onSnapshot(activitiesQuery, (snapshot) => {
+          const unsubscribeActivities = onSnapshot(activitiesQuery, (snapshot) => {
             const activities = snapshot.docs.map(doc => {
               const data = doc.data();
               return {
@@ -69,7 +78,32 @@ export default function HomeScreen() {
             setRecentActivities(activities);
           });
 
-          return () => unsubscribe();
+          // Fetch recent claim requests
+          const claimsQuery = query(
+            collection(db, "claimRequests"),
+            where("userId", "==", auth.currentUser.uid),
+            orderBy("createdAt", "desc"),
+            limit(3)
+          );
+
+          const unsubscribeClaims = onSnapshot(claimsQuery, (snapshot) => {
+            const claims = snapshot.docs.map(doc => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                points: data.points,
+                giftType: data.giftType,
+                status: data.status,
+                createdAt: data.createdAt ? data.createdAt.toDate() : new Date()
+              };
+            });
+            setRecentClaims(claims);
+          });
+
+          return () => {
+            unsubscribeActivities();
+            unsubscribeClaims();
+          };
         } catch (error) {
           console.error("Error fetching data:", error);
         } finally {
@@ -93,6 +127,30 @@ export default function HomeScreen() {
     if (diffHours < 1) return 'Less than an hour ago';
     if (diffHours < 24) return `${diffHours} hours ago`;
     return `${Math.floor(diffHours / 24)} days ago`;
+  };
+
+  // Combines activities and claims into one list and sorts by date
+  const getAllRecentActivity = () => {
+    const activities = recentActivities.map(activity => ({
+      id: activity.id,
+      type: 'activity',
+      points: activity.points,
+      date: activity.date,
+      description: activity.description
+    }));
+
+    const claims = recentClaims.map(claim => ({
+      id: claim.id,
+      type: 'claim',
+      points: claim.points,
+      date: claim.createdAt,
+      description: `${claim.giftType === 'data' ? 'Data' : 'Cash'} reward claim (${claim.status})`
+    }));
+
+    // Combine and sort by date (most recent first)
+    return [...activities, ...claims]
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 3); // Get only the 3 most recent items
   };
 
   const handleQuickAction = (action: 'scan' | 'redeem') => {
@@ -123,6 +181,13 @@ export default function HomeScreen() {
     }
   };
 
+  const getActivityIcon = (type: string) => {
+    if (type === 'claim') {
+      return <Gift size={24} color={Colors.primary.blue} />;
+    }
+    return <Recycle size={24} color={Colors.primary.green} />;
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -130,6 +195,8 @@ export default function HomeScreen() {
       </View>
     );
   }
+
+  const combinedActivities = getAllRecentActivity();
 
   return (
     <ScrollView style={styles.container}>
@@ -167,20 +234,32 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Recent Activity Section */}
+      {/* Recent Activity Section - Updated to show combined activities and claims */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <TouchableOpacity 
+            style={styles.seeAllButton}
+            onPress={() => router.push('/features/activityHistory')}>
+            <Text style={styles.seeAllText}>See All</Text>
+            <ChevronRight size={16} color={Colors.primary.green} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.activityList}>
-          {recentActivities.length > 0 ? (
-            recentActivities.map((activity) => (
+          {combinedActivities.length > 0 ? (
+            combinedActivities.map((activity) => (
               <View key={activity.id} style={styles.activityItem}>
-                <View style={styles.activityIcon}>
-                  <Recycle size={24} color={Colors.primary.green} />
+                <View style={[styles.activityIcon, 
+                  { backgroundColor: activity.type === 'claim' ? 
+                    Colors.primary.blue + '20' : 
+                    Colors.primary.green + '20' 
+                  }]}>
+                  {getActivityIcon(activity.type)}
                 </View>
                 <View style={styles.activityContent}>
                   <Text style={styles.activityTitle}>{activity.description}</Text>
                   <Text style={styles.activityMeta}>
-                    +{activity.points} points • {formatDate(activity.date)}
+                    {activity.type === 'claim' ? '-' : '+'}{activity.points} points • {formatDate(activity.date)}
                   </Text>
                 </View>
               </View>
@@ -368,6 +447,12 @@ const styles = StyleSheet.create({
   section: {
     padding: 24,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'PlusJakartaSans-SemiBold',
@@ -432,12 +517,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.accent.darkGray,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
   },
   seeAllButton: {
     flexDirection: 'row',

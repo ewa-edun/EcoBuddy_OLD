@@ -179,7 +179,7 @@ export default function WasteScheduleScreen() {
       // Update user's total points
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
-        totalPoints: increment(pointsEarned),
+        points: increment(pointsEarned),
         lastRecycled: new Date().toISOString(),
       });
 

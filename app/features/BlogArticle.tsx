@@ -16,7 +16,6 @@ interface Article {
   imageUrl?: string;
   category: string;
   author: {
-    fullName: string;
     id: string;
     avatar: string | null;
   };
@@ -35,7 +34,30 @@ const BlogArticle = () => {
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
   const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
+  const [userData, setUserData] = useState<{fullName?: string; } | null>(null);
   const auth = getAuth();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (auth.currentUser) {
+        try {
+          // Fetch user data
+          const userRef = doc(db, "users", auth.currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            setUserData({
+              fullName: data.fullName,
+            });
+          }
+        } finally {
+       }
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     const fetchArticleData = async () => {
@@ -53,16 +75,16 @@ const BlogArticle = () => {
           setLoading(false);
           return;
         }
-        
+
         const articleData = articleDoc.data();
         
         // Set the article with all its data
         setArticle({
           id: articleDoc.id,
           ...articleData,
+          name: userData?.fullName || "EcoBuddy User",
           // Ensure author data exists
           author: articleData.author || {
-            fullName: 'EcoBuddy Team',
             avatar: null
           }
         });
@@ -84,8 +106,7 @@ const BlogArticle = () => {
         
         // Fetch related articles with the same category
         if (articleData.category) {
-          // For now, use hardcoded related articles
- // In a production app, you would query Firestore for articles with the same category
+   // For now, use hardcoded related articles. In a production app, you would query Firestore for articles with the same category
           setRelatedArticles([
             {
               id: 'related1',
@@ -194,7 +215,7 @@ const BlogArticle = () => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Article not found</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/education')}>
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -249,7 +270,7 @@ const BlogArticle = () => {
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
             <User size={16} color={Colors.text.secondary} />
-            <Text style={styles.metaText}>{article.author?.fullName || 'EcoBuddy Team'}</Text>
+            <Text style={styles.metaText}>{userData?.fullName} </Text>
           </View>
           <View style={styles.metaItem}>
              <Calendar size={16} color={Colors.text.secondary} />

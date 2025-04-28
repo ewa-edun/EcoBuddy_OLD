@@ -119,6 +119,13 @@ export default function FeaturesLayout() {
         headerShown: false,
       }}
     />
+    <Stack.Screen
+      name="activityHistory"
+      options={{
+        title: 'Activity History',
+        headerShown: true,
+      }}
+    />
     </Stack>
   );
 } 

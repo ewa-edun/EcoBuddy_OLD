@@ -222,27 +222,22 @@ WEEKLY DATA TYPE
 
 ## Pages/Fixes to do
 - The model should have better predictions.
-
-- Posts and articles still showing annonymous even though im logged in. the error is that im saving the name as fullName in firebase but here im bringing in fields that dont exist there.
-
-- Recent activity on home page should be linked to waste history and claim rewards.
-- Challenge details showing just the id.
-
 - Add emails from firebase for create account confirmation: Email address verification. and forgot password, change password: Password reset
-
-- When i log out it gives me some firebase insufficient permissions so check that.
 
 # BUGS
 1. I created another account to see how it looks like from there.
   - comments on others posts not working:  Error submitting comment: [FirebaseError: Missing or insufficient permissions.]
-  - Likes not working.
+  - Likes on others post not working.
   - Error tracking article read: [FirebaseError: Missing or insufficient permissions.]
-  - Referrals not working.
+  - Referrals not working. it says referral code is invalid or has expired.
   - Error joining challenge: [FirebaseError: Missing or insufficient permissions.]
-  - 
+- When i log out it gives me some firebase insufficient permissions so check that: [2025-04-27T23:27:24.234Z]  @firebase/firestore: Firestore (11.6.0): Uncaught Error in snapshot listener: FirebaseError: [code=permission-denied]: Missing or insufficient permissions.
+- When i log in, everything that was posted shows my own name only instead of the other different users.
 
-- BUGS: Forgot Password page (dependency issue)
+- Forgot Password page (dependency issue)
 - PROFILE PAGE: Find a solution to why profile images are saying network error from supabase.
+
+when
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)

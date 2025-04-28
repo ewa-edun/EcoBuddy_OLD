@@ -10,7 +10,6 @@ import NewChallengeForm from '../features/newChallengeForm';
 type Post = {
   id: string;
   user?: {
-    fullName: string;
     avatar: string;
     badge: string;
     id: string;
@@ -28,7 +27,6 @@ type Comment = {
   postId: string;
   user: {
     id: string;
-    fullName: string;
     avatar: string;
     badge: string;
   };
@@ -66,6 +64,30 @@ export default function CommunityScreen() {
   });
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [challengesLoading, setChallengesLoading] = useState(false);
+  const [userData, setUserData] = useState<{fullName?: string; } | null>(null);
+
+    useEffect(() => {
+          const fetchUserData = async () => {
+            if (auth.currentUser) {
+              try {
+                // Fetch user data
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                  const data = userSnap.data();
+                  setUserData({
+                    fullName: data.fullName,
+                  });
+                }
+              } finally {
+                // Handle any errors here if needed
+              }
+            }
+          };
+      
+          fetchUserData();
+        }, []);
 
   // Fetch current user and community stats
   useEffect(() => {
@@ -73,7 +95,6 @@ export default function CommunityScreen() {
       if (user) {
         setCurrentUser({
           id: user.uid,
-          fullName: user.displayName || "EcoBuddy User",
           avatar: user.photoURL || "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
           badge: "Member"
         });
@@ -112,8 +133,8 @@ export default function CommunityScreen() {
           const data = doc.data();
           return {
             id: doc.id,
-            user: data.author || {
-              fullName: "EcoBuddy User",
+            name: userData?.fullName || "EcoBuddy User",
+            user: data.uid || {
               avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
               badge: "Member",
               id: data.authorId || "unknown"
@@ -162,8 +183,9 @@ export default function CommunityScreen() {
               ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
                   data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
               : 0,
-            createdBy: data.createdBy || "Unknown",
-            status: data.status || "upcoming"
+            createdBy: data.fullName || "Unknown",
+            status: data.status || "upcoming",
+            name: userData?.fullName || "EcoBuddy User",
           };
         });
 
@@ -259,9 +281,10 @@ export default function CommunityScreen() {
         return {
           id: doc.id,
           postId: data.postId,
+          fullName: data.fullName || "EcoBuddy User",
+          name: userData?.fullName || "EcoBuddy User",
           user: data.user || {
             id: data.userId,
-            fullName: "EcoBuddy User",
             avatar: "https://xrhcligrahuvtfolotpq.supabase.co/storage/v1/object/public/user-avatars//ecobuddy-adaptive-icon.png",
             badge: "Member"
           },
@@ -287,9 +310,10 @@ export default function CommunityScreen() {
       const newComment = {
         postId,
         userId: currentUser.id,
+        name: userData?.fullName || "EcoBuddy User",
+        fullName: userData?.fullName || "EcoBuddy User",
         user: {
           id: currentUser.id,
-          fullName: currentUser.fullName,
           avatar: currentUser.avatar,
           badge: currentUser.badge
         },
@@ -398,8 +422,9 @@ export default function CommunityScreen() {
                 ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
                            data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                 : 0,
-              createdBy: data.createdBy || "Unknown",
-              status: data.status || "upcoming"
+              createdBy: data.fullName || "Annonymous",
+              status: data.status || "upcoming",
+              name: userData?.fullName || "EcoBuddy User",
           };
       }));
     } catch (error) {
@@ -490,7 +515,7 @@ export default function CommunityScreen() {
                       style={styles.avatar} 
                     />
                     <View style={styles.postHeaderText}>
-                      <Text style={styles.userfullName}>EcoBuddy User</Text>
+                      <Text style={styles.userfullName}>{userData?.fullName}</Text>
                       <View style={styles.badgeContainer}>
                         <Text style={styles.badge}>{post.user?.badge}</Text>
                       </View>
@@ -571,7 +596,7 @@ export default function CommunityScreen() {
                               <Image source={{ uri: comment.user.avatar }} style={styles.commentAvatar} />
                               <View style={styles.commentContent}>
                                 <View style={styles.commentHeader}>
-                                  <Text style={styles.commentUserfullName}>EcoBuddy User</Text>
+                                  <Text style={styles.commentUserfullName}>{userData?.fullName}</Text>
                                   <Text style={styles.commentTime}>{comment.timestamp}</Text>
                                 </View>
                                 <Text style={styles.commentText}>{comment.content}</Text>
