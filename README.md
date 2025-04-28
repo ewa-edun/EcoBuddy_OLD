@@ -226,13 +226,13 @@ WEEKLY DATA TYPE
 
 # BUGS
 1. I created another account to see how it looks like from there.
-  - comments on other users posts not working:  Error submitting comment: [FirebaseError: Missing or insufficient permissions.]
-  - Likes on other's post not working as well.
+ 
   - Error tracking article read: [FirebaseError: Missing or insufficient permissions.]
   - Referrals not working. it says referral code is invalid or has expired.
-  - Error joining challenge made by others: [FirebaseError: Missing or insufficient permissions.]
+  - When i log out it gives me some firebase insufficient permissions so check that: [2025-04-27T23:27:24.234Z]  @firebase/firestore: Firestore (11.6.0): Uncaught Error in snapshot listener: FirebaseError: [code=permission-denied]: Missing or insufficient permissions.
+
   - Now my name is displaying no longer annonymous. When i log in, everything that was posted (community posts, comments on posts, and blog articles) shows my own name (the name of the current account im using) only instead of the other different users (everybody who's posted smt).
-- When i log out it gives me some firebase insufficient permissions so check that: [2025-04-27T23:27:24.234Z]  @firebase/firestore: Firestore (11.6.0): Uncaught Error in snapshot listener: FirebaseError: [code=permission-denied]: Missing or insufficient permissions.
+I think the current solution is to be saving the name of the person that post stuff and display the name from there. that way the content doesnt change.
 
 - Forgot Password page (dependency issue)
 - PROFILE PAGE: Find a solution to why profile images are saying network error from supabase.

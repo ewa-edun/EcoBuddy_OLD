@@ -44,6 +44,7 @@ type Challenge = {
   endDate: Date | import('firebase/firestore').Timestamp;
   participants: string[];
   daysLeft: number;
+  createdBy: string;
   status: 'active' | 'completed' | 'upcoming';
 };
 
@@ -182,6 +183,7 @@ export default function CommunityScreen() {
               ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
                   data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
               : 0,
+            createdBy: data.fullName || "EcoBuddy User",
             status: data.status || "upcoming",
           };
         });
@@ -419,6 +421,7 @@ export default function CommunityScreen() {
                 ? Math.ceil((data.endDate.toMillis ? data.endDate.toMillis() - Date.now() : 
                            data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                 : 0,
+              createdBy: data.fullName || "EcoBuddy User",
               status: data.status || "upcoming",
           };
       }));

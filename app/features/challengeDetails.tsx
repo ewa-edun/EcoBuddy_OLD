@@ -16,6 +16,7 @@ type Challenge = {
   endDate: any;
   participants: string[];
   daysLeft: number;
+  createdBy: string;
   status: 'active' | 'completed' | 'upcoming';
 };
 
@@ -93,7 +94,7 @@ useEffect(() => {
                   data.endDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
               : 0,
             status: data.status || "active",
-            
+            createdBy: data.createdBy || "EcoBuddy User",
           };
           
           setChallenge(challenge);

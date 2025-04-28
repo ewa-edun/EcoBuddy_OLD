@@ -44,7 +44,7 @@ const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
         startDate,
         endDate,
         createdAt: serverTimestamp(),
-        createdBy: auth.currentUser.uid,
+        createdBy: auth.currentUser.displayName,
         participants: [], // Initialize with empty array
         status: 'active'
       });
@@ -80,16 +80,21 @@ const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
       <View style={styles.row}>
         <View style={styles.halfInput}>
-          <Text style={styles.label}>Participants num</Text>
+          <Text style={styles.label}>Participants Num</Text>
           <Picker
             selectedValue={targetParticipants}
             onValueChange={setTargetParticipants}
             style={styles.picker}
           >
+            <Picker.Item label="2" value="2" />
+
             <Picker.Item label="50" value="50" />
             <Picker.Item label="100" value="100" />
             <Picker.Item label="200" value="200" />
+            <Picker.Item label="300" value="300" />
+            <Picker.Item label="400" value="400" />
             <Picker.Item label="500" value="500" />
+            <Picker.Item label="750" value="750" />
             <Picker.Item label="1000" value="1000" />
           </Picker>
         </View>
@@ -103,8 +108,11 @@ const NewChallengeForm = ({ onSuccess }: { onSuccess: () => void }) => {
           >
             <Picker.Item label="200" value="200" />
             <Picker.Item label="500" value="500" />
+            <Picker.Item label="750" value="750" />
             <Picker.Item label="1000" value="1000" />
             <Picker.Item label="2000" value="2000" />
+            <Picker.Item label="3000" value="3000" />
+            <Picker.Item label="4000" value="4000" />
             <Picker.Item label="5000" value="5000" />
           </Picker>
         </View>
