@@ -816,7 +816,7 @@ export default function WasteSelectorScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Waste Selector</Text>
+        <Text style={styles.title}>Waste Selection</Text>
         <Text style={styles.subtitle}>Select waste type or scan with camera</Text>
       </View>
 

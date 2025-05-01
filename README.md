@@ -1,7 +1,12 @@
 # EcoBuddy
 
 ## 🌍 Overview
-**EcoBuddy** is an eco-friendly recycling app designed to encourage Nigerians to sort and recycle waste in exchange for points, which can be converted into phone data. By leveraging AI, gamification, and community-driven initiatives, EcoBuddy promotes sustainability and waste management.
+**EcoBuddy** is a recycling app designed to encourage Nigerians to sort and recycle waste in exchange for points, which can be converted into phone data. By leveraging AI, gamification, and community-driven initiatives, EcoBuddy promotes sustainability and waste management.
+
+In a world full of apps, EcoBuddy stands out as a beacon of accessibility and inclusivity.EcoBuddy is designed with YOU in mind. Whether you're a tech-savvy or someone who's just getting started with smartphones, our app makes recycling as easy as a tap of your finger! No jargon just simple steps to make a big difference. In addition  we’ve created a unique platform that connects local scrap collectors, known as "mallams" here in Nigeria with users looking to recycle. 
+By empowering mallams and integrating them into our ecosystem, EcoBuddy fosters a sense of community and collaboration. 
+
+And here’s where it gets even more exciting! EcoBuddy doesn’t just link individuals to recycling centers. it also connects individuals to each other. For example, imagine a fashion designer who has leftover fabric from a stunning outfit she no longer needs this fabric  and it catches the eye of a local artist looking for materials to create unique clothing items. Through EcoBuddy, they connect, and the artist can purchase the fabric to give it a new life
 
 ### **🌱 Problem Statement**
 Nigeria faces poor recycling and sustainability efforts, leading to flooding, diseases, and environmental degradation. EcoBuddy aims to tackle this by providing an engaging and rewarding platform for users to participate in recycling.
@@ -21,7 +26,7 @@ EcoBuddy supports:
 | **Aderoju** | Chief Marketing Officer (CMO) (Leads market research, user engagement strategies, and promotional campaigns.)|
 | **Mosope** | Chief Financial Officer (CFO) (Handles financial planning, revenue models, and investor relations.)|
 | **Chidinma** | Chief Creative Officer (CCO) & Presentation Lead (Manages branding, app design direction, documentation, and team presentations.)|
-| **Mr. Adeniyi** | Team Mentor/Coordinator |
+| **Mr. Adeniyi Ogunbanjo** | Team Mentor/Coordinator |
 
 ---
 
@@ -38,7 +43,6 @@ EcoBuddy supports:
 - Ideal for individuals and students working on recycling projects.
 
 ### **3️⃣ Gamification & Leaderboard**
-- Users earn points for correctly sorting and dropping off waste.
 - Compete on a leaderboard to showcase sustainability efforts.
 - Points can be converted into phone data and cash rewards.
 
@@ -66,11 +70,10 @@ EcoBuddy supports:
 - Kiosks allow internet-free participation in recycling efforts.
 - Strengthens local recycling ecosystems.
 
-### **9️⃣AI Chatbots**
+### **9️⃣ AI Chatbots**
 - AI chatbots for users to interact with and ask questions.
 
----
-
+### **🔟 Games**
  Game page to have 4 games and have same point system to not complicate things (each game gives 100 points max).
 
   - Game 1: **Trash Sort Challenge**
@@ -94,12 +97,13 @@ EcoBuddy supports:
 ## 🛠️ Tech Stack
 
 ### **📱 Frontend**
-- **React Native (Expo)** – Cross-platform mobile app development
-- **React Navigation** – Smooth navigation between pages
+- **React Native (Expo)** – Cross-platform (Android and iOS) mobile app development
+- **React Navigation** – Smooth navigation between pages.
 
 ### **☁️ Backend & Database**
-- **Firebase** – Authentication and database for real-time data sync.
-- **Firebase Firestore** – For database.
+- **Firebase Authentication** – Authentication using email and password.
+- **Firebase Firestore** – Database for real-time data sync.
+- **Supabase storage** - For image storing.
 
 ### **🤖 AI & Machine Learning**
 - **Teachable Machine** – AI-powered item recognition
@@ -137,6 +141,7 @@ EcoBuddy supports:
 MODEL 1. Shoes, tyres, trash, organic waste
 MODEL 2. Paper & Cardboard, plastic, glass, E-Waste
 MODEL 3. Metal and Clothes
+
 ---
 ## Points and Conversion Rates
 "Paper & Cardboard" points: 30
@@ -186,14 +191,12 @@ WEEKLY DATA TYPE
 - Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
 - Mobile kiosk
 - Charity donations should become functional and linked to firebase.
-- Add more profile levels and achievements.
-- Add a recent transactions page to the claim rewards that shows the recent points to data/cash transactions.
 - Subscription packages.
 - NEW GAME: Memory Match Eco Edition
     - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
     - Points: +20 per match, 3 minutes.
 
-#### Subscription based features
+### Subscription based features
 1. Add IOT support for Smart Home Integration
      - Users with smart home devices can sync them with EcoBuddy.
      - AI-driven waste monitoring and feedback on recycling habits.
@@ -201,11 +204,11 @@ WEEKLY DATA TYPE
      - AR (Augumented Reality) game. This creates interactive challenges where users can recycle "virtual items" in their real environment like the camera scans their surroundings and finds virtual item and asks them to sort it into the correct bins.
 3. Personalized Recycling Insight: Complile these data (your recent and past recycling activities) from the users recycling activities in a dashboard. It will include the amount of waste recycled,the environmental benefit achieved and comparison to average recycling behaviors.
      - A user opens their Personal Impact Dashboard in the app after a month of recycling. The dashboard displays the following insights:
-         - Recycling Metrics: "You recycled a total of 200 items this month, including 120 plastic bottles, 50 paper items, and 30 aluminum cans."
-         - Environmental Impact: "Your recycling efforts have saved 250 kg of CO2 emissions, which is equivalent to planting 10 trees!"
-         - Progress Tracking: "You set a goal to recycle 300 items this month. You’re currently at 200 items, with 5 days left to reach your goal!".So they can set recycling goals and the app will help them to achieve It through reminders.This reminders will help them cause the more they recycle the more money and benefit is in it for them 
-         - Comparative Insights: "You recycle 15% more than most users in your area.Keep it up!
-         - Personalized Recommendations:Consider Recycling More Glass and metals as you have recycled less of these compared to others.
+         - **Recycling Metrics**: "You recycled a total of 200 items this month, including 120 plastic bottles, 50 paper items, and 30 aluminum cans."
+         - **Environmental Impact**: "Your recycling efforts have saved 250 kg of CO2 emissions, which is equivalent to planting 10 trees!"
+         - **Progress Tracking**: "You set a goal to recycle 300 items this month. You’re currently at 200 items, with 5 days left to reach your goal!".So they can set recycling goals and the app will help them to achieve It through reminders.This reminders will help them cause the more they recycle the more money and benefit is in it for them 
+         - **Comparative Insights**: "You recycle 15% more than most users in your area.Keep it up!
+         - **Personalized Recommendations**: Consider Recycling More Glass and metals as you have recycled less of these compared to others.
 4. Delivery Service for Recyclables that  will come and take the recyclables from their house and straight to the recycling center and priority from kiosks.
 5. Recycling Calendars and Reminders: Users can create calendars to properly schedule their activities for a particular date they have chosen for the pickup of their recyclables and the app reminds them probably every 30min ,1hr or 2hrs (depending on the timing set by the user)
 6. Making the algorithm of the app to only display news and contents regarding the section of recycling the user is most interested in judging by the users recent activity and their searches using the apps AI (this ai stuff requires payment). This feature may be disabled by a user who will like to get news regarding every section of recycling
@@ -220,16 +223,6 @@ WEEKLY DATA TYPE
 
 **🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
 
-## Pages/Fixes to do
-- The model should have better predictions.
-- Add emails from firebase for create account confirmation: Email address verification. and forgot password, change password: Password reset
-
-# BUGS
-  - When i log out it gives me some firebase insufficient permissions so check that: [2025-04-27T23:27:24.234Z]  @firebase/firestore: Firestore (11.6.0): Uncaught Error in snapshot listener: FirebaseError: [code=permission-denied]: Missing or insufficient permissions.
-
-  - Now my name is displaying no longer annonymous. When i log in, everything that was posted (community posts, comments on posts, and blog articles) shows my own name (the name of the current account im using) only instead of the other different users (everybody who's posted smt). I think the current solution is to be saving the name of the person that post stuff and display the name from there. that way the content doesnt change.
-
-- Forgot Password page (dependency issue)
 
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)
@@ -322,7 +315,6 @@ npm --v
    npm install -g expo-cli
    ```
 
-
 4. **Environment Setup**
    Create a `.env` file in the root directory with the following variables:
    ```
@@ -350,8 +342,7 @@ npm --v
      - Scan the QR code shown in the terminal with your device's camera.
 A QR code will come up in the terminal after you run number 5 command. Scan it and let the app load on your phone.
 
-
--By now, you should be able to see the app on your phone with no issues.
+- By now, you should be able to see the app on your phone with no issues.
 
 7. When you're done checking the app and you want to exit, click control + c to exit the app testing. and if you want to u. it again at a later time start from number 5 again.
 
@@ -370,12 +361,11 @@ A QR code will come up in the terminal after you run number 5 command. Scan it a
    npm install
    ```
 
-
 ### Additional Resources
 - [Expo Documentation](https://docs.expo.dev/)
 - [React Native Documentation](https://reactnative.dev/docs/getting-started)
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [Google Maps Platform](https://developers.google.com/maps/documentation)
 
-
-**Happy coding! 🌱♻️**
+**Happy coding! 🌱♻️** 
+**Brought to you by Team MECA**
