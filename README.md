@@ -213,9 +213,11 @@ WEEKLY DATA TYPE
 5. Recycling Calendars and Reminders: Users can create calendars to properly schedule their activities for a particular date they have chosen for the pickup of their recyclables and the app reminds them probably every 30min ,1hr or 2hrs (depending on the timing set by the user)
 6. Making the algorithm of the app to only display news and contents regarding the section of recycling the user is most interested in judging by the users recent activity and their searches using the apps AI (this ai stuff requires payment). This feature may be disabled by a user who will like to get news regarding every section of recycling
 7. Virtual Tour of recyling facilities: A 3D model of a recycling facility partner. The user would be able to interact with different sections (sorting,shredding) and learn about each stage of the recycling process and machinery involved. They could also get a recorded video of a recycling facility and watch the behind the scenes that happen at these facilities without physically being there.
-8. Personal communication: one on one chatting with each user. only permitted between subscription users.
-9. Little to No ads displayed for them depending on their subscription plan.
-10. Premium users are able to get scraps from the partners if they are personally interested in it. there'll be a limit on how much they collect. eg 50kg of total goods a month so they dont exploit the feature.
+
+   Most likely scrapping number 8
+9. Personal communication: one on one chatting with each user. only permitted between subscription users.
+10. Little to No ads displayed for them depending on their subscription plan.
+11. Premium users are able to get scraps from the partners if they are personally interested in it. there'll be a limit on how much they collect. eg 50kg of total goods a month so they dont exploit the feature.
 
 | *Basic* | Free | Casual users (key features, ads, basic challenges, personal with 5 ppl monthly, basic algorithm).|  
 | *EcoPro* | 2500 naira/month, 7000/3 months, 14000/6 months, 28000/year | Power users (lesser ads, games, higher algorithm, calendar, personal communication with 25 ppl monthly, dashboard). |  
