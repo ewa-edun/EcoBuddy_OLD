@@ -114,7 +114,8 @@ EcoBuddy supports:
 - **Geolocation API** – Tracks user location for navigation
 
 ### **💰 Payments & Rewards**
-- **Flutterwave API** – Handles point-to-cash conversions
+- **Flutterwave API** – Handles point-to-cash conversions 
+- **RevenueCat** for Subscription payment
 - **Telecom API** – Converts points to phone data
 
 ### **🔗 Additional Future APIs**
