@@ -115,7 +115,7 @@ EcoBuddy supports:
 
 ### **💰 Payments & Rewards**
 - **Flutterwave API** – Handles point-to-cash conversions 
-- **RevenueCat** for Subscription payment
+- **RevenueCat** for Subscription payment also submit to the revenuecat hackathon
 - **Telecom API** – Converts points to phone data
 
 ### **🔗 Additional Future APIs**
