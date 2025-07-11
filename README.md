@@ -183,48 +183,6 @@ WEEKLY DATA TYPE
 1000 points = 1100 mb      900 NAIRA
 ---
 
-## 💡 Future Improvements
-- Partner with telecom providers for broader reward options.
-- Dark Mode / Theme Options
-- Past chats of AI Chatbot
-- SMS Notifications.
-- App notificatins and notifications page.
-- Follow and Followers logic, as well as notifications of all sorts. This mean there needs to be a way your profile looks to other people. they shouldnt be able to view personal details (email, phone no, etc) just your name, achievements, followers, post, and points gained.
-- Mobile kiosk
-- Charity donations should become functional and linked to firebase.
-- Subscription packages.
-- NEW GAME: Memory Match Eco Edition
-    - Classic memory card game where users flip cards to match recyclable items (pairs of plastic, paper, etc.). 5 matches 10 cards.
-    - Points: +20 per match, 3 minutes.
-
-### Subscription based features
-1. Add IOT support for Smart Home Integration
-     - Users with smart home devices can sync them with EcoBuddy.
-     - AI-driven waste monitoring and feedback on recycling habits.
-2. Extra Games (3-4): 
-     - AR (Augumented Reality) game. This creates interactive challenges where users can recycle "virtual items" in their real environment like the camera scans their surroundings and finds virtual item and asks them to sort it into the correct bins.
-3. Personalized Recycling Insight: Complile these data (your recent and past recycling activities) from the users recycling activities in a dashboard. It will include the amount of waste recycled,the environmental benefit achieved and comparison to average recycling behaviors.
-     - A user opens their Personal Impact Dashboard in the app after a month of recycling. The dashboard displays the following insights:
-         - **Recycling Metrics**: "You recycled a total of 200 items this month, including 120 plastic bottles, 50 paper items, and 30 aluminum cans."
-         - **Environmental Impact**: "Your recycling efforts have saved 250 kg of CO2 emissions, which is equivalent to planting 10 trees!"
-         - **Progress Tracking**: "You set a goal to recycle 300 items this month. You’re currently at 200 items, with 5 days left to reach your goal!".So they can set recycling goals and the app will help them to achieve It through reminders.This reminders will help them cause the more they recycle the more money and benefit is in it for them 
-         - **Comparative Insights**: "You recycle 15% more than most users in your area.Keep it up!
-         - **Personalized Recommendations**: Consider Recycling More Glass and metals as you have recycled less of these compared to others.
-4. Delivery Service for Recyclables that  will come and take the recyclables from their house and straight to the recycling center and priority from kiosks.
-5. Recycling Calendars and Reminders: Users can create calendars to properly schedule their activities for a particular date they have chosen for the pickup of their recyclables and the app reminds them probably every 30min ,1hr or 2hrs (depending on the timing set by the user)
-6. Making the algorithm of the app to only display news and contents regarding the section of recycling the user is most interested in judging by the users recent activity and their searches using the apps AI (this ai stuff requires payment). This feature may be disabled by a user who will like to get news regarding every section of recycling
-7. Virtual Tour of recyling facilities: A 3D model of a recycling facility partner. The user would be able to interact with different sections (sorting,shredding) and learn about each stage of the recycling process and machinery involved. They could also get a recorded video of a recycling facility and watch the behind the scenes that happen at these facilities without physically being there.
-8. Personal communication: one on one chatting with each user. only permitted between subscription users.
-9. Little to No ads displayed for them depending on their subscription plan.
-10. Premium users are able to get scraps from the partners if they are personally interested in it. there'll be a limit on how much they collect. eg 50kg of total goods a month so they dont exploit the feature.
-
-| *Basic* | Free | Casual users (key features, ads, basic challenges, personal with 5 ppl monthly, basic algorithm).|  
-| *EcoPro* | 2500 naira/month, 7000/3 months, 14000/6 months, 28000/year | Power users (lesser ads, games, higher algorithm, calendar, personal communication with 25 ppl monthly, dashboard). |  
-| *EcoPro+* | 5000 naira/month, 14000/3 months, 28000/6 months, 55000/year | Hardcore eco-warriors (ad-free, all features). |  
-
-**🚀 Let's make Nigeria greener, one recycled item at a time!** 🌱♻️
-
-
 ## 🚀 Getting Started
 1. Open your VSCode, Open a folder (create a new on eand name it anything you want sha that maybe Technovation)
 2. Once the folder is open, open the terminal, control + `, or just find it in the run (you'll see different sections on top named file, edit, run, help, view, just check I think view or smt till you see terminal, then open it)
