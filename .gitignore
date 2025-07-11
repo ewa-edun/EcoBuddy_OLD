@@ -37,6 +37,7 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+todo.md
 
 # Config files
 /lib/gemini/config.ts
